@@ -1,7 +1,7 @@
 {
-  "version": "5.0.1",
+  "version": "5.1.0",
   "fecha": "2026-11-23",
   "novedades": [
-    "La app aprovecha todo el ancho de las pantallas grandes y se ve más grande"
+    "Rotaciones: las 3 semanas a la vista; pulsa cada día para decir si es libre, festivo o turno"
   ]
 }

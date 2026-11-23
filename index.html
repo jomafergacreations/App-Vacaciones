@@ -223,6 +223,26 @@ body.cal-full{overflow:hidden}
 body.cal-full .cal-anual-card{position:fixed;inset:0;z-index:40;margin:0;border-radius:0;display:flex;flex-direction:column;border:0}
 body.cal-full .anual{flex:1;max-height:none}
 
+.rsems{display:flex;flex-direction:column;gap:14px}
+.rsem{background:var(--hormigon);border-radius:12px;padding:12px}
+.rsem-t{font-family:var(--cond);font-weight:700;font-size:20px;margin:0 0 8px 2px}
+.rsem-d{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.rdia{display:flex;flex-direction:column;align-items:center;justify-content:space-between;min-height:104px;padding:8px 4px;border:1px solid var(--linea);border-top:6px solid var(--tc,var(--linea));border-radius:9px;background:#fff;font:inherit;cursor:pointer;color:var(--asfalto)}
+.rdia:hover{border-color:var(--asfalto);border-top-color:var(--tc,var(--asfalto))}
+.rdia .rd-n{font-size:12px;font-weight:700;color:var(--gris);text-transform:uppercase;letter-spacing:.03em}
+.rdia .rd-c{font-family:var(--cond);font-weight:700;font-size:38px;line-height:1;color:var(--tc,#C3C8D0)}
+.rdia .rd-t{font-size:12.5px;font-weight:600;color:var(--gris);text-align:center;line-height:1.1}
+.rdia.lib{background:color-mix(in srgb,var(--tc) 10%,#fff)}
+.rdia.vacio .rd-t{font-weight:500}
+.dlg-fondo{position:fixed;inset:0;z-index:60;background:rgba(34,38,46,.55);display:grid;place-items:center;padding:16px}
+.dlg{background:#fff;border-radius:14px;padding:20px;width:100%;max-width:420px;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.dlg h2{font-family:var(--cond);font-size:28px;margin:0 0 6px}
+.dlg-ops{display:flex;flex-direction:column;gap:8px}
+.dlg-op{display:flex;align-items:center;gap:14px;border:1px solid var(--linea);border-left:6px solid var(--tc,var(--linea));border-radius:9px;background:#fff;padding:10px 12px;font:inherit;cursor:pointer;text-align:left;color:var(--asfalto)}
+.dlg-op:hover{border-color:var(--asfalto);border-left-color:var(--tc,var(--asfalto))}
+.dlg-op.on{background:var(--senal-soft);border-color:var(--asfalto)}
+.dlg-op b{font-family:var(--cond);font-size:26px;width:40px;text-align:center;color:var(--tc,var(--gris))}
+.dlg-op small{color:var(--gris)}
 .rot{display:grid;grid-template-columns:auto repeat(7,1fr);gap:4px;max-width:640px}
 .rot-h{text-align:center;font-size:12px;font-weight:700;color:var(--gris)}
 .rot-s{font-family:var(--cond);font-weight:600;font-size:15px;align-self:center;padding-right:8px;white-space:nowrap}
@@ -373,7 +393,7 @@ body.bloqueada{overflow:hidden}
   .cal .d{min-height:86px;font-size:13px} .cal .d .n{font-size:19px} .cal .d .o{font-size:18px}
   .anual{--nw:200px} .an-fila{height:34px} .an-nom{font-size:15px} .an-bar{font-size:12.5px} .an-mes{font-size:16px}
   .cartel .who{font-size:44px} .cartel .flecha{font-size:56px;padding:0 24px}
-  .rot{max-width:820px} .rot-c{height:58px;font-size:24px}
+  .rdia{min-height:128px} .rdia .rd-c{font-size:46px} .rdia .rd-t{font-size:14px} .rsem-t{font-size:22px}
   .list-order li{padding:9px 8px}
 }
 @media (min-width:1900px){
@@ -389,6 +409,7 @@ body.bloqueada{overflow:hidden}
   .portada h2{font-size:36px} .asig .t{font-size:24px} .asig .flecha{font-size:34px;padding:0 14px} .asig .ir{display:none} .tile .nom{font-size:34px} .tile.prod .nom{font-size:38px} .tile{min-height:110px;padding:18px}
   .anual{--nw:112px;max-height:65vh}
   .selcal{grid-template-columns:repeat(2,1fr);gap:12px} .ed{font-size:11px}
+  .rsem{padding:8px} .rsem-d{gap:4px} .rdia{min-height:78px;padding:6px 2px;border-top-width:4px} .rdia .rd-c{font-size:26px} .rdia .rd-t{font-size:10px} .rdia .rd-n{font-size:10px}
   .dp-layout{grid-template-columns:1fr} .dp-lista{position:static;max-height:none} .solo-movil{display:block} .solo-ancho{display:none} .fcal{grid-template-columns:repeat(2,1fr);gap:12px} .fd{font-size:11px} .tc{font-size:7.5px} .an-nom{font-size:12.5px;padding:0 6px}
 }
 @media print{
@@ -418,7 +439,7 @@ body.bloqueada{overflow:hidden}
    Reglas base: Convenio Menzies (BOE-A-2023-25956), arts. 32 y 33
    Datos guardados en el navegador (localStorage). Haz copias.
    ========================================================= */
-const APP_VERSION = '5.0.1';   // súbela junto con version.json en cada publicación
+const APP_VERSION = '5.1.0';   // súbela junto con version.json en cada publicación
 const LS_KEY = 'vacaciones-agp-v1';
 const SIN = '_'; // clave interna para «sin grupo»
 
@@ -471,7 +492,7 @@ const SUGERENCIAS = { // ideas para crear skills rápido; se pueden ignorar
   Rampa:['Agente de rampa','Auxiliar de rampa','Coordinador de pista','Conductor','Carga','Jefe de turno'],
   Operaciones:['Agente administrativo','Auxiliar administrativo','Coordinador de operaciones','Control de carga','Jefe de turno','Supervisor'],
 };
-const TURNOS_DEF = [ {cod:'M',nombre:'Mañana',color:'#1F5FBF',libre:false}, {cod:'T',nombre:'Tarde',color:'#B86E00',libre:false}, {cod:'N',nombre:'Noche',color:'#5B3E99',libre:false}, {cod:'P',nombre:'Partido',color:'#0E8A9A',libre:false}, {cod:'L',nombre:'Libre',color:'#23864F',libre:true} ];
+const TURNOS_DEF = [ {cod:'R',nombre:'Libre',color:'#23864F',libre:true}, {cod:'F',nombre:'Festivo',color:'#C23B30',libre:true}, {cod:'M',nombre:'Mañana',color:'#1F5FBF',libre:false}, {cod:'T',nombre:'Tarde',color:'#B86E00',libre:false}, {cod:'N',nombre:'Noche',color:'#5B3E99',libre:false} ];
 const AJUSTES_DEF = { computo:'naturales', bloquear:true, rondas:3, ptsSS:8, ptsPuente:2, diasDefecto:24,
   ponderar:true, baseDias:24, bloqueoGrupo:true, maxDesprog:3, preaviso:15, pctTurno:10, desprogPuntua:true };
 const depsIniciales = () => ['Pasaje','Rampa','Operaciones'].map(n=>({id:uid(), nombre:n, baseDias:''}));
@@ -508,6 +529,10 @@ function normalizar(d){ // también migra datos de versiones anteriores
   }
   d.trabajadores.forEach(t=>{ if(!Array.isArray(t.skills)) t.skills=[]; if(!Array.isArray(t.cese)) t.cese=[]; });
   d.rotaciones ||= []; d.transf ||= []; if(!Array.isArray(d.turnosTipos) || !d.turnosTipos.length) d.turnosTipos = TURNOS_DEF.map(t=>({...t}));
+  if(d.turnosTipos.map(t=>t.cod).join()==='M,T,N,P,L'){ // tipos de la 5.0: el libre pasa a ser «R» y se añade festivo
+    d.rotaciones.forEach(r=>r.semanas.forEach(sem=>sem.forEach((c,k)=>{ if(c==='L') sem[k]='R'; })));
+    d.turnosTipos = TURNOS_DEF.map(t=>({...t}));
+  }
   d.grupos.forEach(g=>{ if(g.rotacionId===undefined) g.rotacionId=''; });
   d.cupos.forEach(c=>{ c.skills ||= []; if(c.grupoId===undefined) c.grupoId=''; if(c.depId===undefined) c.depId=''; if(c.prodId===undefined) c.prodId = c.depId ? prod0 : ''; });
   delete d.vistaDep;
@@ -818,6 +843,7 @@ function render(){
   document.getElementById('main').innerHTML = intro() + V[UI.vista]() + pie();
   const on = document.querySelector('.step.on'); if(on) on.scrollIntoView({block:'nearest',inline:'center'});
   if(UI.vista==='pdf') ajustarHoja();
+  if(UI.vista==='rotaciones' && UI.rotEdit) document.querySelector('.dlg-op.on, .dlg-op')?.focus();
   if(UI.vista==='calendario' && UI.cal.modo==='anual') ajustarAnual();
 }
 const skillChip = id => { const t=skillDe(id); return t ? `<span class="chip" style="background:${t.color}1a;color:${t.color}">${esc(t.nombre)}</span>` : '<span class="chip grey">Sin skill</span>'; };
@@ -1654,6 +1680,7 @@ function salirPantallaCompleta(){
   try{ if(document.fullscreenElement) document.exitFullscreen(); }catch(e){}
 }
 document.addEventListener('fullscreenchange', ()=>{ if(!document.fullscreenElement && document.body.classList.contains('cal-full')){ document.body.classList.remove('cal-full'); if(UI.vista==='calendario') render(); } });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape' && UI.rotEdit && !document.getElementById('bloqueo')){ UI.rotEdit=null; render(); } });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape' && document.body.classList.contains('cal-full') && !document.getElementById('bloqueo')){ salirPantallaCompleta(); render(); } });
 
 function vCalMes(seg){
@@ -1704,50 +1731,60 @@ function vCalMes(seg){
 /* =========================================================
    Rotaciones
    ========================================================= */
+const DIAS_LARGOS = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
 function vRotaciones(){
-  const rs = rotacionesVis(), P = UI.rotPincel;
-  const paleta = `<div class="chips" role="group" aria-label="Pincel">
-    <button class="pill ${P===undefined||P===null?'on':''}" onclick="UI.rotPincel=null;render()">Ir cambiando</button>
-    ${S.turnosTipos.map(t=>`<button class="pill ${P===t.cod?'on':''}" onclick="UI.rotPincel='${esc(t.cod)}';render()"><span class="dot" style="background:${t.color}"></span>${esc(t.cod)} ${esc(t.nombre)}</button>`).join('')}
-    <button class="pill ${P===''?'on':''}" onclick="UI.rotPincel='';render()">Vaciar</button></div>`;
-  return `${rs.length?`<div class="card"><h2>Pincel</h2><p class="help">Elige un turno y toca las casillas para pintarlo. Con «Ir cambiando», cada toque pasa al siguiente turno.</p>${paleta}</div>`:''}
-  ${rs.map(tarjetaRotacion).join('')}
-  <div class="card"><h2>Nueva rotación</h2>
-    <div class="row"><label style="flex:1 1 220px">Nombre<input id="nRot" placeholder="Rotación base"></label>
-      <label style="flex:0 1 200px">Empieza el lunes<input id="nRotIni" type="date" value="${lunesDe(`${S.ciclo}-01-01`)}"></label>
-      <button class="btn primary" onclick="crearRotacion()">Crear rotación</button></div>
-    <p class="help" style="margin:10px 0 0">Se crea vacía, con 3 semanas de lunes a domingo. La fecha marca el lunes en el que empieza la semana 1; a partir de ahí se repite cada 3 semanas.</p>
+  if(!rotacionesVis().length){ crearRotacion(true); }
+  const rs = rotacionesVis();
+  if(!UI.rotSel || !rs.some(r=>r.id===UI.rotSel)) UI.rotSel = rs[0].id;
+  const r = rotDeId(UI.rotSel), gs = gruposVis(), usan = gs.filter(g=>g.rotacionId===r.id);
+  const libres = r.semanas.flat().filter(c=>tipoTurno(c)?.libre).length;
+  const dia = (wi,di) => { const c=r.semanas[wi][di], t=tipoTurno(c);
+    return `<button class="rdia ${t?'':'vacio'} ${t&&t.libre?'lib':''}" style="${t?`--tc:${t.color}`:''}" onclick="UI.rotEdit={wi:${wi},di:${di}};render()" aria-label="Semana ${wi+1}, ${DIAS_LARGOS[di]}: ${t?esc(t.nombre):'trabajo'}">
+      <span class="rd-n">${DIAS_LARGOS[di].slice(0,3)}</span><span class="rd-c">${t?esc(t.cod):'·'}</span><span class="rd-t">${t?esc(t.nombre):'Trabajo'}</span></button>`; };
+  let dlg = '';
+  if(UI.rotEdit){
+    const {wi,di} = UI.rotEdit, actual = r.semanas[wi][di];
+    dlg = `<div class="dlg-fondo" onclick="if(event.target===this){UI.rotEdit=null;render()}"><div class="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgT">
+      <h2 id="dlgT">Semana ${wi+1}, ${DIAS_LARGOS[di].toLowerCase()}</h2><p class="muted" style="margin:-4px 0 14px">¿Qué es este día?</p>
+      <div class="dlg-ops">${S.turnosTipos.map(t=>`<button class="dlg-op ${actual===t.cod?'on':''}" style="--tc:${t.color}" onclick="ponerDiaRot('${r.id}',${wi},${di},'${esc(t.cod)}')"><b>${esc(t.cod)}</b><span>${esc(t.nombre)}${t.libre?' <small>(no se trabaja)</small>':''}</span></button>`).join('')}
+        <button class="dlg-op ${!actual?'on':''}" onclick="ponerDiaRot('${r.id}',${wi},${di},'')"><b>·</b><span>Trabajo, sin marcar</span></button></div>
+      <div class="row" style="margin-top:14px;justify-content:flex-end"><button class="btn" id="dlgCerrar" onclick="UI.rotEdit=null;render()">Cancelar</button></div>
+    </div></div>`;
+  }
+  return `<div class="card">
+    <div class="row" style="align-items:flex-end;margin-bottom:6px">
+      ${rs.length>1?`<div class="chips" style="flex:1 1 100%;margin-bottom:6px">${rs.map(x=>`<button class="pill ${x.id===r.id?'on':''}" onclick="UI.rotSel='${x.id}';render()">${esc(x.nombre)}</button>`).join('')}</div>`:''}
+      <label style="flex:1 1 220px">Nombre<input value="${esc(r.nombre)}" onchange="rotDeId('${r.id}').nombre=this.value.trim()||rotDeId('${r.id}').nombre;save();render()"></label>
+      <label style="flex:0 1 210px">La semana 1 empieza el lunes<input type="date" value="${r.inicio}" onchange="rotDeId('${r.id}').inicio=lunesDe(this.value||'${r.inicio}');save();render()"></label>
+      <button class="btn primary" onclick="crearRotacion()">+ Crear nueva rotación</button>
+    </div>
+    <p class="help" style="margin:8px 0 18px">Pulsa un día para decir qué es: libre (R), festivo, turno… Las 3 semanas se repiten una tras otra desde el lunes indicado. ${libres} día(s) libres o festivos en el ciclo.</p>
+    <div class="rsems">${r.semanas.map((sem,wi)=>`<div class="rsem"><div class="rsem-t">Semana ${wi+1}</div><div class="rsem-d">${sem.map((_,di)=>dia(wi,di)).join('')}</div></div>`).join('')}</div>
+    <div class="row" style="margin-top:18px;align-items:center">
+      <span class="muted">Grupos con esta rotación:</span> ${usan.length?usan.map(g=>`<span class="chip grey">${esc(g.nombre)} <button class="xchip" onclick="grupoDe('${g.id}').rotacionId='';save();render()" aria-label="Quitar de ${esc(g.nombre)}">✕</button></span>`).join(' '):'<span class="muted">ninguno</span>'}
+      ${gs.filter(g=>g.rotacionId!==r.id).length?`<select style="width:auto;margin:0" onchange="if(this.value){grupoDe(this.value).rotacionId='${r.id}';save();render()}"><option value="">Asignar a un grupo…</option>${gs.filter(g=>g.rotacionId!==r.id).map(g=>`<option value="${g.id}">${esc(g.nombre)}${g.rotacionId?' (cambia de rotación)':''}</option>`).join('')}</select>`:''}
+      ${gs.length>usan.length && gs.length>1?`<button class="btn small" onclick="gruposVis().forEach(g=>g.rotacionId='${r.id}');save();render()">Asignar a todos los grupos</button>`:''}
+      <span style="flex:1"></span>${rs.length>1?`<button class="btn small danger" onclick="borrarRotacion('${r.id}')">Eliminar esta rotación</button>`:''}
+    </div>
   </div>
-  <div class="card"><h2>Tipos de turno</h2>
-    <p class="help">Los códigos que puedes poner en las rotaciones. Valen para todos los departamentos. Marca «Libre» en los que son días de descanso.</p>
+  <div class="card"><h2>Tipos de día</h2>
+    <p class="help">Lo que puedes asignar a cada día de la rotación. Valen para todos los departamentos. Marca «No se trabaja» en libres, festivos y similares.</p>
     ${S.turnosTipos.map((t,i)=>`<div class="row" style="flex-wrap:nowrap;align-items:center;margin-bottom:8px">
       <input type="color" value="${t.color}" aria-label="Color" style="width:44px;height:40px;padding:2px;margin:0;flex:0 0 44px" onchange="S.turnosTipos[${i}].color=this.value;save();render()">
       <input value="${esc(t.cod)}" maxlength="3" aria-label="Código" style="width:64px;flex:0 0 64px;margin:0;font-weight:700;text-transform:uppercase" onchange="cambiarCodTurno(${i},this.value)">
-      <input value="${esc(t.nombre)}" aria-label="Nombre del turno" style="flex:1;min-width:0;margin:0" onchange="S.turnosTipos[${i}].nombre=this.value.trim()||S.turnosTipos[${i}].nombre;save();render()">
-      <label class="chk" style="white-space:nowrap"><input type="checkbox" ${t.libre?'checked':''} onchange="S.turnosTipos[${i}].libre=this.checked;save();render()">Libre</label>
-      <button class="btn small danger" onclick="borrarTipoTurno(${i})" aria-label="Borrar tipo de turno">✕</button></div>`).join('')}
-    <div class="row" style="margin-top:10px"><label style="flex:0 1 90px">Código<input id="nTc" maxlength="3" placeholder="I"></label><label style="flex:1">Nombre<input id="nTn" placeholder="Intermedio"></label><button class="btn" onclick="añadirTipoTurno()">Añadir turno</button></div>
-  </div>`;
+      <input value="${esc(t.nombre)}" aria-label="Nombre" style="flex:1;min-width:0;margin:0" onchange="S.turnosTipos[${i}].nombre=this.value.trim()||S.turnosTipos[${i}].nombre;save();render()">
+      <label class="chk" style="white-space:nowrap"><input type="checkbox" ${t.libre?'checked':''} onchange="S.turnosTipos[${i}].libre=this.checked;save();render()">No se trabaja</label>
+      <button class="btn small danger" onclick="borrarTipoTurno(${i})" aria-label="Borrar tipo">✕</button></div>`).join('')}
+    <div class="row" style="margin-top:10px"><label style="flex:0 1 90px">Código<input id="nTc" maxlength="3" placeholder="V"></label><label style="flex:1">Nombre<input id="nTn" placeholder="Vacaciones fijas"></label><button class="btn" onclick="añadirTipoTurno()">Añadir tipo</button></div>
+  </div>${dlg}`;
 }
-function tarjetaRotacion(r){
-  const gs = gruposVis(), usan = gs.filter(g=>g.rotacionId===r.id);
-  return `<div class="card"><div class="row" style="align-items:flex-end;margin-bottom:12px">
-      <label style="flex:1 1 220px">Nombre<input value="${esc(r.nombre)}" onchange="rotDeId('${r.id}').nombre=this.value.trim()||rotDeId('${r.id}').nombre;save();render()"></label>
-      <label style="flex:0 1 200px">Empieza el lunes<input type="date" value="${r.inicio}" onchange="rotDeId('${r.id}').inicio=lunesDe(this.value||'${r.inicio}');save();render()"></label>
-      <button class="btn danger" onclick="borrarRotacion('${r.id}')">Eliminar rotación</button></div>
-    <div class="rot">
-      <span></span>${DOW.map(d=>`<span class="rot-h">${d}</span>`).join('')}
-      ${r.semanas.map((sem,wi)=>`<span class="rot-s">Semana ${wi+1}</span>${sem.map((c,di)=>{const t=tipoTurno(c); return `<button class="rot-c ${t&&t.libre?'lib':''}" style="${t?`--tc:${t.color}`:''}" onclick="pintarRot('${r.id}',${wi},${di})" aria-label="Semana ${wi+1}, ${DOW[di]}: ${t?esc(t.nombre):'vacío'}">${t?esc(t.cod):'·'}</button>`}).join('')}`).join('')}
-    </div>
-    <div class="row" style="margin-top:14px;align-items:center">
-      <span class="muted">Grupos con esta rotación:</span> ${usan.length?usan.map(g=>`<span class="chip grey">${esc(g.nombre)} <button class="xchip" onclick="grupoDe('${g.id}').rotacionId='';save();render()" aria-label="Quitar de ${esc(g.nombre)}">✕</button></span>`).join(' '):'<span class="muted">ninguno</span>'}
-      ${gs.filter(g=>g.rotacionId!==r.id).length?`<select style="width:auto;margin:0" onchange="if(this.value){grupoDe(this.value).rotacionId='${r.id}';save();render()}"><option value="">Asignar a un grupo…</option>${gs.filter(g=>g.rotacionId!==r.id).map(g=>`<option value="${g.id}">${esc(g.nombre)}${g.rotacionId?' (cambia de rotación)':''}</option>`).join('')}</select>`:''}
-    </div></div>`;
-}
-function crearRotacion(){
-  const n=document.getElementById('nRot').value.trim()||`Rotación ${rotacionesVis().length+1}`, ini=lunesDe(document.getElementById('nRotIni').value||`${S.ciclo}-01-01`);
-  S.rotaciones.push({id:uid(), nombre:n, depId:S.ctx.dep, prodId:S.ctx.prod, inicio:ini, semanas:[0,1,2].map(()=>Array(7).fill(''))});
-  save(); render(); toast('Rotación creada: toca las casillas para configurarla');
+function ponerDiaRot(id, wi, di, cod){ const r=rotDeId(id); if(!r) return; r.semanas[wi][di]=cod; UI.rotEdit=null; save(); render(); }
+function crearRotacion(silencio){
+  const r = {id:uid(), nombre:`Rotación ${rotacionesVis().length+1}`, depId:S.ctx.dep, prodId:S.ctx.prod, inicio:lunesDe(`${S.ciclo}-01-01`), semanas:[0,1,2].map(()=>Array(7).fill(''))};
+  S.rotaciones.push(r); UI.rotSel = r.id;
+  if(!silencio && rotacionesVis().length===1) gruposVis().forEach(g=>{ if(!g.rotacionId) g.rotacionId=r.id; });
+  if(silencio) gruposVis().forEach(g=>{ if(!g.rotacionId) g.rotacionId=r.id; });   // la primera rotación se asigna a los grupos
+  save(); if(!silencio){ render(); toast('Rotación creada: pulsa los días para configurarla'); }
 }
 function pintarRot(id, wi, di){
   const r = rotDeId(id); if(!r) return;
@@ -1758,7 +1795,7 @@ function pintarRot(id, wi, di){
   save(); render();
 }
 function borrarRotacion(id){
-  if(!confirm('¿Eliminar esta rotación? Los grupos que la usan se quedarán sin rotación.')) return;
+  if(!confirm('¿Eliminar esta rotación? Los grupos que la usan se quedarán sin rotación.')) return; UI.rotSel=null;
   S.rotaciones = S.rotaciones.filter(r=>r.id!==id); S.grupos.forEach(g=>{ if(g.rotacionId===id) g.rotacionId=''; }); save(); render();
 }
 function cambiarCodTurno(i, v){
@@ -1770,7 +1807,7 @@ function cambiarCodTurno(i, v){
 function añadirTipoTurno(){
   const c=document.getElementById('nTc').value.trim().toUpperCase().slice(0,3), n=document.getElementById('nTn').value.trim();
   if(!c || !n) return toast('Pon código y nombre'); if(tipoTurno(c)) return toast('Ese código ya existe');
-  S.turnosTipos.push({cod:c, nombre:n, color:COLORES[S.turnosTipos.length%COLORES.length], libre:false}); save(); render();
+  S.turnosTipos.push({cod:c, nombre:n, color:COLORES[S.turnosTipos.length%COLORES.length], libre:false}); save(); render(); toast('Tipo añadido');
 }
 function borrarTipoTurno(i){
   const c = S.turnosTipos[i].cod, usos = S.rotaciones.reduce((a,r)=>a+r.semanas.flat().filter(x=>x===c).length,0);
@@ -1972,6 +2009,12 @@ render();
    Para publicar: subir APP_VERSION, añadir sus pasos a NOVEDADES y poner la misma versión en version.json.
    ========================================================= */
 const NOVEDADES = {
+  '5.1.0': [
+    { titulo:'Rotación en 3 semanas', donde:'Menú › Rotaciones',
+      texto:'Al entrar ves directamente las 3 semanas de la rotación, una debajo de otra, de lunes a domingo. Pulsa un día y elige qué es: libre (R), festivo, mañana, tarde, noche… o déjalo como día de trabajo.' },
+    { titulo:'Tipos de día a tu medida', donde:'Rotaciones › Tipos de día',
+      texto:'Puedes cambiar el código, el nombre y el color de cada tipo, o añadir los que necesites. Si hace falta otra rotación, usa «Crear nueva rotación».' },
+  ],
   '5.0.1': [
     { titulo:'Más grande en pantallas anchas', donde:'Toda la app',
       texto:'En ordenadores con pantalla grande la app ocupa todo el ancho: textos, calendarios, tarjetas y botones se ven más grandes y caben más meses por fila.' },
