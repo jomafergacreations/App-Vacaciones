@@ -1,7 +1,7 @@
 {
-  "version": "5.2.1",
+  "version": "5.3.0",
   "fecha": "2026-11-23",
   "novedades": [
-    "Se puede eliminar cualquier rotación, también la única"
+    "Burbuja Grupos: crea grupos, mete trabajadores a mano y mira el año con su rotación"
   ]
 }

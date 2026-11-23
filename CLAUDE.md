@@ -15,7 +15,7 @@ Si `version.json` lleva una versión mayor que la de `index.html`, la app entrar
 ## Estructura
 
 - Inicio: departamento (Pasaje, Rampa, Operaciones) → producto (GroundHandling azul, RedBull naranja) → menú del producto (`vMenu`). Todo lo de dentro se filtra por ese contexto (`S.ctx`).
-- Menú: tarjeta «Asignación de vacaciones» (único sitio con barra de pasos: Grupos de elección › Elección › Resumen y cierre, `PASOS`) y secciones sueltas (`SECCIONES`): Plantilla (pestañas Trabajadores y Cupos de plantilla), Skills, Rotaciones, Transformaciones, Desprogramaciones, Calendario y Exportar PDF.
+- Menú: tarjeta «Asignación de vacaciones» (único sitio con barra de pasos: Grupos de elección › Elección › Resumen y cierre, `PASOS`) y secciones sueltas (`SECCIONES`): Plantilla (pestañas Trabajadores y Cupos de plantilla), Grupos (vista `equipos`: miembros a mano y año con la rotación del grupo), Skills, Rotaciones, Transformaciones, Desprogramaciones, Calendario y Exportar PDF.
 - Grupos de elección ≠ cupos de plantilla: los grupos solo marcan quién elige con quién y en qué orden (y el 10 % de desprogramaciones); los cupos limitan cuántos pueden estar fuera a la vez.
 - Rotaciones: plantilla de 3 semanas (L-D) por departamento y producto; se asigna a grupos (`grupo.rotacionId`) o a una persona concreta (`trabajador.rotacionId`, que manda sobre la del grupo); `turnoDia(w, fecha)` da el turno de cada persona.
 - Transformaciones: cambios de contrato con fecha (`S.transf`); `derechoCiclo(w, año)` prorratea los días de vacaciones por tramos. Solo se deshace la última de cada persona.

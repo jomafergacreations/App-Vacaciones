@@ -250,6 +250,12 @@ body.cal-full .anual{flex:1;max-height:none}
 .rot-c:hover{border-color:var(--asfalto)}
 .rot-c.lib{background:#EBEFF6}
 .xchip{border:0;background:none;color:inherit;font:inherit;cursor:pointer;padding:0 0 0 4px}
+.gl{display:flex;flex-direction:column;max-height:420px;overflow:auto;border:1px solid var(--linea);border-radius:10px}
+.gl-i{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--linea);font-weight:400;color:var(--asfalto);font-size:14.5px}
+.gl-i:last-child{border-bottom:0}
+label.gl-i{cursor:pointer} label.gl-i:hover{background:var(--hormigon)}
+.fd.rc{border-top:3px solid var(--tc,var(--linea))}
+.fd.rc.rlib{background:var(--tc);border-color:var(--tc);color:#fff;font-weight:700}
 .dp-layout{display:grid;grid-template-columns:270px 1fr;gap:16px;align-items:start}
 .dp-layout>*{min-width:0}
 .dp-lista{position:sticky;top:76px;max-height:calc(100vh - 96px);overflow:auto;padding:12px}
@@ -440,7 +446,7 @@ body.bloqueada{overflow:hidden}
    Reglas base: Convenio Menzies (BOE-A-2023-25956), arts. 32 y 33
    Datos guardados en el navegador (localStorage). Haz copias.
    ========================================================= */
-const APP_VERSION = '5.2.1';   // súbela junto con version.json en cada publicación
+const APP_VERSION = '5.3.0';   // súbela junto con version.json en cada publicación
 const LS_KEY = 'vacaciones-agp-v1';
 const SIN = '_'; // clave interna para «sin grupo»
 
@@ -775,6 +781,7 @@ const PASOS = [
 ];
 const SECCIONES = [
   ['plantilla','Plantilla','Las personas de este departamento y producto y los cupos de plantilla, es decir, cuántas pueden estar de vacaciones a la vez. Puedes verlos y cambiarlos cuando quieras.'],
+  ['equipos','Grupos','Crea los grupos, mete a cada trabajador en el suyo y mira el año entero con la rotación de cada grupo. Son los mismos grupos con los que se eligen las vacaciones.'],
   ['skills','Skills','Las funciones que pueden tener los trabajadores de este departamento y producto.'],
   ['rotaciones','Rotaciones','El patrón de turnos de la base, en una plantilla de 3 semanas. Cada grupo lleva una rotación y todos sus miembros la siguen.'],
   ['transformaciones','Transformaciones','Cambios de contrato con su fecha. Los días de vacaciones del año se prorratean por tramos.'],
@@ -842,7 +849,7 @@ function render(){
     `<button class="step extra" onclick="go('menu')">‹ Menú</button><span class="sep"></span>` +
     PASOS.map(([k,n],i)=>`<button class="step ${UI.vista===k?'on':''} ${pasoHecho(k)?'done':''}" onclick="go('${k}')" ${UI.vista===k?'aria-current="step"':''}><span class="num">${pasoHecho(k)&&UI.vista!==k?'✓':i+1}</span>${n}</button>`).join('');
   document.body.classList.toggle('ancho', UI.vista==='calendario' && UI.cal.modo==='anual');
-  const V = {plantilla:vPlantilla, menu:vMenu, rotaciones:vRotaciones, transformaciones:vTransformaciones, inicio:vInicio, producto:vProducto, ajustes:vAjustes, skills:vSkills, grupos:vGrupos, trabajadores:vTrabajadores, cupos:vCupos, eleccion:vEleccion, desprog:vDesprog, resumen:vResumen, calendario:vCalendario, pdf:vPDF};
+  const V = {equipos:vEquipos, plantilla:vPlantilla, menu:vMenu, rotaciones:vRotaciones, transformaciones:vTransformaciones, inicio:vInicio, producto:vProducto, ajustes:vAjustes, skills:vSkills, grupos:vGrupos, trabajadores:vTrabajadores, cupos:vCupos, eleccion:vEleccion, desprog:vDesprog, resumen:vResumen, calendario:vCalendario, pdf:vPDF};
   const an0 = document.getElementById('anual'); if(an0){ UI.cal.sx = an0.scrollLeft; UI.cal.sy = an0.scrollTop; }
   document.getElementById('main').innerHTML = intro() + V[UI.vista]() + pie();
   const on = document.querySelector('.step.on'); if(on) on.scrollIntoView({block:'nearest',inline:'center'});
@@ -902,6 +909,7 @@ function vMenu(){
     <span class="ir" aria-hidden="true">›</span></button>
   <div class="mtiles">
     ${tile('plantilla','Plantilla', `${ts.length} persona${ts.length===1?'':'s'}, ${S.cupos.filter(c=>cupoVisible(c)&&c.depId).length} cupos de plantilla`, '👤')}
+    ${tile('equipos','Grupos', `${gruposVis().length} grupo${gruposVis().length===1?'':'s'}${trabsVis().filter(t=>!t.grupoId).length?`, ${trabsVis().filter(t=>!t.grupoId).length} sin grupo`:''}`, '◫')}
     ${tile('skills','Skills', `${skillsVis().length} skill${skillsVis().length===1?'':'s'}`, '★')}
     ${tile('rotaciones','Rotaciones', `${rotacionesVis().length} rotación(es), ${gruposVis().filter(g=>g.rotacionId).length} de ${gruposVis().length} grupos con rotación`, '↻')}
     ${tile('transformaciones','Transformaciones', `${S.transf.filter(t=>{const w=trabDe(t.trabajadorId); return w&&visible(w);}).length} cambios de contrato`, '⇄')}
@@ -1034,7 +1042,7 @@ function borrarSkill(id){
 function vGrupos(){
   const gs = gruposVis(), sinG = trabsVis().filter(t=>!t.grupoId).length;
   return `<div class="card"><h2>Grupos de elección de ${esc(ctxTxt())} (${gs.length})</h2>
-    <p class="help">Sirven para el orden de elección de vacaciones y para el 10 % de desprogramaciones. Cada grupo puede llevar una rotación; quien tenga una rotación propia la conserva.</p>
+    <p class="help">Sirven para el orden de elección de vacaciones y para el 10 % de desprogramaciones. Cada grupo puede llevar una rotación; quien tenga una rotación propia la conserva. Para meter o sacar gente, usa la burbuja <a href="#" onclick="go('equipos');return false">Grupos</a> del menú.</p>
     ${gs.length ? `<table><tr><th>Grupo</th><th>Rotación</th><th class="num">Personas</th><th class="num hide-m">Máx. desprog. por día</th><th></th></tr>
       ${gs.map(g=>`<tr><td><div class="row" style="align-items:center;flex-wrap:nowrap"><span class="dot" style="background:${g.color}"></span><input style="margin:0;min-width:0" value="${esc(g.nombre)}" aria-label="Nombre del grupo" onchange="grupoDe('${g.id}').nombre=this.value.trim()||grupoDe('${g.id}').nombre;save();render()"></div></td>
         <td><select style="margin:0;min-width:110px" aria-label="Rotación del grupo" onchange="grupoDe('${g.id}').rotacionId=this.value;save();render()">${opts(rotacionesVis(), g.rotacionId, ['','Sin rotación'])}</select></td>
@@ -1045,6 +1053,75 @@ function vGrupos(){
     ${sinG?`<p class="chip warn" style="margin-top:12px">${sinG} trabajador(es) sin grupo: asígnalos en Trabajadores</p>`:''}
     ${!rotacionesVis().length?`<p class="help" style="margin:12px 0 0">Todavía no hay rotaciones. <a href="#" onclick="go('rotaciones');return false">Crea una en Rotaciones</a> para asignarla a los grupos.</p>`:''}
   </div>`;
+}
+/* =========================================================
+   Grupos: miembros y año con la rotación del grupo
+   ========================================================= */
+function vEquipos(){
+  const gs = gruposVis(), sinG = trabsVis().filter(t=>!t.grupoId);
+  if(!UI.gSel || !gs.some(g=>g.id===UI.gSel)) UI.gSel = gs[0]?.id || '';
+  const g = grupoDe(UI.gSel), y = UI.gAnio ||= S.ciclo;
+  const cab = `<div class="card">
+    <div class="chips" style="margin-bottom:${gs.length?'14px':'0'}">${gs.map(x=>`<button class="pill ${x.id===UI.gSel?'on':''}" onclick="UI.gSel='${x.id}';render()"><span class="dot" style="background:${x.color}"></span>${esc(x.nombre)} (${miembros(x.id).length})</button>`).join('')}</div>
+    <div class="row"><label style="flex:1 1 220px">Nuevo grupo<input id="nGrupo2" placeholder="Turno A" onkeydown="if(event.key==='Enter')crearGrupoSec()"></label><button class="btn primary" onclick="crearGrupoSec()">+ Crear grupo</button></div>
+    ${sinG.length?`<p class="chip warn" style="margin-top:12px">${sinG.length} trabajador(es) sin grupo</p>`:''}
+  </div>`;
+  if(!g) return cab + `<p class="help">Crea el primer grupo para empezar a meter trabajadores.</p>`;
+  const miem = trabsVis().filter(t=>t.grupoId===g.id).sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
+  const otros = trabsVis().filter(t=>t.grupoId!==g.id).sort((a,b)=>(a.grupoId?1:0)-(b.grupoId?1:0) || a.nombre.localeCompare(b.nombre,'es'));
+  const r = rotDeId(g.rotacionId);
+  return cab + `<div class="grid2">
+    <div class="card"><div class="row" style="align-items:flex-end;margin-bottom:14px">
+        <label style="flex:1 1 180px">Nombre del grupo<input value="${esc(g.nombre)}" onchange="grupoDe('${g.id}').nombre=this.value.trim()||grupoDe('${g.id}').nombre;save();render()"></label>
+        <label style="flex:1 1 160px">Rotación<select onchange="grupoDe('${g.id}').rotacionId=this.value;save();render()">${opts(rotacionesVis(), g.rotacionId, ['','Sin rotación'])}</select></label>
+        <button class="btn danger" onclick="borrarGrupo('${g.id}')">Eliminar grupo</button></div>
+      <h2>Miembros (${miem.length})</h2>
+      ${miem.length?`<div class="gl">${miem.map(t=>`<div class="gl-i"><span><b>${esc(t.nombre)}</b><span class="muted"> ${esc(skillsTxt(t))}${t.rotacionId&&rotDeId(t.rotacionId)?`, rotación propia: ${esc(rotDeId(t.rotacionId).nombre)}`:''}</span></span><button class="btn small" onclick="moverAGrupo(['${t.id}'],'')">Sacar</button></div>`).join('')}</div>`:'<p class="help">Este grupo todavía no tiene a nadie. Añádelos desde la lista de al lado.</p>'}
+    </div>
+    <div class="card"><h2>Añadir a ${esc(g.nombre)}</h2>
+      ${otros.length?`<input placeholder="Buscar" aria-label="Buscar trabajador" style="margin:0 0 10px" oninput="const q=this.value.toLowerCase();document.querySelectorAll('.gl-add .gl-i').forEach(e=>e.style.display=e.dataset.n.includes(q)?'':'none')">
+        <div class="gl gl-add">${otros.map(t=>`<label class="gl-i" data-n="${esc(t.nombre.toLowerCase())}"><span><input type="checkbox" class="gAdd" value="${t.id}"><b>${esc(t.nombre)}</b><span class="muted"> ${t.grupoId?'en '+esc(nombreGrupo(t.grupoId)):'sin grupo'}</span></span></label>`).join('')}</div>
+        <div class="row" style="margin-top:12px"><button class="btn primary" onclick="moverAGrupo([...document.querySelectorAll('.gAdd:checked')].map(x=>x.value),'${g.id}')">Meter en ${esc(g.nombre)}</button>
+        <span class="muted">Si ya estaban en otro grupo, se cambian a este.</span></div>`
+        :'<p class="help">Todos los trabajadores ya están en este grupo.</p>'}
+    </div>
+  </div>
+  <div class="card">
+    <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h2 style="margin:0">${r?`Año ${y} con la rotación «${esc(r.nombre)}»`:`Año ${y}`}</h2>
+      <div class="an-anio"><button class="btn small" onclick="UI.gAnio=${y-1};render()" aria-label="Año anterior">‹</button><b>${y}</b><button class="btn small" onclick="UI.gAnio=${y+1};render()" aria-label="Año siguiente">›</button></div>
+    </div>
+    ${r?calendarioRotacion(r, y):`<p class="help">Este grupo no tiene rotación. Elige una arriba${rotacionesVis().length?'':' o créala en <a href="#" onclick="go(\'rotaciones\');return false">Rotaciones</a>'}.</p>`}
+  </div>`;
+}
+/* año entero pintado con una rotación: cada día con su turno */
+function calendarioRotacion(r, y){
+  const n = r.semanas.length*7;
+  const cod = s => { const i = ((daysBetween(r.inicio, s) % n) + n) % n; return r.semanas[Math.floor(i/7)][i%7]; };
+  const cuenta = {};
+  let html = '<div class="fcal">';
+  for(let m=0;m<12;m++){
+    const mm=String(m+1).padStart(2,'0'), first=`${y}-${mm}-01`, dim=new Date(Date.UTC(y,m+1,0)).getUTCDate(), off=(pd(first).getUTCDay()+6)%7;
+    html += `<div class="smes"><div class="smes-t">${MESES[m][0].toUpperCase()+MESES[m].slice(1)}</div><div class="sgrid">${DOW.map(d=>`<span class="sdow">${d}</span>`).join('')}${'<span></span>'.repeat(off)}`;
+    for(let d=1; d<=dim; d++){
+      const s=`${y}-${mm}-${String(d).padStart(2,'0')}`, c=cod(s), t=tipoTurno(c); if(c) cuenta[c]=(cuenta[c]||0)+1;
+      html += `<span class="fd rc ${t&&t.libre?'rlib':''} ${esSS(s)?'ss':''}" style="${t?`--tc:${t.color}`:''}" title="${fmt(s)}: ${t?esc(t.nombre):'trabajo'}${esSS(s)?', Semana Santa':''}${esPuente(s)?', puente':''}">${d}${t?`<i class="tc" style="color:${t.libre?'#fff':t.color}">${esc(t.cod)}</i>`:''}</span>`;
+    }
+    html += '</div></div>';
+  }
+  return html + `</div><div class="legend">${S.turnosTipos.filter(t=>cuenta[t.cod]).map(t=>`<span style="--c:${t.color}">${esc(t.cod)} ${esc(t.nombre)}: ${cuenta[t.cod]} días</span>`).join('')}<span style="--c:#fff;outline:1px solid var(--linea)">Sin marcar (trabajo)</span></div>`;
+}
+function crearGrupoSec(){
+  const n=document.getElementById('nGrupo2').value.trim(); if(!n) return toast('Escribe el nombre del grupo');
+  const g={id:uid(),nombre:n,depId:S.ctx.dep,prodId:S.ctx.prod,color:COLORES[S.grupos.length%COLORES.length],rotacionId:rotacionesVis().length===1?rotacionesVis()[0].id:''};
+  S.grupos.push(g); UI.gSel=g.id; save(); render(); toast('Grupo creado');
+}
+function moverAGrupo(ids, gid){
+  if(!ids.length) return toast('Marca a alguien en la lista');
+  ids.forEach(id=>{ const w=trabDe(id); if(!w || w.grupoId===gid) return;
+    Object.values(S.turnos).forEach(t=>Object.values(t.hechos).forEach(a=>{ const i=a.indexOf(id); if(i>=0) a.splice(i,1); }));
+    w.grupoId = gid; });
+  save(); render(); toast(gid ? `${ids.length} persona(s) en ${nombreGrupo(gid)}` : 'Sacado del grupo');
 }
 function añadirGrupo(){ const n=document.getElementById('nGrupo').value.trim(); if(!n) return; S.grupos.push({id:uid(),nombre:n,depId:S.ctx.dep,prodId:S.ctx.prod,color:COLORES[S.grupos.length%COLORES.length]}); save(); render(); document.getElementById('nGrupo')?.focus(); }
 function borrarGrupo(id){
@@ -2044,6 +2121,12 @@ render();
    Para publicar: subir APP_VERSION, añadir sus pasos a NOVEDADES y poner la misma versión en version.json.
    ========================================================= */
 const NOVEDADES = {
+  '5.3.0': [
+    { titulo:'Burbuja Grupos', donde:'Menú › Grupos',
+      texto:'Crea grupos y mete a los trabajadores a mano: marca a quien quieras en la lista y pulsa «Meter en…». Para sacar a alguien, «Sacar». Son los mismos grupos con los que se eligen las vacaciones.' },
+    { titulo:'Año con la rotación del grupo', donde:'Menú › Grupos',
+      texto:'Debajo de cada grupo ves el año entero con su rotación: cada día con su turno y los libres y festivos marcados en color. Cambia de año con las flechas.' },
+  ],
   '5.2.1': [
     { titulo:'Eliminar rotaciones', donde:'Menú › Rotaciones',
       texto:'Junto a «Crear nueva rotación» tienes «Eliminar rotación». Funciona con cualquiera, también con la única que haya; los grupos y personas que la usaban se quedan sin rotación.' },
