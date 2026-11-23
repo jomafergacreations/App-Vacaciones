@@ -440,7 +440,7 @@ body.bloqueada{overflow:hidden}
    Reglas base: Convenio Menzies (BOE-A-2023-25956), arts. 32 y 33
    Datos guardados en el navegador (localStorage). Haz copias.
    ========================================================= */
-const APP_VERSION = '5.2.0';   // súbela junto con version.json en cada publicación
+const APP_VERSION = '5.2.1';   // súbela junto con version.json en cada publicación
 const LS_KEY = 'vacaciones-agp-v1';
 const SIN = '_'; // clave interna para «sin grupo»
 
@@ -1750,8 +1750,10 @@ function vCalMes(seg){
    ========================================================= */
 const DIAS_LARGOS = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
 function vRotaciones(){
-  if(!rotacionesVis().length){ crearRotacion(true); }
+  S.rotIniciada ||= {};
+  if(!rotacionesVis().length && !S.rotIniciada[ctxKey()]){ S.rotIniciada[ctxKey()] = true; crearRotacion(true); }   // solo la primera vez
   const rs = rotacionesVis();
+  if(!rs.length) return `<div class="card"><h2>No hay rotaciones</h2><p class="help">Crea una para configurar sus 3 semanas y asignarla a los grupos.</p><button class="btn primary" onclick="crearRotacion()">+ Crear nueva rotación</button></div>`;
   if(!UI.rotSel || !rs.some(r=>r.id===UI.rotSel)) UI.rotSel = rs[0].id;
   const r = rotDeId(UI.rotSel), gs = gruposVis(), usan = gs.filter(g=>g.rotacionId===r.id);
   const libres = r.semanas.flat().filter(c=>tipoTurno(c)?.libre).length;
@@ -1774,6 +1776,7 @@ function vRotaciones(){
       <label style="flex:1 1 220px">Nombre<input value="${esc(r.nombre)}" onchange="rotDeId('${r.id}').nombre=this.value.trim()||rotDeId('${r.id}').nombre;save();render()"></label>
       <label style="flex:0 1 210px">La semana 1 empieza el lunes<input type="date" value="${r.inicio}" onchange="rotDeId('${r.id}').inicio=lunesDe(this.value||'${r.inicio}');save();render()"></label>
       <button class="btn primary" onclick="crearRotacion()">+ Crear nueva rotación</button>
+      <button class="btn danger" onclick="borrarRotacion('${r.id}')">Eliminar rotación</button>
     </div>
     <p class="help" style="margin:8px 0 18px">Pulsa un día para decir qué es: libre (R), festivo, turno… Las 3 semanas se repiten una tras otra desde el lunes indicado. ${libres} día(s) libres o festivos en el ciclo.</p>
     <div class="rsems">${r.semanas.map((sem,wi)=>`<div class="rsem"><div class="rsem-t">Semana ${wi+1}</div><div class="rsem-d">${sem.map((_,di)=>dia(wi,di)).join('')}</div></div>`).join('')}</div>
@@ -1782,7 +1785,6 @@ function vRotaciones(){
       <span class="muted">Grupos con esta rotación:</span> ${usan.length?usan.map(g=>`<span class="chip grey">${esc(g.nombre)} <button class="xchip" onclick="grupoDe('${g.id}').rotacionId='';save();render()" aria-label="Quitar de ${esc(g.nombre)}">✕</button></span>`).join(' '):'<span class="muted">ninguno</span>'}
       ${gs.filter(g=>g.rotacionId!==r.id).length?`<select style="width:auto;margin:0" onchange="if(this.value){grupoDe(this.value).rotacionId='${r.id}';save();render()}"><option value="">Asignar a un grupo…</option>${gs.filter(g=>g.rotacionId!==r.id).map(g=>`<option value="${g.id}">${esc(g.nombre)}${g.rotacionId?' (cambia de rotación)':''}</option>`).join('')}</select>`:''}
       ${gs.length>usan.length && gs.length>1?`<button class="btn small" onclick="gruposVis().forEach(g=>g.rotacionId='${r.id}');save();render()">Asignar a todos los grupos</button>`:''}
-      <span style="flex:1"></span>${rs.length>1?`<button class="btn small danger" onclick="borrarRotacion('${r.id}')">Eliminar esta rotación</button>`:''}
     </div>
   </div>
   ${tarjetaRotPropia()}
@@ -1827,8 +1829,9 @@ function pintarRot(id, wi, di){
   save(); render();
 }
 function borrarRotacion(id){
-  if(!confirm('¿Eliminar esta rotación? Los grupos y personas que la usan se quedarán sin ella.')) return; UI.rotSel=null;
-  S.rotaciones = S.rotaciones.filter(r=>r.id!==id); S.grupos.forEach(g=>{ if(g.rotacionId===id) g.rotacionId=''; }); S.trabajadores.forEach(t=>{ if(t.rotacionId===id) t.rotacionId=''; }); save(); render();
+  const r = rotDeId(id), ng = S.grupos.filter(g=>g.rotacionId===id).length, np = S.trabajadores.filter(t=>t.rotacionId===id).length;
+  if(!confirm(`¿Eliminar «${r?.nombre||'la rotación'}»?${ng||np?` ${ng} grupo(s) y ${np} persona(s) que la usan se quedarán sin rotación.`:''}`)) return; UI.rotSel=null; S.rotIniciada ||= {}; S.rotIniciada[ctxKey()] = true;
+  S.rotaciones = S.rotaciones.filter(r=>r.id!==id); S.grupos.forEach(g=>{ if(g.rotacionId===id) g.rotacionId=''; }); S.trabajadores.forEach(t=>{ if(t.rotacionId===id) t.rotacionId=''; }); save(); render(); toast('Rotación eliminada');
 }
 function cambiarCodTurno(i, v){
   const nuevo = v.trim().toUpperCase().slice(0,3), viejo = S.turnosTipos[i].cod;
@@ -2041,6 +2044,10 @@ render();
    Para publicar: subir APP_VERSION, añadir sus pasos a NOVEDADES y poner la misma versión en version.json.
    ========================================================= */
 const NOVEDADES = {
+  '5.2.1': [
+    { titulo:'Eliminar rotaciones', donde:'Menú › Rotaciones',
+      texto:'Junto a «Crear nueva rotación» tienes «Eliminar rotación». Funciona con cualquiera, también con la única que haya; los grupos y personas que la usaban se quedan sin rotación.' },
+  ],
   '5.2.0': [
     { titulo:'Plantilla y sus cupos', donde:'Menú › Plantilla',
       texto:'Trabajadores y cupos de plantilla están ahora juntos en la burbuja «Plantilla», en dos pestañas. Los cupos se ven y se cambian en cualquier momento.' },

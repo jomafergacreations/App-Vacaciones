@@ -1,9 +1,7 @@
 {
-  "version": "5.2.0",
+  "version": "5.2.1",
   "fecha": "2026-11-23",
   "novedades": [
-    "Plantilla: trabajadores y cupos de plantilla juntos, editables en cualquier momento",
-    "Los grupos de la asignación pasan a llamarse grupos de elección",
-    "Rotación específica por persona"
+    "Se puede eliminar cualquier rotación, también la única"
   ]
 }
