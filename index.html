@@ -189,8 +189,9 @@ td .chip{white-space:normal}
 #print{display:none}
 /* aviso de actualización: bloquea la app hasta actualizar */
 body.bloqueada{overflow:hidden}
-#actualizacion{position:fixed;inset:0;z-index:100;background:rgba(34,38,46,.74);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);display:grid;place-items:center;padding:20px}
-.act-caja{background:var(--papel);border-radius:14px;overflow:hidden;max-width:440px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.35);animation:actEntra .25s ease-out}
+#bloqueo{position:fixed;inset:0;z-index:100;background:rgba(34,38,46,.74);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);display:grid;place-items:center;padding:20px}
+.act-caja{background:var(--papel);border-radius:14px;overflow:hidden;max-width:440px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.35)}
+#bloqueo.nuevo .act-caja{animation:actEntra .25s ease-out}
 @keyframes actEntra{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
 .act-cab{display:flex;align-items:stretch;background:var(--senal);color:var(--asfalto)}
 .act-cab .flecha{background:var(--asfalto);color:var(--senal);font-family:var(--cond);font-weight:700;font-size:40px;display:grid;place-items:center;padding:0 18px;line-height:1}
@@ -203,6 +204,15 @@ body.bloqueada{overflow:hidden}
 .act-cuerpo ul{margin:0 0 16px;padding-left:20px;color:var(--gris);font-size:14px}
 .act-btn{width:100%;justify-content:center;font-size:17px;padding:14px}
 .act-pie{font-size:12.5px;color:var(--gris);text-align:center;margin-top:10px}
+.rec-cuerpo{padding:20px 20px 18px}
+.rec-cuerpo h3{font-family:var(--cond);font-size:26px;font-weight:700;line-height:1.1;margin:0 0 8px}
+.rec-cuerpo p{margin:0 0 12px}
+.rec-donde{display:inline-block;background:var(--hormigon);border-radius:5px;padding:3px 9px;font-size:13px;font-weight:600;color:var(--gris)}
+.rec-puntos{display:flex;gap:6px;justify-content:center;margin:18px 0 14px}
+.rec-puntos i{width:22px;height:5px;border-radius:3px;background:var(--linea)}
+.rec-puntos i.on{background:var(--asfalto)} .rec-puntos i.hecho{background:var(--senal)}
+.rec-nav{display:flex;gap:10px}
+.rec-nav .btn{flex:1;justify-content:center;padding:13px}
 
 
 @media (max-width:760px){
@@ -239,7 +249,7 @@ body.bloqueada{overflow:hidden}
    Reglas base: Convenio Menzies (BOE-A-2023-25956), arts. 32 y 33
    Datos guardados en el navegador (localStorage). Haz copias.
    ========================================================= */
-const APP_VERSION = '3.1.0';   // súbela junto con version.json en cada publicación
+const APP_VERSION = '3.2.0';   // súbela junto con version.json en cada publicación
 const LS_KEY = 'vacaciones-agp-v1';
 const SIN = '_'; // clave interna para «sin grupo»
 
@@ -1236,13 +1246,50 @@ if(S.trabajadores.length && !S.pasosOk.length) UI.vista='eleccion';
 render();
 
 /* =========================================================
-   Aviso de actualización
-   La app consulta version.json del repositorio. Si hay una versión más nueva,
-   bloquea la pantalla hasta que se actualice. Los datos no se tocan.
+   Actualizaciones
+   1. La app abierta consulta version.json del repositorio cada minuto y al volver a la pestaña.
+      Si hay una versión más nueva, bloquea la pantalla hasta que se actualice.
+   2. Después de actualizar, obliga a recorrer las novedades paso a paso.
+   Para publicar: subir APP_VERSION, añadir sus pasos a NOVEDADES y poner la misma versión en version.json.
    ========================================================= */
+const NOVEDADES = {
+  '3.2.0': [
+    { titulo:'Departamentos', donde:'Cabecera y paso 2',
+      texto:'Pasaje, Rampa y Operaciones tienen cada uno sus grupos, sus cupos y su propia base de ponderación. Con el selector de arriba trabajas con un departamento o con todos a la vez.' },
+    { titulo:'Vacaciones a mano', donde:'Paso 5, Elección',
+      texto:'Además de elegir por turnos, ahora puedes apuntar o editar las vacaciones de cualquiera con «A mano». Si no hay cupo, puedes guardarlas igual y quedan marcadas en rojo.' },
+    { titulo:'Exportar a PDF', donde:'Exportar PDF',
+      texto:'Saca un informe con el cuadrante anual, la tabla de vacaciones, los puntos, las desprogramaciones y una columna de firma. Elige qué incluir, revisa la vista previa y guárdalo como PDF.' },
+    { titulo:'Actualizaciones automáticas', donde:'Toda la app',
+      texto:'Cuando se publique una versión nueva, la app te avisará sola y te pedirá actualizar. Después te enseñará lo que ha cambiado, como ahora.' },
+  ],
+};
 let avisoActualizacion = false;
-const esMasNueva = (a,b) => { const pa=String(a).split('.').map(Number), pb=String(b).split('.').map(Number);
-  for(let i=0;i<3;i++){ if((pa[i]||0)!==(pb[i]||0)) return (pa[i]||0)>(pb[i]||0); } return false; };
+const cmpVer = (a,b) => { const pa=String(a).split('.').map(Number), pb=String(b).split('.').map(Number);
+  for(let i=0;i<3;i++){ const d=(pa[i]||0)-(pb[i]||0); if(d) return d; } return 0; };
+const esMasNueva = (a,b) => cmpVer(a,b) > 0;
+
+function bloquear(html){
+  let d = document.getElementById('bloqueo');
+  if(!d){ d=document.createElement('div'); d.id='bloqueo'; d.className='nuevo'; d.setAttribute('role','alertdialog'); d.setAttribute('aria-modal','true'); document.body.appendChild(d); setTimeout(()=>d.classList.remove('nuevo'),400); }
+  d.innerHTML = html;
+  document.body.classList.add('bloqueada');
+  document.querySelectorAll('header.app, nav.pasos, main, #toast').forEach(e=>e.setAttribute('inert',''));
+  d.onkeydown = e => { // el foco no sale del cuadro y Escape no lo cierra
+    if(e.key==='Escape'){ e.preventDefault(); return; }
+    if(e.key!=='Tab') return;
+    const f=[...d.querySelectorAll('button:not([disabled])')]; if(!f.length) return;
+    const i=f.indexOf(document.activeElement); e.preventDefault();
+    f[(i + (e.shiftKey?-1:1) + f.length) % f.length].focus();
+  };
+  return d;
+}
+function desbloquear(){
+  document.getElementById('bloqueo')?.remove();
+  document.body.classList.remove('bloqueada');
+  document.querySelectorAll('[inert]').forEach(e=>e.removeAttribute('inert'));
+}
+
 async function comprobarVersion(){
   if(avisoActualizacion || !/^https?:$/.test(location.protocol)) return;
   try{
@@ -1254,30 +1301,61 @@ async function comprobarVersion(){
 }
 function mostrarActualizacion(v){
   avisoActualizacion = true;
-  const d = document.createElement('div');
-  d.id='actualizacion'; d.setAttribute('role','alertdialog'); d.setAttribute('aria-modal','true'); d.setAttribute('aria-labelledby','actTit');
   const nov = Array.isArray(v.novedades) ? v.novedades : [];
-  d.innerHTML = `<div class="act-caja">
-    <div class="act-cab"><span class="flecha" aria-hidden="true">↻</span><div class="tit"><div class="ctx">Versión ${esc(v.version)}</div><h2 id="actTit">Hay una versión nueva</h2></div></div>
+  const d = bloquear(`<div class="act-caja">
+    <div class="act-cab"><span class="flecha" aria-hidden="true">↻</span><div class="tit"><div class="ctx">Versión ${esc(v.version)}</div><h2 id="bTit">Hay una versión nueva</h2></div></div>
     <div class="act-cuerpo"><p>Actualiza para seguir usando la app. Tus datos se quedan como están.</p>
-      ${nov.length?`<h3>Novedades</h3><ul>${nov.map(n=>`<li>${esc(n)}</li>`).join('')}</ul>`:''}
+      ${nov.length?`<h3>Qué trae</h3><ul>${nov.map(n=>`<li>${esc(n)}</li>`).join('')}</ul>`:''}
       <button class="btn primary act-btn" id="actBtn">Actualizar ahora</button>
-      <div class="act-pie">Tienes la versión ${APP_VERSION}</div></div></div>`;
-  document.body.appendChild(d);
-  document.body.classList.add('bloqueada');
-  document.querySelectorAll('header.app, nav.pasos, main, #toast').forEach(e=>e.setAttribute('inert',''));
+      <div class="act-pie">Tienes la versión ${APP_VERSION}</div></div></div>`);
+  d.setAttribute('aria-labelledby','bTit');
   const b = d.querySelector('#actBtn');
   b.addEventListener('click', ()=>{ b.disabled=true; b.textContent='Actualizando…'; save();
     location.replace(location.pathname + '?v=' + encodeURIComponent(v.version) + '&t=' + Date.now()); });
-  d.addEventListener('keydown', e=>{ if(e.key==='Tab'||e.key==='Escape'){ e.preventDefault(); b.focus(); } });
   b.focus();
 }
-if(/[?&]v=/.test(location.search)){ history.replaceState(null,'',location.pathname+location.hash); setTimeout(()=>toast(`App actualizada a la versión ${APP_VERSION}`),300); }
-comprobarVersion();
-setInterval(comprobarVersion, 5*60*1000);
-document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) comprobarVersion(); });
-window.addEventListener('focus', comprobarVersion);
 
+/* ----- recorrido de novedades ----- */
+function novedadesPendientes(){
+  const vista = S.versionVista || '0';
+  return Object.keys(NOVEDADES).filter(v=>esMasNueva(v,vista) && !esMasNueva(v,APP_VERSION)).sort(cmpVer)
+    .flatMap(v=>NOVEDADES[v].map(n=>({...n, version:v})));
+}
+function mostrarRecorrido(items, i){
+  if(avisoActualizacion) return;              // si ya hay otra versión esperando, primero se actualiza
+  const n = items[i], ultimo = i===items.length-1;
+  const d = bloquear(`<div class="act-caja">
+    <div class="act-cab"><span class="flecha" aria-hidden="true">${i+1}</span><div class="tit"><div class="ctx">Versión ${esc(n.version)}, novedad ${i+1} de ${items.length}</div><h2 id="bTit">Lo que ha cambiado</h2></div></div>
+    <div class="rec-cuerpo">
+      <h3>${esc(n.titulo)}</h3>
+      <p>${esc(n.texto)}</p>
+      ${n.donde?`<span class="rec-donde">Dónde: ${esc(n.donde)}</span>`:''}
+      <div class="rec-puntos" aria-hidden="true">${items.map((_,j)=>`<i class="${j===i?'on':j<i?'hecho':''}"></i>`).join('')}</div>
+      <div class="rec-nav">${i>0?'<button class="btn" id="recAnt">‹ Anterior</button>':''}
+        <button class="btn primary" id="recSig">${ultimo?'Entendido, empezar':'Siguiente ›'}</button></div>
+    </div></div>`);
+  d.setAttribute('aria-labelledby','bTit');
+  d.querySelector('#recAnt')?.addEventListener('click', ()=>mostrarRecorrido(items, i-1));
+  d.querySelector('#recSig').addEventListener('click', ()=>{
+    if(!ultimo) return mostrarRecorrido(items, i+1);
+    S.versionVista = APP_VERSION; save(); desbloquear(); toast(`Ya estás en la versión ${APP_VERSION}`);
+  });
+  d.querySelector('#recSig').focus();
+}
+function iniciarActualizaciones(){
+  if(/[?&]v=/.test(location.search)) history.replaceState(null,'',location.pathname+location.hash);
+  const conDatos = S.trabajadores.length || S.periodos.length || S.grupos.length;
+  if(!conDatos && !S.versionVista){ S.versionVista = APP_VERSION; save(); }   // quien empieza de cero no necesita el recorrido
+  const pend = novedadesPendientes();
+  if(pend.length) mostrarRecorrido(pend, 0);
+  else if(!S.versionVista || esMasNueva(APP_VERSION, S.versionVista)){ S.versionVista = APP_VERSION; save(); }
+  comprobarVersion();
+  setInterval(comprobarVersion, 60*1000);
+  document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) comprobarVersion(); });
+  window.addEventListener('focus', comprobarVersion);
+  window.addEventListener('online', comprobarVersion);
+}
+iniciarActualizaciones();
 </script>
 </body>
 </html>
