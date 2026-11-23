@@ -14,8 +14,11 @@ Si `version.json` lleva una versión mayor que la de `index.html`, la app entrar
 
 ## Estructura
 
-- Inicio: se elige departamento (Pasaje, Rampa, Operaciones) y luego producto (GroundHandling azul, RedBull naranja). Todo lo de dentro (skills, grupos, trabajadores, cupos, elección, desprogramaciones, resumen, calendario, PDF) se filtra por ese contexto (`S.ctx`).
-- Ajustes generales (convenio, Semana Santa, puentes, ponderación, copias) en el botón ⚙: valen para todos.
+- Inicio: departamento (Pasaje, Rampa, Operaciones) → producto (GroundHandling azul, RedBull naranja) → menú del producto (`vMenu`). Todo lo de dentro se filtra por ese contexto (`S.ctx`).
+- Menú: tarjeta «Asignación de vacaciones» (único sitio con barra de pasos: Grupos › Elección › Resumen y cierre, `PASOS`) y secciones sueltas (`SECCIONES`): Trabajadores, Skills, Cupos, Rotaciones, Transformaciones, Desprogramaciones, Calendario y Exportar PDF.
+- Rotaciones: plantilla de 3 semanas (L-D) por departamento y producto; se asigna a grupos (`grupo.rotacionId`); `turnoDia(w, fecha)` da el turno de cada persona.
+- Transformaciones: cambios de contrato con fecha (`S.transf`); `derechoCiclo(w, año)` prorratea los días de vacaciones por tramos. Solo se deshace la última de cada persona.
+- Ajustes generales (convenio, Semana Santa, puentes, ponderación, reglas de desprogramación, copias) en el botón ⚙.
 - Las vacaciones no se borran al cerrar ciclo: el histórico se consulta en el calendario anual. Los cálculos del ciclo filtran por año (`periodosDe`, `desprogDe`).
 - Cualquier cambio de formato de datos debe migrarse en `normalizar()`.
 
