@@ -1,7 +1,9 @@
 {
-  "version": "5.4.1",
+  "version": "5.5.0",
   "fecha": "2026-11-23",
   "novedades": [
-    "El calendario anual muestra los turnos de la rotación de cada persona"
+    "Calendario: descansos y festivos de la rotación en bloques de color con su letra",
+    "Rotación individual desde la tabla de Plantilla",
+    "Filtro por tipo de contrato en Plantilla y Calendario"
   ]
 }

@@ -210,8 +210,9 @@ td .chip{white-space:normal}
 .cese-fila{gap:6px!important}
 .cese-fila input{flex:1 1 0;min-width:0}
 .cese-fila .muted{flex:0 0 auto}
-.an-rot{position:absolute;top:0;bottom:0;box-shadow:inset 0 -3px 0 var(--tc);font-family:var(--cond);font-weight:700;font-size:11px;color:var(--tc);display:flex;align-items:flex-start;justify-content:center;padding-top:1px;pointer-events:none}
-.an-rot.lib{background:color-mix(in srgb,var(--tc) 22%,transparent);box-shadow:none;color:var(--tc)}
+.an-rot{position:absolute;top:3px;bottom:3px;display:grid;place-items:center;font-family:var(--cond);font-weight:700;font-size:12px;color:var(--tc);pointer-events:none;overflow:hidden}
+.an-rot.lib{background:var(--tc);color:#fff;border-left:1px solid rgba(255,255,255,.55)}
+.anual.z-ajustar .an-rot b{display:none}
 .an-bar,.an-dp,.an-cese{z-index:1}
 .an-cese{position:absolute;top:4px;bottom:4px;border-radius:4px;background:repeating-linear-gradient(135deg,#C9CED6 0 3px,#EEF0F3 3px 7px);cursor:pointer}
 .an-dp{position:absolute;top:7px;bottom:7px;background:var(--senal);border:1px solid #9A7A00;border-radius:2px;min-width:3px;pointer-events:auto;cursor:help}
@@ -268,6 +269,8 @@ body.cal-full .anual{flex:1;max-height:none}
 label.gl-i{cursor:pointer} label.gl-i:hover{background:var(--hormigon)}
 .fd.rc{border-top:3px solid var(--tc,var(--linea))}
 .fd.rc.rlib{background:var(--tc);border-color:var(--tc);color:#fff;font-weight:700}
+.sel-mini{margin:0;padding:6px 8px;font-size:13px;min-width:150px;width:auto}
+.sel-mini+.sel-mini{margin-top:4px}
 .dp-layout{display:grid;grid-template-columns:270px 1fr;gap:16px;align-items:start}
 .dp-layout>*{min-width:0}
 .dp-lista{position:sticky;top:76px;max-height:calc(100vh - 96px);overflow:auto;padding:12px}
@@ -458,7 +461,7 @@ body.bloqueada{overflow:hidden}
    Reglas base: Convenio Menzies (BOE-A-2023-25956), arts. 32 y 33
    Datos guardados en el navegador (localStorage). Haz copias.
    ========================================================= */
-const APP_VERSION = '5.4.1';   // súbela junto con version.json en cada publicación
+const APP_VERSION = '5.5.0';   // súbela junto con version.json en cada publicación
 const LS_KEY = 'vacaciones-agp-v1';
 const SIN = '_'; // clave interna para «sin grupo»
 
@@ -1203,9 +1206,14 @@ function vTrabajadores(){
     <div class="row"><button class="btn primary" onclick="guardarTrab()">${e?'Guardar cambios':'Añadir trabajador'}</button>${e?`<button class="btn" onclick="UI.editTrab=null;render()">Cancelar</button>`:''}</div>
   </div>
   <div class="card"><h2>Trabajadores de ${esc(ctxTxt())} (${trabsVis().length})</h2>
-    ${ks.length?`<div class="scroll"><table><tr><th>Nombre</th><th class="hide-m">Skills</th><th class="num">Días</th><th class="num hide-m">Factor</th><th class="num">Pts ant.</th><th class="num hide-m">Pts −2</th><th></th></tr>
-    ${ks.map(k=>`<tr class="grp"><td colspan="7">${esc(nombreGrupo(k))} (${ordenEleccion(k).length})</td></tr>` + ordenEleccion(k).map((t,i)=>`<tr><td><span class="muted">${i+1}.</span> <b>${esc(t.nombre)}</b><div class="muted">${modalidadTxt(t)}<span class="solo-m">, ${esc(skillsTxt(t))}</span>${ceseDe(t).length?`<br>Cese: ${esc(ceseTxt(t))}`:(esDisc(t)?' <span class="chip grey">Sin cese</span>':'')}${t.rotacionId&&rotDeId(t.rotacionId)?`<br>Rotación propia: ${esc(rotDeId(t.rotacionId).nombre)}`:''}</div></td><td class="hide-m">${skillsChips(t)}</td><td class="num">${t.diasDerecho}</td><td class="num hide-m muted">${factorInfo(t).txt}</td><td class="num">${nf(t.ptsAnt||0)}</td><td class="num hide-m">${nf(t.ptsAnt2||0)}</td>
-      <td class="num" style="white-space:nowrap"><button class="btn small" onclick="UI.editTrab='${t.id}';render();scrollTo(0,0)">Editar</button> <button class="btn small danger" onclick="borrarTrab('${t.id}')" aria-label="Borrar">✕</button></td></tr>`).join('')).join('')}</table></div>`:'<p class="help">Todavía no hay nadie. Añádelos uno a uno con el formulario o pega la lista desde tu Excel.</p>'}
+    ${filtroContrato('plantMod')}
+    ${ks.length?`<div class="scroll"><table><tr><th>Nombre</th><th class="hide-m">Skills</th><th>Rotación</th><th class="num">Días</th><th class="num hide-m">Factor</th><th class="num">Pts ant.</th><th class="num hide-m">Pts −2</th><th></th></tr>
+    ${ks.map(k=>{ const ts=ordenEleccion(k).filter(t=>pasaContrato(t,UI.plantMod)); if(!ts.length) return '';
+      return `<tr class="grp"><td colspan="8">${esc(nombreGrupo(k))} (${ts.length})</td></tr>` + ts.map((t,i)=>`<tr><td><span class="muted">${ordenEleccion(k).indexOf(t)+1}.</span> <b>${esc(t.nombre)}</b><div class="muted">${modalidadTxt(t)}<span class="solo-m">, ${esc(skillsTxt(t))}</span>${ceseDe(t).length?`<br>Cese: ${esc(ceseTxt(t))}`:(esDisc(t)?' <span class="chip grey">Sin cese</span>':'')}</div></td>
+      <td class="hide-m">${skillsChips(t)}</td>
+      <td>${celdaRotacion(t)}</td>
+      <td class="num">${t.diasDerecho}</td><td class="num hide-m muted">${factorInfo(t).txt}</td><td class="num">${nf(t.ptsAnt||0)}</td><td class="num hide-m">${nf(t.ptsAnt2||0)}</td>
+      <td class="num" style="white-space:nowrap"><button class="btn small" onclick="UI.editTrab='${t.id}';render();scrollTo(0,0)">Editar</button> <button class="btn small danger" onclick="borrarTrab('${t.id}')" aria-label="Borrar">✕</button></td></tr>`).join(''); }).join('') || `<tr><td colspan="8" class="muted">Nadie con ese tipo de contrato.</td></tr>`}</table></div>`:'<p class="help">Todavía no hay nadie. Añádelos uno a uno con el formulario o pega la lista desde tu Excel.</p>'}
   </div>
   <div class="card"><h2>Pegar desde Excel</h2>
     <p class="help">Copia en tu Excel estas columnas, en este orden, y pégalas aquí: <b>Nombre, Grupo, Skills, Días de vacaciones, Puntos año anterior y Puntos hace 2 años</b>. Desde «Grupo» son opcionales. Si alguien tiene varias skills, sepáralas con «/». Todos entran en ${esc(ctxTxt())}; los grupos y skills que no existan se crean solos.</p>
@@ -1213,6 +1221,23 @@ function vTrabajadores(){
     <div class="row" style="margin-top:12px"><button class="btn primary" onclick="importarPegado()">Importar lista</button></div>
   </div>`;
 }
+const CONTRATOS = [['all','Todos'],['completo','Tiempo completo'],['parcial','Tiempo parcial'],['discontinuo','Fijos discontinuos']];
+const pasaContrato = (w, m) => !m || m==='all' || w.modalidad===m;
+function filtroContrato(clave){
+  const v = UI[clave] || 'all';
+  return `<div class="chips" role="group" aria-label="Tipo de contrato" style="margin-bottom:12px">${CONTRATOS.map(([k,n])=>{ const c = k==='all' ? trabsVis().length : trabsVis().filter(t=>t.modalidad===k).length;
+    return `<button class="pill ${v===k?'on':''}" onclick="UI.${clave}='${k}';render()">${n} (${c})</button>`; }).join('')}</div>`;
+}
+function celdaRotacion(t){
+  const g = t.grupoId ? grupoDe(t.grupoId) : null, rg = g ? rotDeId(g.rotacionId) : null, propia = t.rotacionId && rotDeId(t.rotacionId);
+  let h = `<select class="sel-mini" aria-label="Rotación de ${esc(t.nombre)}" onchange="ponerRotPersona('${t.id}',this.value)"><option value="">${rg?'La del grupo ('+esc(rg.nombre)+')':'La del grupo (ninguna)'}</option>${rotacionesVis().map(r=>`<option value="${r.id}" ${t.rotacionId===r.id?'selected':''}>${esc(r.nombre)}</option>`).join('')}</select>`;
+  if(propia){
+    const r = rotDeId(t.rotacionId), n = r.semanas.length*7, i = ((daysBetween(inicioRot(t,r),`${S.ciclo}-01-01`)%n)+n)%n, k = Math.floor(i/7);
+    h += `<select class="sel-mini" aria-label="Semana del 1 de enero" title="Semana de la rotación en la que cae el 1 de enero de ${S.ciclo}" onchange="fijarSemanaEnero('t','${t.id}',this.value)">${r.semanas.map((_,x)=>`<option value="${x}" ${x===k?'selected':''}>1 ene: semana ${x+1}</option>`).join('')}</select>`;
+  }
+  return h;
+}
+function ponerRotPersona(id, rid){ const t=trabDe(id); if(!t) return; t.rotacionId=rid; if(!rid){ delete t.rotSemana; delete t.rotAnio; } save(); render(); toast(rid?'Rotación individual asignada':'Vuelve a la rotación de su grupo'); }
 function añadirSkillEnFicha(){ // crea la skill sin perder lo que ya está escrito en la ficha
   const inp=document.getElementById('fSkillNueva'), n=inp.value.trim(); if(!n) return;
   let t = buscaSkill(n), cont=document.getElementById('fSkills');
@@ -1692,7 +1717,7 @@ function vCalendario(){
   const seg = `<div class="seg"><button class="${UI.cal.modo==='anual'?'on':''}" onclick="UI.cal.modo='anual';render()">Año completo</button><button class="${UI.cal.modo==='mes'?'on':''}" onclick="UI.cal.modo='mes';render()">Mes y cupos</button></div>`;
   return UI.cal.modo==='mes' ? vCalMes(seg) : vCalAnual(seg);
 }
-const pasaFiltroCal = t => t && visible(t) && (UI.cal.grupo==='all'||gk(t)===UI.cal.grupo) && (UI.cal.skill==='all'||tieneSkill(t,UI.cal.skill))
+const pasaFiltroCal = t => t && visible(t) && (UI.cal.grupo==='all'||gk(t)===UI.cal.grupo) && (UI.cal.skill==='all'||tieneSkill(t,UI.cal.skill)) && pasaContrato(t, UI.cal.mod)
   && (!UI.cal.buscar || t.nombre.toLowerCase().includes(UI.cal.buscar.toLowerCase()));
 function aniosDisponibles(){
   const ys = new Set([S.ciclo-1, S.ciclo, S.ciclo+1]);
@@ -1714,7 +1739,8 @@ function vCalAnual(seg){
   // capa de fondo: fines de semana, meses, Semana Santa, puentes, hoy
   const ss = y===S.ciclo ? S.semanaSanta : semanaSantaDefault(y);
   let capa = '';
-  for(let i=0;i<dias;i++){ const wd = pd(addDays(ini,i)).getUTCDay(); if(wd===6) capa += `<i class="fs" style="left:calc(var(--dw)*${i});width:calc(var(--dw)*2)"></i>`; }
+  const hayRot = UI.cal.turnos!==false && filas.some(f=>f.ts.some(t=>rotDe(t)));
+  if(!hayRot) for(let i=0;i<dias;i++){ const wd = pd(addDays(ini,i)).getUTCDay(); if(wd===6) capa += `<i class="fs" style="left:calc(var(--dw)*${i});width:calc(var(--dw)*2)"></i>`; }
   for(let m=1;m<12;m++) capa += `<i class="lm" style="left:calc(var(--dw)*${idx(`${y}-${String(m+1).padStart(2,'0')}-01`)})"></i>`;
   const cs = clip(ss.desde, ss.hasta); if(cs) capa += `<i class="ss" style="left:calc(var(--dw)*${cs[0]});width:calc(var(--dw)*${cs[1]})" title="Semana Santa"></i>`;
   if(y===S.ciclo) S.puentes.forEach(p=>{ const c=clip(p.desde,p.hasta); if(c) capa += `<i class="pu" style="left:calc(var(--dw)*${c[0]});width:calc(var(--dw)*${c[1]})"></i>`; });
@@ -1724,7 +1750,9 @@ function vCalAnual(seg){
   for(let m=0;m<12;m++){ const d0=`${y}-${String(m+1).padStart(2,'0')}-01`, dm=new Date(Date.UTC(y,m+1,0)).getUTCDate();
     cab += `<span class="an-mes" style="left:calc(var(--dw)*${idx(d0)});width:calc(var(--dw)*${dm})">${MESES[m][0].toUpperCase()+MESES[m].slice(1)}</span>`; }
   const conDias = UI.cal.zoom!=='ajustar';
-  if(conDias) for(let i=0;i<dias;i++){ const d=pd(addDays(ini,i)), wd=d.getUTCDay(); cab += `<span class="an-dia ${wd===0||wd===6?'fs':''}" style="left:calc(var(--dw)*${i});width:var(--dw)">${d.getUTCDate()}</span>`; }
+  if(conDias) for(let i=0;i<dias;i++){ const d=pd(addDays(ini,i)), wd=d.getUTCDay();
+    if(UI.cal.zoom==='semana'){ if(wd===1) cab += `<span class="an-dia" style="left:calc(var(--dw)*${i});width:calc(var(--dw)*7);text-align:left;padding-left:2px;border-left:1px solid var(--linea)">L ${d.getUTCDate()}</span>`; }
+    else cab += `<span class="an-dia ${wd===0||wd===6?'fs':''}" style="left:calc(var(--dw)*${i});width:var(--dw)">${d.getUTCDate()}</span>`; }
   const ocu = cuenta.map((c,i)=>c?`<i class="${c===maxC?'max':''}" style="left:calc(var(--dw)*${i});width:var(--dw);height:${Math.round(c/maxC*24)+2}px" title="${fmt(addDays(ini,i))}: ${c} de vacaciones"></i>`:'').join('');
   const fila = t => {
     const ps = S.periodos.filter(p=>p.trabajadorId===t.id).map(p=>({p,c:clip(p.desde,p.hasta)})).filter(x=>x.c);
@@ -1743,13 +1771,14 @@ function vCalAnual(seg){
       <div class="an-anio"><button class="btn small" onclick="UI.cal.anio=${ys[iy-1]??y-1};render()" aria-label="Año anterior">‹</button><b>${y}</b><button class="btn small" onclick="UI.cal.anio=${ys[iy+1]??y+1};render()" aria-label="Año siguiente">›</button></div>
       <label>Grupo<select onchange="UI.cal.grupo=this.value;render()">${opts(gruposVis(), UI.cal.grupo, ['all','Todos'])}</select></label>
       <label>Skill<select onchange="UI.cal.skill=this.value;render()">${opts(skillsVis(), UI.cal.skill, ['all','Todas'])}</select></label>
+      <label>Contrato<select onchange="UI.cal.mod=this.value;render()">${CONTRATOS.map(([k,n])=>`<option value="${k}" ${(UI.cal.mod||'all')===k?'selected':''}>${n}</option>`).join('')}</select></label>
       <label>Buscar<input value="${esc(UI.cal.buscar)}" placeholder="Nombre" oninput="UI.cal.buscar=this.value;clearTimeout(window._bt);window._bt=setTimeout(()=>{render();const i=document.querySelector('.an-barra input');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}},250)"></label>
       <span class="esp"></span>
       <div class="seg" aria-label="Zoom"><button class="${UI.cal.zoom==='ajustar'?'on':''}" onclick="UI.cal.zoom='ajustar';render()">Año</button><button class="${UI.cal.zoom==='semana'?'on':''}" onclick="UI.cal.zoom='semana';render()">Semanas</button><button class="${UI.cal.zoom==='dia'?'on':''}" onclick="UI.cal.zoom='dia';render()">Días</button></div>
       <label class="chk" style="flex:0 0 auto"><input type="checkbox" ${UI.cal.turnos!==false?'checked':''} onchange="UI.cal.turnos=this.checked;render()">Turnos</label>
       <button class="btn ink" onclick="pantallaCompleta()">${document.body.classList.contains('cal-full')?'Salir de pantalla completa':'Pantalla completa'}</button>
     </div>
-    <div class="anual" id="anual" style="--dias:${dias}">
+    <div class="anual z-${UI.cal.zoom}" id="anual" style="--dias:${dias}">
      ${total?`<div class="an-grid">
       <div class="an-capa">${capa}</div>
       <div class="an-cab ${conDias?'con-dias':''}"><div class="an-fila"><div class="an-nom">${total} personas</div><div class="an-pista">${cab}</div></div></div>
@@ -1757,22 +1786,17 @@ function vCalAnual(seg){
       ${filas.map(f=>`<div class="an-fila an-grp"><div class="an-nom">${esc(nombreGrupo(f.k))}</div><div class="an-pista"></div></div>${f.ts.map(fila).join('')}`).join('')}
      </div>`:'<div class="an-vacio">Nadie coincide con los filtros.</div>'}
     </div>
-    <div class="legend"><span style="--c:var(--ctx)">Vacaciones</span><span style="--c:repeating-linear-gradient(135deg,#9AB 0 3px,var(--ctx) 3px 6px)">Apuntadas a mano</span><span style="--c:var(--bad)">Sin cupo</span><span style="--c:var(--senal)">Desprogramación</span><span style="--c:repeating-linear-gradient(135deg,#C9CED6 0 2px,#EEF0F3 2px 4px)">Cese</span><span style="--c:rgba(246,195,0,.35)">Semana Santa</span><span style="--c:#F5F6F8;outline:1px solid var(--linea)">Fin de semana</span><span style="--c:var(--bad)">Línea roja: hoy</span>${UI.cal.turnos!==false?S.turnosTipos.map(t=>`<span style="--c:${t.libre?t.color:'#fff'};${t.libre?'':`box-shadow:inset 0 -3px 0 ${t.color}`}">${esc(t.cod)} ${esc(t.nombre)}</span>`).join(''):''}</div>
+    <div class="legend"><span style="--c:var(--ctx)">Vacaciones</span><span style="--c:repeating-linear-gradient(135deg,#9AB 0 3px,var(--ctx) 3px 6px)">Apuntadas a mano</span><span style="--c:var(--bad)">Sin cupo</span><span style="--c:var(--senal)">Desprogramación</span><span style="--c:repeating-linear-gradient(135deg,#C9CED6 0 2px,#EEF0F3 2px 4px)">Cese</span><span style="--c:rgba(246,195,0,.35)">Semana Santa</span><span style="--c:#F5F6F8;outline:1px solid var(--linea)">Fin de semana</span><span style="--c:var(--bad)">Línea roja: hoy</span>${UI.cal.turnos!==false?S.turnosTipos.filter(t=>t.libre).map(t=>`<span style="--c:${t.color}">${esc(t.cod)} ${esc(t.nombre)}</span>`).join('')+'<span>Letras de cada día con el zoom «Semanas» o «Días»</span>':''}</div>
   </div>`;
 }
 /* turnos de la rotación de una persona en el cuadrante anual: tramos seguidos del mismo turno */
 function franjaTurnos(w, y, dias, conLetra){
   const r = rotDe(w); if(!r) return '';
-  const ini = inicioRot(w, r), y0 = `${y}-01-01`; let html = '', i = 0;
-  while(i < dias){
-    const c = codEnFecha(r, ini, addDays(y0,i)); let j = i+1;
-    while(j < dias && codEnFecha(r, ini, addDays(y0,j))===c) j++;
-    const t = tipoTurno(c);
-    if(t){
-      if(conLetra) for(let k=i;k<j;k++) html += `<span class="an-rot ${t.libre?'lib':''}" style="--tc:${t.color};left:calc(var(--dw)*${k});width:var(--dw)" title="${fmt(addDays(y0,k))}: ${esc(t.nombre)}">${esc(t.cod)}</span>`;
-      else html += `<span class="an-rot ${t.libre?'lib':''}" style="--tc:${t.color};left:calc(var(--dw)*${i});width:calc(var(--dw)*${j-i})" title="${esc(t.nombre)}: ${fmt(addDays(y0,i))}${j-i>1?' – '+fmt(addDays(y0,j-1)):''}"></span>`;
-    }
-    i = j;
+  const ini = inicioRot(w, r), y0 = `${y}-01-01`, todos = UI.cal.zoom==='dia'; let html = '';
+  for(let k=0;k<dias;k++){
+    const t = tipoTurno(codEnFecha(r, ini, addDays(y0,k))); if(!t) continue;
+    if(t.libre) html += `<span class="an-rot lib" style="--tc:${t.color};left:calc(var(--dw)*${k});width:var(--dw)" title="${fmt(addDays(y0,k))}: ${esc(t.nombre)}"><b>${esc(t.cod)}</b></span>`;
+    else if(todos) html += `<span class="an-rot" style="--tc:${t.color};left:calc(var(--dw)*${k});width:var(--dw)" title="${fmt(addDays(y0,k))}: ${esc(t.nombre)}"><b>${esc(t.cod)}</b></span>`;
   }
   return html;
 }
@@ -2182,6 +2206,14 @@ render();
    Para publicar: subir APP_VERSION, añadir sus pasos a NOVEDADES y poner la misma versión en version.json.
    ========================================================= */
 const NOVEDADES = {
+  '5.5.0': [
+    { titulo:'Descansos y festivos claros', donde:'Menú › Calendario',
+      texto:'Los días que en la rotación son de no trabajar (R, X…) salen como bloques de color sólido en la fila de cada persona. Con el zoom «Semanas» o «Días» llevan su letra dentro. El sombreado de fines de semana ya no se mezcla con ellos.' },
+    { titulo:'Rotación individual desde Plantilla', donde:'Plantilla › Trabajadores',
+      texto:'En la tabla de trabajadores cada persona tiene su desplegable de rotación. Si le pones una propia, aparece otro para elegir en qué semana cae su 1 de enero.' },
+    { titulo:'Filtro por contrato', donde:'Plantilla y Calendario',
+      texto:'Filtra por tiempo completo, tiempo parcial o fijos discontinuos para ver solo a ese grupo de personas.' },
+  ],
   '5.4.1': [
     { titulo:'Turnos en el calendario del año', donde:'Menú › Calendario',
       texto:'El cuadrante anual muestra ya la rotación de cada persona: los libres y festivos sombreados en su color y una línea del color del turno en los días de trabajo. Con el zoom «Días» ves la letra de cada día. La casilla «Turnos» los oculta si te estorban.' },
