@@ -250,6 +250,15 @@ body.cal-full .anual{flex:1;max-height:none}
 .rot-c:hover{border-color:var(--asfalto)}
 .rot-c.lib{background:#EBEFF6}
 .xchip{border:0;background:none;color:inherit;font:inherit;cursor:pointer;padding:0 0 0 4px}
+.ene{border-collapse:separate;border-spacing:2px;font-size:13px}
+.ene th,.ene td{border:0;padding:0;text-align:center}
+.ene .ene-n{text-align:left;padding-right:10px;min-width:130px;white-space:nowrap;position:sticky;left:0;background:#fff;z-index:1}
+.ene .ene-s{min-width:190px;padding-right:10px;text-align:left}
+.ene .ene-d{font-size:12px;font-weight:700;width:30px;min-width:30px;color:var(--asfalto)}
+.ene .ene-d span{display:block;font-size:10px;color:var(--gris);font-weight:600}
+.ene .ene-d.fs{color:var(--gris)}
+.ene .ene-c{height:34px;border-radius:5px;border:1px solid var(--linea);border-top:3px solid var(--tc,var(--linea));font-family:var(--cond);font-weight:700;font-size:15px;color:var(--tc,var(--gris));background:#fff}
+.ene .ene-c.lib{background:var(--tc);color:#fff;border-color:var(--tc)}
 .gl{display:flex;flex-direction:column;max-height:420px;overflow:auto;border:1px solid var(--linea);border-radius:10px}
 .gl-i{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--linea);font-weight:400;color:var(--asfalto);font-size:14.5px}
 .gl-i:last-child{border-bottom:0}
@@ -446,7 +455,7 @@ body.bloqueada{overflow:hidden}
    Reglas base: Convenio Menzies (BOE-A-2023-25956), arts. 32 y 33
    Datos guardados en el navegador (localStorage). Haz copias.
    ========================================================= */
-const APP_VERSION = '5.3.0';   // súbela junto con version.json en cada publicación
+const APP_VERSION = '5.4.0';   // súbela junto con version.json en cada publicación
 const LS_KEY = 'vacaciones-agp-v1';
 const SIN = '_'; // clave interna para «sin grupo»
 
@@ -612,9 +621,18 @@ const rotacionesVis = () => S.rotaciones.filter(r=>r.depId===S.ctx.dep && r.prod
 const rotDe = w => !w ? null : (w.rotacionId && rotDeId(w.rotacionId)) || (w.grupoId ? rotDeId(grupoDe(w.grupoId)?.rotacionId) : null) || null;   // la propia manda sobre la del grupo
 const tipoTurno = cod => S.turnosTipos.find(t=>t.cod===cod);
 const lunesDe = s => { const d=pd(s).getUTCDay(); return addDays(s, -((d+6)%7)); };
+/* fase: en qué semana de la rotación cae el 1 de enero (por grupo o por persona con rotación propia) */
+const inicioDesdeEnero = (anio, semana) => addDays(lunesDe(`${anio}-01-01`), -7*Number(semana));
+function inicioRot(w, r){
+  if(w && w.rotacionId && rotDeId(w.rotacionId)===r && w.rotSemana!=null && w.rotSemana!=='') return inicioDesdeEnero(w.rotAnio, w.rotSemana);
+  const g = w && w.grupoId ? grupoDe(w.grupoId) : null;
+  if(g && rotDeId(g.rotacionId)===r && g.rotSemana!=null && g.rotSemana!=='') return inicioDesdeEnero(g.rotAnio, g.rotSemana);
+  return r.inicio;
+}
+const codEnFecha = (r, ini, s) => { const n = r.semanas.length*7, i = ((daysBetween(ini, s) % n) + n) % n; return r.semanas[Math.floor(i/7)][i%7]; };
 function turnoDia(w, s){
   const r = rotDe(w); if(!r || !r.inicio) return null;
-  const n = r.semanas.length*7, i = ((daysBetween(r.inicio, s) % n) + n) % n;
+  const n = r.semanas.length*7, i = ((daysBetween(inicioRot(w,r), s) % n) + n) % n;
   const cod = r.semanas[Math.floor(i/7)][i%7]; return cod ? (tipoTurno(cod) || {cod, nombre:cod, color:'#5F6775', libre:false}) : null;
 }
 const marcaTurno = (w,s) => { const t = turnoDia(w,s); return t ? `<i class="tc" style="color:${t.color}">${esc(t.cod)}</i>` : ''; };
@@ -1074,6 +1092,7 @@ function vEquipos(){
     <div class="card"><div class="row" style="align-items:flex-end;margin-bottom:14px">
         <label style="flex:1 1 180px">Nombre del grupo<input value="${esc(g.nombre)}" onchange="grupoDe('${g.id}').nombre=this.value.trim()||grupoDe('${g.id}').nombre;save();render()"></label>
         <label style="flex:1 1 160px">Rotación<select onchange="grupoDe('${g.id}').rotacionId=this.value;save();render()">${opts(rotacionesVis(), g.rotacionId, ['','Sin rotación'])}</select></label>
+        ${r?`<label style="flex:1 1 160px">El 1 de enero de ${S.ciclo} va en<select onchange="fijarSemanaEnero('g','${g.id}',this.value)">${r.semanas.map((_,k)=>`<option value="${k}" ${(()=>{const n=r.semanas.length*7,i=((daysBetween(inicioRot({grupoId:g.id},r),`${S.ciclo}-01-01`)%n)+n)%n;return Math.floor(i/7)===k})()?'selected':''}>Semana ${k+1}</option>`).join('')}</select></label>`:''}
         <button class="btn danger" onclick="borrarGrupo('${g.id}')">Eliminar grupo</button></div>
       <h2>Miembros (${miem.length})</h2>
       ${miem.length?`<div class="gl">${miem.map(t=>`<div class="gl-i"><span><b>${esc(t.nombre)}</b><span class="muted"> ${esc(skillsTxt(t))}${t.rotacionId&&rotDeId(t.rotacionId)?`, rotación propia: ${esc(rotDeId(t.rotacionId).nombre)}`:''}</span></span><button class="btn small" onclick="moverAGrupo(['${t.id}'],'')">Sacar</button></div>`).join('')}</div>`:'<p class="help">Este grupo todavía no tiene a nadie. Añádelos desde la lista de al lado.</p>'}
@@ -1091,13 +1110,12 @@ function vEquipos(){
       <h2 style="margin:0">${r?`Año ${y} con la rotación «${esc(r.nombre)}»`:`Año ${y}`}</h2>
       <div class="an-anio"><button class="btn small" onclick="UI.gAnio=${y-1};render()" aria-label="Año anterior">‹</button><b>${y}</b><button class="btn small" onclick="UI.gAnio=${y+1};render()" aria-label="Año siguiente">›</button></div>
     </div>
-    ${r?calendarioRotacion(r, y):`<p class="help">Este grupo no tiene rotación. Elige una arriba${rotacionesVis().length?'':' o créala en <a href="#" onclick="go(\'rotaciones\');return false">Rotaciones</a>'}.</p>`}
+    ${r?calendarioRotacion(r, y, inicioRot({grupoId:g.id}, r)):`<p class="help">Este grupo no tiene rotación. Elige una arriba${rotacionesVis().length?'':' o créala en <a href="#" onclick="go(\'rotaciones\');return false">Rotaciones</a>'}.</p>`}
   </div>`;
 }
 /* año entero pintado con una rotación: cada día con su turno */
-function calendarioRotacion(r, y){
-  const n = r.semanas.length*7;
-  const cod = s => { const i = ((daysBetween(r.inicio, s) % n) + n) % n; return r.semanas[Math.floor(i/7)][i%7]; };
+function calendarioRotacion(r, y, ini){
+  const cod = s => codEnFecha(r, ini||r.inicio, s);
   const cuenta = {};
   let html = '<div class="fcal">';
   for(let m=0;m<12;m++){
@@ -1851,11 +1869,11 @@ function vRotaciones(){
     <div class="row" style="align-items:flex-end;margin-bottom:6px">
       ${rs.length>1?`<div class="chips" style="flex:1 1 100%;margin-bottom:6px">${rs.map(x=>`<button class="pill ${x.id===r.id?'on':''}" onclick="UI.rotSel='${x.id}';render()">${esc(x.nombre)}</button>`).join('')}</div>`:''}
       <label style="flex:1 1 220px">Nombre<input value="${esc(r.nombre)}" onchange="rotDeId('${r.id}').nombre=this.value.trim()||rotDeId('${r.id}').nombre;save();render()"></label>
-      <label style="flex:0 1 210px">La semana 1 empieza el lunes<input type="date" value="${r.inicio}" onchange="rotDeId('${r.id}').inicio=lunesDe(this.value||'${r.inicio}');save();render()"></label>
+      <label style="flex:0 1 250px">Por defecto, la semana 1 empieza el lunes<input type="date" value="${r.inicio}" onchange="rotDeId('${r.id}').inicio=lunesDe(this.value||'${r.inicio}');save();render()"></label>
       <button class="btn primary" onclick="crearRotacion()">+ Crear nueva rotación</button>
       <button class="btn danger" onclick="borrarRotacion('${r.id}')">Eliminar rotación</button>
     </div>
-    <p class="help" style="margin:8px 0 18px">Pulsa un día para decir qué es: libre (R), festivo, turno… Las 3 semanas se repiten una tras otra desde el lunes indicado. ${libres} día(s) libres o festivos en el ciclo.</p>
+    <p class="help" style="margin:8px 0 18px">Pulsa un día para decir qué es: libre (R), festivo, turno… Las 3 semanas se repiten una tras otra. En qué semana empieza cada grupo se elige más abajo, en enero. ${libres} día(s) libres o festivos en el ciclo.</p>
     <div class="rsems">${r.semanas.map((sem,wi)=>`<div class="rsem"><div class="rsem-t">Semana ${wi+1}</div><div class="rsem-d">${sem.map((_,di)=>dia(wi,di)).join('')}</div></div>`).join('')}</div>
     <div class="row" style="margin-top:18px;align-items:center">
       ${trabsVis().some(t=>t.rotacionId===r.id)?`<span class="muted">Personas con esta rotación propia: ${trabsVis().filter(t=>t.rotacionId===r.id).map(t=>esc(t.nombre)).join(', ')}.</span><span style="flex-basis:100%"></span>`:''}
@@ -1864,6 +1882,7 @@ function vRotaciones(){
       ${gs.length>usan.length && gs.length>1?`<button class="btn small" onclick="gruposVis().forEach(g=>g.rotacionId='${r.id}');save();render()">Asignar a todos los grupos</button>`:''}
     </div>
   </div>
+  ${tarjetaEnero()}
   ${tarjetaRotPropia()}
   <div class="card"><h2>Tipos de día</h2>
     <p class="help">Lo que puedes asignar a cada día de la rotación. Valen para todos los departamentos. Marca «No se trabaja» en libres, festivos y similares.</p>
@@ -1875,6 +1894,28 @@ function vRotaciones(){
       <button class="btn small danger" onclick="borrarTipoTurno(${i})" aria-label="Borrar tipo">✕</button></div>`).join('')}
     <div class="row" style="margin-top:10px"><label style="flex:0 1 90px">Código<input id="nTc" maxlength="3" placeholder="V"></label><label style="flex:1">Nombre<input id="nTn" placeholder="Vacaciones fijas"></label><button class="btn" onclick="añadirTipoTurno()">Añadir tipo</button></div>
   </div>${dlg}`;
+}
+function tarjetaEnero(){
+  const y = S.ciclo, dias = Array.from({length:31}, (_,i)=>`${y}-01-${String(i+1).padStart(2,'0')}`);
+  const dowL = s => DOW[(pd(s).getUTCDay()+6)%7];
+  const d1 = DIAS_LARGOS[(pd(`${y}-01-01`).getUTCDay()+6)%7].toLowerCase();
+  const filas = [];
+  gruposVis().forEach(g=>{ const r=rotDeId(g.rotacionId); if(r) filas.push({tipo:'g', id:g.id, nombre:g.nombre, r, sem:(g.rotSemana!=null&&g.rotSemana!==''&&g.rotAnio===y)?Number(g.rotSemana):null, ini:inicioRot({grupoId:g.id}, r)}); });
+  trabsVis().filter(t=>t.rotacionId && rotDeId(t.rotacionId)).forEach(t=>{ const r=rotDeId(t.rotacionId); filas.push({tipo:'t', id:t.id, nombre:t.nombre+' (propia)', r, sem:(t.rotSemana!=null&&t.rotSemana!==''&&t.rotAnio===y)?Number(t.rotSemana):null, ini:inicioRot(t, r)}); });
+  if(!filas.length) return `<div class="card"><h2>Enero ${y}</h2><p class="help">Asigna esta rotación a algún grupo para decidir en qué semana empieza cada uno el 1 de enero.</p></div>`;
+  const semDe = (r, ini) => { const n=r.semanas.length*7, i=((daysBetween(ini,`${y}-01-01`)%n)+n)%n; return Math.floor(i/7); };
+  return `<div class="card"><h2>Enero ${y}: ¿en qué semana empieza cada uno?</h2>
+    <p class="help">El 1 de enero de ${y} es ${d1}. Elige qué semana de la rotación le toca a cada grupo esa semana; a partir de ahí sigue sin cortes el resto del año.</p>
+    <div class="scroll"><table class="ene"><tr><th class="ene-n">Grupo</th><th class="ene-s">Semana del día 1</th>${dias.map(s=>`<th class="ene-d ${['S','D'].includes(dowL(s))?'fs':''}"><span>${dowL(s)}</span>${Number(s.slice(8))}</th>`).join('')}</tr>
+    ${filas.map(f=>{ const actual = f.sem!=null ? f.sem : semDe(f.r, f.ini);
+      return `<tr><td class="ene-n"><b>${esc(f.nombre)}</b><div class="muted">${esc(f.r.nombre)}</div></td>
+      <td class="ene-s"><select style="margin:0" aria-label="Semana de ${esc(f.nombre)} el 1 de enero" onchange="fijarSemanaEnero('${f.tipo}','${f.id}',this.value)">${f.r.semanas.map((sem,k)=>{const t=tipoTurno(sem[(pd(`${y}-01-01`).getUTCDay()+6)%7]); return `<option value="${k}" ${k===actual?'selected':''}>Semana ${k+1}${t?` (el ${d1} 1 es ${t.cod})`:''}</option>`}).join('')}</select>${f.sem==null?'<div class="muted" style="font-size:12px">Según la fecha de la rotación</div>':''}</td>
+      ${dias.map(s=>{ const c=codEnFecha(f.r,f.ini,s), t=tipoTurno(c); return `<td class="ene-c ${t&&t.libre?'lib':''}" style="${t?`--tc:${t.color}`:''}" title="${fmt(s)}: ${t?esc(t.nombre):'trabajo'}">${t?esc(t.cod):''}</td>`; }).join('')}</tr>`; }).join('')}
+    </table></div></div>`;
+}
+function fijarSemanaEnero(tipo, id, k){
+  const o = tipo==='g' ? grupoDe(id) : trabDe(id); if(!o) return;
+  o.rotAnio = S.ciclo; o.rotSemana = Number(k); save(); render(); toast('Semana de enero guardada');
 }
 function tarjetaRotPropia(){
   const rs = rotacionesVis(), con = trabsVis().filter(t=>t.rotacionId && rotDeId(t.rotacionId)).sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
@@ -2121,6 +2162,12 @@ render();
    Para publicar: subir APP_VERSION, añadir sus pasos a NOVEDADES y poner la misma versión en version.json.
    ========================================================= */
 const NOVEDADES = {
+  '5.4.0': [
+    { titulo:'Enero en Rotaciones', donde:'Menú › Rotaciones',
+      texto:'Debajo de las 3 semanas ves enero entero, con una fila por grupo. Para cada uno eliges en qué semana de la rotación cae el 1 de enero (1, 2 o 3) y la fila se repinta al momento. Desde ahí la rotación sigue sin cortes.' },
+    { titulo:'También en Grupos', donde:'Menú › Grupos',
+      texto:'Junto a la rotación del grupo puedes elegir en qué semana va el 1 de enero; el año entero de debajo se ajusta.' },
+  ],
   '5.3.0': [
     { titulo:'Burbuja Grupos', donde:'Menú › Grupos',
       texto:'Crea grupos y mete a los trabajadores a mano: marca a quien quieras en la lista y pulsa «Meter en…». Para sacar a alguien, «Sacar». Son los mismos grupos con los que se eligen las vacaciones.' },
