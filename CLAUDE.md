@@ -12,6 +12,13 @@ Cada publicación tiene que hacer estas tres cosas a la vez, en el mismo commit:
 
 Si `version.json` lleva una versión mayor que la de `index.html`, la app entrará en bucle de actualización: subirlas siempre juntas.
 
+## Estructura
+
+- Inicio: se elige departamento (Pasaje, Rampa, Operaciones) y luego producto (GroundHandling azul, RedBull naranja). Todo lo de dentro (skills, grupos, trabajadores, cupos, elección, desprogramaciones, resumen, calendario, PDF) se filtra por ese contexto (`S.ctx`).
+- Ajustes generales (convenio, Semana Santa, puentes, ponderación, copias) en el botón ⚙: valen para todos.
+- Las vacaciones no se borran al cerrar ciclo: el histórico se consulta en el calendario anual. Los cálculos del ciclo filtran por año (`periodosDe`, `desprogDe`).
+- Cualquier cambio de formato de datos debe migrarse en `normalizar()`.
+
 ## Convenciones
 
 - Todo el texto de la interfaz en español, en tono claro y directo.

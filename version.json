@@ -1,8 +1,10 @@
 {
-  "version": "3.3.0",
+  "version": "4.0.0",
   "fecha": "2026-11-23",
   "novedades": [
-    "Cada trabajador puede tener varios tipos o funciones",
-    "Los tipos de trabajador se gestionan ahora en Plantilla"
+    "Nueva pantalla de inicio: eliges departamento y después producto (GroundHandling o RedBull)",
+    "Los tipos de trabajador pasan a llamarse skills, propias de cada departamento y producto",
+    "Calendario anual a pantalla completa con años anteriores",
+    "Ajustes generales en el botón ⚙"
   ]
 }

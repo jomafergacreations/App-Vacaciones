@@ -11,13 +11,15 @@
 <style id="pageStyle">@page{size:A4 landscape;margin:12mm}</style>
 <style>
 /* Identidad: señalética de aeropuerto.
-   Asfalto y hormigón de plataforma como base, amarillo de cartel de dirección para lo que pide acción ahora,
-   azul de pista para lo interactivo. Barlow (rótulos de carretera) en versión condensada para titulares y cifras. */
+   Asfalto y hormigón de plataforma como base; amarillo de cartel para lo que pide acción ahora;
+   los departamentos son carteles de ubicación (amarillo sobre negro); cada producto lleva su color.
+   Barlow (rótulos de carretera) en versión condensada para titulares y cifras. */
 :root{
   --asfalto:#22262E; --hormigon:#ECEEF1; --papel:#FFFFFF; --linea:#D9DDE3; --gris:#5F6775;
   --senal:#F6C300; --senal-soft:#FFF6D1;
   --pista:#1F5FBF; --pista-soft:#E6EEFA;
   --ok:#23864F; --ok-soft:#E2F2E8; --warn:#B86E00; --warn-soft:#FFF1D2; --bad:#C23B30; --bad-soft:#FBE4E1;
+  --ctx:#1F5FBF;   /* color del producto en el que se trabaja */
   --cond:"Barlow Condensed","Arial Narrow","Roboto Condensed",system-ui,sans-serif;
   --text:"Barlow",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
 }
@@ -27,16 +29,23 @@ body{margin:0;font-family:var(--text);background:var(--hormigon);color:var(--asf
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
 /* cabecera */
-header.app{background:var(--asfalto);color:#fff;display:flex;align-items:center;gap:12px;padding:0 18px;height:58px;position:sticky;top:0;z-index:6}
+header.app{background:var(--asfalto);color:#fff;display:flex;align-items:center;gap:10px;padding:0 16px;height:58px;position:sticky;top:0;z-index:6}
+.marca{display:flex;align-items:center;gap:10px;background:none;border:0;color:#fff;cursor:pointer;padding:0;font:inherit}
 .logo{width:34px;height:34px;border-radius:7px;background:var(--senal);color:var(--asfalto);display:grid;place-items:center;font-size:19px;flex:0 0 auto}
-header.app h1{font-family:var(--cond);font-weight:700;font-size:23px;letter-spacing:.01em;margin:0;flex:1;white-space:nowrap}
+.marca h1{font-family:var(--cond);font-weight:700;font-size:23px;margin:0;white-space:nowrap}
+.migas{display:flex;align-items:center;gap:6px;flex:1;min-width:0;overflow:hidden}
+.miga{border:0;font:inherit;font-weight:700;font-family:var(--cond);font-size:18px;padding:4px 10px;border-radius:6px;cursor:pointer;white-space:nowrap;background:#363B45;color:var(--senal)}
+.miga.prod{background:var(--ctx);color:#fff}
+.migas .sep-m{color:#6B7280}
 .ciclo{font-family:var(--cond);font-size:15px;color:#B8BEC9;white-space:nowrap}
 .ciclo b{color:var(--senal);font-size:22px;font-weight:700;margin-left:4px}
-#hdrDep{width:auto;margin:0;background:#363B45;color:#fff;border:1px solid #4A505C;font-weight:600;padding:7px 10px;max-width:230px}
+.engranaje{background:#363B45;border:1px solid #4A505C;color:#fff;border-radius:8px;width:38px;height:38px;font-size:18px;cursor:pointer;flex:0 0 auto}
+.engranaje.on{background:var(--senal);color:var(--asfalto);border-color:var(--senal)}
 
 /* pasos */
-nav.pasos{display:flex;gap:4px;overflow-x:auto;background:var(--papel);border-bottom:1px solid var(--linea);padding:9px 12px;position:sticky;top:58px;z-index:5;scrollbar-width:none}
+nav.pasos{display:flex;gap:4px;overflow-x:auto;background:var(--papel);border-bottom:1px solid var(--linea);padding:9px 12px;position:sticky;top:58px;z-index:5;scrollbar-width:none;box-shadow:inset 0 3px 0 var(--ctx)}
 nav.pasos::-webkit-scrollbar{display:none}
+nav.pasos:empty{display:none}
 .step{display:flex;align-items:center;gap:7px;border:0;background:none;padding:6px 12px 6px 6px;border-radius:8px;font:inherit;font-size:14px;font-weight:500;color:var(--gris);white-space:nowrap;cursor:pointer}
 .step:hover{background:var(--hormigon)}
 .step .num{width:24px;height:24px;border-radius:5px;background:var(--hormigon);display:grid;place-items:center;font-family:var(--cond);font-weight:700;font-size:15px;color:var(--gris)}
@@ -47,12 +56,29 @@ nav.pasos::-webkit-scrollbar{display:none}
 .sep{width:1px;background:var(--linea);margin:4px 6px;flex:0 0 1px}
 
 main{max-width:1120px;margin:0 auto;padding:22px 18px 8px}
+body.ancho main{max-width:none}
 .intro{margin:0 0 20px;max-width:70ch}
 .intro .k{font-size:14px;font-weight:600;color:var(--gris)}
 .intro h2{font-family:var(--cond);font-size:38px;line-height:1.05;font-weight:700;margin:2px 0 8px;letter-spacing:-.005em}
 .intro p{margin:0;color:var(--gris)}
-.filtro{display:inline-flex;align-items:center;gap:6px;background:var(--asfalto);color:#fff;border-radius:6px;padding:3px 10px;font-size:13px;font-weight:600;margin-top:10px}
-.filtro button{background:none;border:0;color:var(--senal);font:inherit;cursor:pointer;padding:0 0 0 4px}
+
+/* portada: departamentos y productos */
+.portada{margin:18px 0 24px}
+.portada .k{font-size:15px;font-weight:600;color:var(--gris);margin:0 0 4px}
+.portada h2{font-family:var(--cond);font-size:46px;line-height:1.02;font-weight:700;margin:0;max-width:16ch}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-bottom:22px}
+.tile{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;text-align:left;border:0;border-radius:14px;padding:22px;cursor:pointer;font:inherit;background:var(--asfalto);color:#fff;min-height:132px;transition:transform .12s}
+.tile:hover{transform:translateY(-2px)}
+.tile .ini{width:58px;height:58px;border-radius:9px;background:var(--senal);color:var(--asfalto);display:grid;place-items:center;font-family:var(--cond);font-weight:700;font-size:34px}
+.tile .nom{font-family:var(--cond);font-weight:700;font-size:40px;line-height:1;display:block;color:var(--senal)}
+.tile .dato{display:block;color:#B8BEC9;font-size:14px;margin-top:6px}
+.tile .fl{font-family:var(--cond);font-size:44px;color:var(--senal);line-height:1}
+.tile.prod{background:var(--c);min-height:170px}
+.tile.prod .nom{color:#fff;font-size:46px}
+.tile.prod .dato{color:rgba(255,255,255,.85)}
+.tile.prod .fl{color:#fff}
+.tile.prod .ini{background:rgba(255,255,255,.18);color:#fff}
+.volver{background:none;border:0;font:inherit;font-weight:600;color:var(--pista);cursor:pointer;padding:0;margin-bottom:6px}
 
 .card{background:var(--papel);border:1px solid var(--linea);border-radius:14px;padding:18px;margin-bottom:16px}
 .card h2{font-family:var(--cond);font-size:23px;font-weight:600;margin:0 0 12px;line-height:1.15}
@@ -83,7 +109,6 @@ th,td{text-align:left;padding:9px 7px;border-bottom:1px solid var(--linea);verti
 th{font-size:13px;color:var(--gris);font-weight:600}
 td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 tr.grp td{background:var(--hormigon);font-family:var(--cond);font-weight:600;font-size:16px;padding:7px}
-tr.grp .chip{font-family:var(--text);font-size:12px;margin-left:6px;vertical-align:1px}
 .scroll{overflow-x:auto}
 
 .chip{display:inline-block;padding:2px 9px;border-radius:5px;font-size:12.5px;font-weight:600;background:var(--pista-soft);color:var(--pista);white-space:nowrap}
@@ -93,22 +118,13 @@ td .chip{white-space:normal}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .pill{border:1px solid var(--linea);background:#fff;border-radius:8px;padding:8px 13px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;color:var(--asfalto)}
 .pill.on{background:var(--asfalto);color:#fff;border-color:var(--asfalto)}
-.seg{display:inline-flex;background:var(--papel);border:1px solid var(--linea);border-radius:10px;padding:3px;margin-bottom:16px}
-.seg button{border:0;background:none;font:inherit;font-weight:600;padding:8px 16px;border-radius:7px;cursor:pointer;color:var(--gris)}
+.pill.sug{border-style:dashed;font-weight:500}
+.seg{display:inline-flex;background:var(--papel);border:1px solid var(--linea);border-radius:10px;padding:3px}
+.seg button{border:0;background:none;font:inherit;font-weight:600;padding:8px 14px;border-radius:7px;cursor:pointer;color:var(--gris);white-space:nowrap}
 .seg button.on{background:var(--asfalto);color:#fff}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;flex:0 0 auto}
 
-/* departamentos */
-.deps{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}
-.gfila{border-top:1px solid var(--linea);padding:10px 0}
-.gmeta{display:flex;gap:8px;align-items:center;margin-top:6px;font-size:13px;color:var(--gris);padding-left:16px}
-.gmeta span{white-space:nowrap}
-.gmeta select{flex:1;margin:0;padding:6px 8px;font-size:13px;min-width:0}
-.dep{background:var(--papel);border:1px solid var(--linea);border-radius:12px;padding:16px;border-top:6px solid var(--c);min-width:0}
-.dep .nombre{font-family:var(--cond);font-size:26px;font-weight:700;line-height:1.1;margin:0 0 2px}
-.dep .cifras{display:flex;gap:16px;margin:8px 0 10px;font-size:13px;color:var(--gris)}
-.dep .cifras b{font-family:var(--cond);font-size:22px;display:block;color:var(--asfalto);line-height:1}
-
-/* el cartel de turno: el elemento con carácter de la app */
+/* el cartel de turno */
 .cartel{display:flex;align-items:stretch;background:var(--senal);color:var(--asfalto);border-radius:12px;overflow:hidden;margin-bottom:18px}
 .cartel .flecha{background:var(--asfalto);color:var(--senal);display:grid;place-items:center;font-family:var(--cond);font-size:46px;font-weight:700;padding:0 18px;line-height:1}
 .cartel .cuerpo{flex:1;padding:14px 18px;display:flex;flex-wrap:wrap;align-items:center;gap:14px}
@@ -127,6 +143,7 @@ td .chip{white-space:normal}
 .stats b{font-family:var(--cond);font-size:30px;font-weight:700;display:block;line-height:1.05;color:var(--asfalto)}
 .preview .stats b{font-size:24px}
 
+/* calendario mensual (cupos) */
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
 .cal .dow{font-size:12px;color:var(--gris);text-align:center;font-weight:600;padding:4px 0}
 .cal .d{min-height:66px;border-radius:7px;border:1px solid var(--linea);padding:5px 6px;font-size:12px;cursor:pointer;background:#fff;display:flex;flex-direction:column}
@@ -140,7 +157,52 @@ td .chip{white-space:normal}
 .cal .d.ss .n::after{content:" SS";font-size:10px;color:var(--warn)} .cal .d.pu .n::after{content:" P";font-size:10px;color:var(--pista)}
 .legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12.5px;color:var(--gris);margin-top:12px}
 .legend span::before{content:"";display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px;background:var(--c)}
-.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;flex:0 0 auto}
+
+/* calendario anual */
+.cal-anual-card{padding:14px}
+.an-barra{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:12px}
+.an-barra label{flex:0 1 150px}
+.an-barra .esp{flex:1}
+.an-anio{display:flex;align-items:center;gap:6px}
+.an-anio b{font-family:var(--cond);font-size:30px;line-height:1;min-width:64px;text-align:center}
+.anual{--nw:170px;--dw:3px;overflow:auto;max-height:72vh;border:1px solid var(--linea);border-radius:10px;background:#fff;position:relative}
+.an-grid{position:relative;width:calc(var(--nw) + var(--dw) * var(--dias));min-width:100%}
+.an-fila{display:flex;height:30px;border-bottom:1px solid #EEF0F3;position:relative;z-index:1}
+.an-fila:hover .an-nom{background:#F6F7F9}
+.an-nom{position:sticky;left:0;z-index:3;width:var(--nw);flex:0 0 var(--nw);background:#fff;border-right:1px solid var(--linea);padding:0 10px;display:flex;align-items:center;gap:6px;font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.an-nom small{color:var(--gris);font-weight:500}
+.an-pista{position:relative;flex:1;cursor:copy}
+.an-cab{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--linea)}
+.an-cab .an-fila{height:auto;border:0}
+.an-cab .an-nom{font-family:var(--cond);font-size:15px;color:var(--gris);align-items:flex-end;padding-bottom:4px}
+.an-mes{position:absolute;top:0;height:22px;border-left:1px solid var(--linea);font-family:var(--cond);font-weight:700;font-size:14px;padding-left:5px;overflow:hidden;white-space:nowrap}
+.an-dia{position:absolute;top:22px;height:18px;text-align:center;font-size:10.5px;color:var(--gris);font-variant-numeric:tabular-nums}
+.an-dia.fs{color:#A0A6B1}
+.an-cab .an-pista{height:22px;cursor:default}
+.an-cab.con-dias .an-pista{height:42px}
+.an-ocu{height:34px}
+.an-ocu .an-nom{font-size:12.5px;color:var(--gris);font-weight:600}
+.an-ocu .an-pista{cursor:default}
+.an-ocu i{position:absolute;bottom:3px;background:var(--ctx);opacity:.55;border-radius:1px 1px 0 0}
+.an-ocu i.max{opacity:1}
+.an-grp{height:26px;background:var(--hormigon);z-index:2}
+.an-grp .an-nom{background:var(--hormigon);font-family:var(--cond);font-size:15px}
+.an-grp .an-pista{cursor:default}
+.an-bar{position:absolute;top:5px;bottom:5px;border:0;padding:0 4px;border-radius:4px;background:var(--ctx);color:#fff;font:inherit;font-size:11.5px;font-weight:600;cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:clip;text-align:left;min-width:2px}
+.an-bar:hover{filter:brightness(1.12);z-index:2}
+.an-bar.forz{background:var(--bad)}
+.an-bar.mano{background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.22) 0 4px,transparent 4px 8px)}
+.an-dp{position:absolute;top:7px;bottom:7px;background:var(--senal);border:1px solid #9A7A00;border-radius:2px;min-width:3px;pointer-events:auto;cursor:help}
+.an-capa{position:absolute;top:0;bottom:0;left:var(--nw);right:0;pointer-events:none;z-index:0}
+.an-capa .lm{position:absolute;top:0;bottom:0;width:1px;background:#E1E4E9}
+.an-capa .fs{position:absolute;top:0;bottom:0;background:#F5F6F8}
+.an-capa .ss{position:absolute;top:0;bottom:0;background:rgba(246,195,0,.13)}
+.an-capa .pu{position:absolute;top:0;bottom:0;background:rgba(31,95,191,.07)}
+.an-capa .hoy{position:absolute;top:0;bottom:0;width:2px;background:var(--bad)}
+.an-vacio{padding:40px 20px;text-align:center;color:var(--gris)}
+body.cal-full{overflow:hidden}
+body.cal-full .cal-anual-card{position:fixed;inset:0;z-index:40;margin:0;border-radius:0;display:flex;flex-direction:column;border:0}
+body.cal-full .anual{flex:1;max-height:none}
 
 .list-order{list-style:none;padding:0;margin:0;max-height:420px;overflow:auto}
 .list-order li{padding:7px 6px;border-bottom:1px solid var(--linea);display:flex;gap:10px;align-items:center}
@@ -154,10 +216,10 @@ td .chip{white-space:normal}
 .grid2>*{min-width:0}
 .formula{background:var(--hormigon);border-radius:8px;padding:11px 13px;font-size:14px;margin-top:10px}
 
-#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(8px);background:var(--asfalto);color:#fff;padding:11px 18px;border-radius:10px;font-size:14px;font-weight:500;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:20;max-width:90vw}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(8px);background:var(--asfalto);color:#fff;padding:11px 18px;border-radius:10px;font-size:14px;font-weight:500;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:90;max-width:90vw}
 #toast.show{opacity:1;transform:translateX(-50%)}
 
-/* ----- informe PDF (sirve para la vista previa y para imprimir) ----- */
+/* ----- informe PDF ----- */
 .hoja-wrap{overflow:hidden;background:#C9CED6;border-radius:12px;padding:18px}
 .hoja{background:#fff;width:273mm;min-height:100mm;margin:0;padding:10mm;box-shadow:0 2px 10px rgba(34,38,46,.18);transform-origin:top left}
 .hoja.vertical{width:186mm}
@@ -167,7 +229,7 @@ td .chip{white-space:normal}
 .inf-cab h1{font-family:var(--cond);font-size:24pt;line-height:1;margin:0;flex:1}
 .inf-cab .meta{font-size:9pt;color:var(--gris);text-align:right}
 .inf h2{font-family:var(--cond);font-size:16pt;margin:14px 0 6px;display:flex;align-items:center;gap:8px}
-.inf h2 .barra{width:6px;height:18px;border-radius:2px;background:var(--c,var(--senal))}
+.inf h2 .barra{width:6px;height:18px;border-radius:2px;background:var(--ctx)}
 .inf h2 small{font-family:var(--text);font-size:9.5pt;font-weight:500;color:var(--gris)}
 .inf table{font-size:9.5pt}
 .inf th,.inf td{padding:4px 5px}
@@ -178,7 +240,7 @@ td .chip{white-space:normal}
 .gantt .fila{display:flex;align-items:center;border-top:1px solid var(--linea);height:17px}
 .gantt .nom{width:var(--nw);flex:0 0 var(--nw);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:6px}
 .gantt .pista{position:relative;flex:1;height:100%;background-image:var(--rejilla)}
-.gantt .per{position:absolute;top:3px;bottom:3px;background:var(--pista);border-radius:2px}
+.gantt .per{position:absolute;top:3px;bottom:3px;background:var(--ctx);border-radius:2px}
 .gantt .per.forz{background:var(--bad)}
 .gantt .dp{position:absolute;top:1px;bottom:1px;width:3px;background:var(--senal);border:1px solid #9A7A00;border-radius:1px}
 .gantt .ss{position:absolute;top:0;bottom:0;background:rgba(246,195,0,.18)}
@@ -188,7 +250,8 @@ td .chip{white-space:normal}
 .inf .pie-inf{margin-top:12px;font-size:8pt;color:var(--gris)}
 #print{display:none}
 .solo-m{display:none}
-/* aviso de actualización: bloquea la app hasta actualizar */
+
+/* ----- bloqueo: actualizaciones y novedades ----- */
 body.bloqueada{overflow:hidden}
 #bloqueo{position:fixed;inset:0;z-index:100;background:rgba(34,38,46,.74);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);display:grid;place-items:center;padding:20px}
 .act-caja{background:var(--papel);border-radius:14px;overflow:hidden;max-width:440px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.35)}
@@ -215,13 +278,14 @@ body.bloqueada{overflow:hidden}
 .rec-nav{display:flex;gap:10px}
 .rec-nav .btn{flex:1;justify-content:center;padding:13px}
 
-
 @media (max-width:760px){
   .hide-m{display:none} .solo-m{display:inline} .grid2{grid-template-columns:1fr}
   .cal .d{min-height:54px;font-size:11px;padding:4px} .cal .d .p{display:none}
   main{padding:16px 10px 6px} .intro h2{font-size:30px}
   .cartel .flecha{font-size:34px;padding:0 12px} .cartel .who{font-size:30px}
-  header.app{padding:0 10px;gap:8px} header.app h1{font-size:19px} .ciclo{display:none} #hdrDep{max-width:130px}
+  header.app{padding:0 10px;gap:8px} .marca h1{display:none} .ciclo{display:none} .miga{font-size:16px;padding:3px 8px}
+  .portada h2{font-size:36px} .tile .nom{font-size:34px} .tile.prod .nom{font-size:38px} .tile{min-height:110px;padding:18px}
+  .anual{--nw:112px;max-height:65vh} .an-nom{font-size:12.5px;padding:0 6px}
 }
 @media print{
   body{background:#fff}
@@ -234,12 +298,12 @@ body.bloqueada{overflow:hidden}
 </head>
 <body>
 <header class="app">
-  <span class="logo" aria-hidden="true">✈</span>
-  <h1>Vacaciones AGP</h1>
-  <select id="hdrDep" aria-label="Departamento" onchange="cambiarDep(this.value)"></select>
+  <button class="marca" onclick="irInicio()" aria-label="Volver al inicio"><span class="logo" aria-hidden="true">✈</span><h1>Vacaciones AGP</h1></button>
+  <div class="migas" id="migas"></div>
   <span class="ciclo" id="hdrCiclo"></span>
+  <button class="engranaje" id="btnAjustes" onclick="go(UI.vista==='ajustes'?UI.volverDe:'ajustes')" aria-label="Ajustes generales" title="Ajustes generales">⚙</button>
 </header>
-<nav class="pasos" id="pasos" aria-label="Pasos"></nav>
+<nav class="pasos" id="pasos" aria-label="Secciones"></nav>
 <main id="main"></main>
 <div id="toast" role="status"></div>
 <div id="print"></div>
@@ -250,7 +314,7 @@ body.bloqueada{overflow:hidden}
    Reglas base: Convenio Menzies (BOE-A-2023-25956), arts. 32 y 33
    Datos guardados en el navegador (localStorage). Haz copias.
    ========================================================= */
-const APP_VERSION = '3.3.0';   // súbela junto con version.json en cada publicación
+const APP_VERSION = '4.0.0';   // súbela junto con version.json en cada publicación
 const LS_KEY = 'vacaciones-agp-v1';
 const SIN = '_'; // clave interna para «sin grupo»
 
@@ -276,6 +340,7 @@ const uid = () => Math.random().toString(36).slice(2,10);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const r2 = n => Math.round(n*100)/100;
 const nf = n => (Math.round(n*100)/100).toLocaleString('es-ES');
+const delAnio = (s,y) => !!s && s.startsWith(String(y));
 
 /* ---------- estado ---------- */
 const TRAMOS_CONVENIO = [
@@ -296,65 +361,93 @@ const TRAMOS_CONVENIO = [
   {desde:'12-16',hasta:'12-31',pts:8, nombre:'Diciembre 2.ª quincena'},
 ];
 const COLORES = ['#1F5FBF','#23864F','#B86E00','#7B4BB3','#C23B30','#0E8A9A','#7A5C3E','#C2477A'];
-const DEP_COLORES = {Pasaje:'#1F5FBF', Rampa:'#E08A00', Operaciones:'#23864F'};
+const PRODUCTOS_DEF = [ {id:'gh', nombre:'GroundHandling', color:'#1F5FBF'}, {id:'rb', nombre:'RedBull', color:'#E8730C'} ];
+const SUGERENCIAS = { // ideas para crear skills rápido; se pueden ignorar
+  Pasaje:['Agente de pasaje','Facturación','Embarque','Coordinador de pasaje','Supervisor','Auxiliar administrativo'],
+  Rampa:['Agente de rampa','Auxiliar de rampa','Coordinador de pista','Conductor','Carga','Jefe de turno'],
+  Operaciones:['Agente administrativo','Auxiliar administrativo','Coordinador de operaciones','Control de carga','Jefe de turno','Supervisor'],
+};
 const AJUSTES_DEF = { computo:'naturales', bloquear:true, rondas:3, ptsSS:8, ptsPuente:2, diasDefecto:24,
   ponderar:true, baseDias:24, maxDesprog:3, preaviso:15, pctTurno:10, desprogPuntua:true };
-const depsIniciales = () => ['Pasaje','Rampa','Operaciones'].map(n=>({id:uid(), nombre:n, color:DEP_COLORES[n], baseDias:''}));
+const depsIniciales = () => ['Pasaje','Rampa','Operaciones'].map(n=>({id:uid(), nombre:n, baseDias:''}));
 
 function estadoInicial(){
   const ciclo = new Date().getFullYear() + (new Date().getMonth() >= 6 ? 1 : 0);
-  const tipos = ['Auxiliar administrativo','Agente administrativo','Coordinador de pista','Auxiliar de rampa','Agente de rampa','Jefe de turno']
-    .map((n,i)=>({id:uid(), nombre:n, color:COLORES[i%COLORES.length]}));
-  return normalizar({ version:3, ciclo, tipos, departamentos:depsIniciales(), grupos:[], trabajadores:[], tramos:TRAMOS_CONVENIO.map(t=>({...t})),
-    semanaSanta:semanaSantaDefault(ciclo), puentes:[], cupos:[], periodos:[], desprog:[], turnos:{}, pasosOk:[], vistaDep:'all' });
+  return normalizar({ version:4, ciclo, departamentos:depsIniciales(), productos:PRODUCTOS_DEF.map(p=>({...p})), skills:[], grupos:[], trabajadores:[],
+    tramos:TRAMOS_CONVENIO.map(t=>({...t})), semanaSanta:semanaSantaDefault(ciclo), puentes:[], cupos:[], periodos:[], desprog:[], turnos:{}, pasosOk:{}, ctx:{dep:'',prod:''} });
 }
-function normalizar(d){ // también migra copias de versiones anteriores
-  d.version = 3;
+function normalizar(d){ // también migra datos de versiones anteriores
   d.ajustes = {...AJUSTES_DEF, ...(d.ajustes||{})};
   if(!d.departamentos) d.departamentos = depsIniciales();
-  d.grupos ||= []; d.desprog ||= []; d.pasosOk ||= []; d.puentes ||= []; d.cupos ||= []; d.periodos ||= []; d.tipos ||= [];
-  d.trabajadores ||= []; d.vistaDep ||= 'all';
-  d.grupos.forEach(g=>{ if(g.depId===undefined) g.depId=''; });
-  d.trabajadores.forEach(t=>{ if(t.grupoId===undefined) t.grupoId=''; if(t.depId===undefined) t.depId=''; if(!Array.isArray(t.tipos)) t.tipos = t.tipoId ? [t.tipoId] : []; t.tipoId = t.tipos[0] || ''; });
-  d.cupos.forEach(c=>{ c.tipos ||= []; if(c.grupoId===undefined) c.grupoId=''; if(c.depId===undefined) c.depId=''; });
-  if(!d.turnos || 'hechos' in d.turnos) d.turnos = {};
+  if(!d.productos) d.productos = PRODUCTOS_DEF.map(p=>({...p}));
+  d.grupos ||= []; d.desprog ||= []; d.puentes ||= []; d.cupos ||= []; d.periodos ||= []; d.trabajadores ||= [];
+  d.turnos ||= {}; if('hechos' in d.turnos) d.turnos = {};
+  if(!d.ctx) d.ctx = {dep:'', prod:''};
+  if(!d.pasosOk || Array.isArray(d.pasosOk)) d.pasosOk = {};
+  const prod0 = d.productos[0].id;
+  d.grupos.forEach(g=>{ if(g.depId===undefined) g.depId=''; if(!g.prodId) g.prodId=prod0; });
+  const gDep = w => (w.grupoId && d.grupos.find(g=>g.id===w.grupoId)?.depId) || w.depId || '';
+  const gProd = w => (w.grupoId && d.grupos.find(g=>g.id===w.grupoId)?.prodId) || w.prodId || prod0;
+  d.trabajadores.forEach(t=>{ if(t.grupoId===undefined) t.grupoId=''; if(t.depId===undefined) t.depId=''; if(!t.prodId) t.prodId=gProd(t); t.depId = gDep(t); });
+  if(!d.skills){ // versión 3: los «tipos» eran globales; ahora cada departamento y producto tiene sus skills
+    d.skills = [];
+    const viejos = d.tipos || [], mapa = {};
+    const skillPara = (tipoId, dep, prod) => {
+      const k = tipoId+'|'+dep+'|'+prod; if(mapa[k]) return mapa[k];
+      const t = viejos.find(x=>x.id===tipoId); if(!t) return null;
+      const s = {id:uid(), nombre:t.nombre, color:t.color, depId:dep, prodId:prod}; d.skills.push(s); return mapa[k]=s.id;
+    };
+    d.trabajadores.forEach(w=>{ const ids = Array.isArray(w.tipos)?w.tipos:(w.tipoId?[w.tipoId]:[]); w.skills = ids.map(id=>skillPara(id,w.depId,w.prodId)).filter(Boolean); delete w.tipos; delete w.tipoId; });
+    d.cupos.forEach(c=>{ const ids = c.tipos||[]; c.skills = c.depId ? ids.map(id=>skillPara(id,c.depId,c.prodId||prod0)).filter(Boolean) : []; delete c.tipos; });
+    delete d.tipos;
+  }
+  d.trabajadores.forEach(t=>{ if(!Array.isArray(t.skills)) t.skills=[]; });
+  d.cupos.forEach(c=>{ c.skills ||= []; if(c.grupoId===undefined) c.grupoId=''; if(c.depId===undefined) c.depId=''; if(c.prodId===undefined) c.prodId = c.depId ? prod0 : ''; });
+  delete d.vistaDep;
+  d.version = 4;
   return d;
 }
 let S;
 try { const raw = JSON.parse(localStorage.getItem(LS_KEY)); S = raw ? normalizar(raw) : estadoInicial(); } catch(e){ S = estadoInicial(); }
 const save = () => { try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch(e){ toast('No se ha podido guardar en este navegador'); } };
 
-let UI = { vista:'reglas', modo:'turnos', grupo:null, trab:null, desde:'', hasta:'', editTrab:null, editCupo:null,
-  calMes:null, calTipo:'all', calGrupo:'all', calDia:null, dpTrab:'', dpDia:'', dpSol:hoy(),
+let UI = { vista:'inicio', volverDe:'inicio', modo:'turnos', grupo:null, trab:null, desde:'', hasta:'', editTrab:null, editCupo:null,
+  cal:{modo:'anual', anio:null, zoom: (window.innerWidth<760 ? 'semana' : 'ajustar'), grupo:'all', skill:'all', buscar:'', mes:null, dia:null},
+  dpTrab:'', dpDia:'', dpSol:hoy(),
   m:{trab:'', desde:'', hasta:'', forzar:false, nota:'', edit:null, filtro:'all'},
   pdf:{grupo:'all', cuadrante:true, tabla:true, puntos:true, desprog:true, firma:false, orient:'landscape'} };
 
 /* ---------- consultas ---------- */
-const tipoDe = id => S.tipos.find(t=>t.id===id);
+const skillDe = id => S.skills.find(t=>t.id===id);
 const grupoDe = id => S.grupos.find(g=>g.id===id);
 const depDeId = id => S.departamentos.find(d=>d.id===id);
+const prodDeId = id => S.productos.find(p=>p.id===id);
 const trabDe = id => S.trabajadores.find(t=>t.id===id);
-const tiposDe = w => (w && Array.isArray(w.tipos) ? w.tipos : (w&&w.tipoId?[w.tipoId]:[])).filter(id=>tipoDe(id));   // una persona puede tener varias funciones
-const tiposTxt = w => tiposDe(w).map(id=>tipoDe(id).nombre).join(' / ') || 'Sin tipo';
-const tieneTipo = (w,id) => tiposDe(w).includes(id);
 const gk = w => w.grupoId || SIN;
-const depDe = w => (w.grupoId && grupoDe(w.grupoId)?.depId) || w.depId || '';  // el departamento lo marca el grupo
+const depDe = w => (w.grupoId && grupoDe(w.grupoId)?.depId) || w.depId || '';
+const prodDe = w => (w.grupoId && grupoDe(w.grupoId)?.prodId) || w.prodId || '';
 const nombreGrupo = k => k===SIN ? 'Sin grupo' : (grupoDe(k)?.nombre || 'Sin grupo');
 const nombreDep = id => depDeId(id)?.nombre || 'Sin departamento';
-const DEP = () => S.vistaDep;                                 // departamento que se está viendo
-const visible = w => DEP()==='all' || depDe(w)===DEP();
-const grupoVisible = g => DEP()==='all' || g.depId===DEP();
-const gruposVis = () => S.grupos.filter(grupoVisible);
-const miembros = k => S.trabajadores.filter(t=>gk(t)===k);    // sin filtrar: para el 10 % del turno
-const miembrosVis = k => miembros(k).filter(visible);
+const nombreProd = id => prodDeId(id)?.nombre || '';
+const skillsDe = w => (w && Array.isArray(w.skills) ? w.skills : []).filter(id=>skillDe(id));
+const skillsTxt = w => skillsDe(w).map(id=>skillDe(id).nombre).join(' / ') || 'Sin skill';
+const tieneSkill = (w,id) => skillsDe(w).includes(id);
+
+/* contexto: departamento + producto con el que se trabaja */
+const enCtx = () => !!(S.ctx.dep && S.ctx.prod && depDeId(S.ctx.dep) && prodDeId(S.ctx.prod));
+const ctxTxt = () => `${nombreDep(S.ctx.dep)}, ${nombreProd(S.ctx.prod)}`;
+const visible = w => depDe(w)===S.ctx.dep && prodDe(w)===S.ctx.prod;
+const gruposVis = () => S.grupos.filter(g=>g.depId===S.ctx.dep && g.prodId===S.ctx.prod);
+const skillsVis = () => S.skills.filter(k=>k.depId===S.ctx.dep && k.prodId===S.ctx.prod);
 const trabsVis = () => S.trabajadores.filter(visible);
-function gruposActivos(todos){ // grupos con gente, en orden, más «sin grupo» si hace falta
-  const mm = todos ? miembros : miembrosVis;
-  const ks = S.grupos.filter(g=>todos||grupoVisible(g)).map(g=>g.id).filter(k=>mm(k).length);
-  if(mm(SIN).length) ks.push(SIN);
+const miembros = k => S.trabajadores.filter(t=>gk(t)===k && (k!==SIN || visible(t)));
+function gruposActivos(){
+  const ks = gruposVis().map(g=>g.id).filter(k=>miembros(k).length);
+  if(miembros(SIN).length) ks.push(SIN);
   return ks;
 }
-function cambiarDep(v){ S.vistaDep=v; UI.grupo=null; UI.trab=null; UI.calGrupo='all'; UI.pdf.grupo='all'; UI.m.filtro='all'; save(); render(); }
+const tKey = k => k===SIN ? `${SIN}${S.ctx.dep}|${S.ctx.prod}` : k;
+const ctxKey = () => `${S.ctx.dep}|${S.ctx.prod}`;
 
 /* ---------- puntos (art. 33) ---------- */
 function cuentaDia(s){
@@ -374,28 +467,24 @@ function statsRango(desde,hasta){
   for(const s of eachDay(desde,hasta)){ naturales++; if(cuentaDia(s)){ computables++; pts+=ptsDia(s); } }
   return {naturales,computables,pts};
 }
-/* Base de ponderación: la del departamento si tiene una propia; si no, la general. */
 const baseDe = w => { const d = depDeId(depDe(w)); return Number(d?.baseDias) > 0 ? Number(d.baseDias) : Number(S.ajustes.baseDias); };
 /* Factor sobre los puntos brutos.
-   - Con ponderación: base / días de vacaciones del trabajador (24/30 = ×0,8 a quien tiene 30 días).
-     En un fijo discontinuo equivale a aplicar 365/días contratados sobre sus días equivalentes a año completo,
-     así que no se aplica dos veces.
+   - Con ponderación: base del departamento / días de vacaciones del trabajador (24/30 = ×0,8).
+     En un fijo discontinuo equivale a aplicar 365/días contratados sobre sus días de año completo: no se aplica dos veces.
    - Sin ponderación: solo el ajuste del convenio para fijos discontinuos (365 / días contratados). */
 function factorInfo(w){
   const A = S.ajustes, der = Number(w.diasDerecho)||0, base = baseDe(w);
   const disc = w.modalidad==='discontinuo' && Number(w.diasContratados)>0;
-  if(A.ponderar && base>0 && der>0){
-    const f = base/der;
-    return { f, txt: f===1 ? '×1' : `×${nf(f)} (${base}/${der})` };
-  }
+  if(A.ponderar && base>0 && der>0){ const f = base/der; return { f, txt: f===1 ? '×1' : `×${nf(f)} (${base}/${der})` }; }
   if(disc){ const f = 365/Number(w.diasContratados); return { f, txt:`×${nf(f)} (365/${w.diasContratados})` }; }
   return { f:1, txt:'×1' };
 }
 const factor = w => factorInfo(w).f;
-const desprogDe = id => S.desprog.filter(d=>d.trabajadorId===id).sort((a,b)=>a.solicitud.localeCompare(b.solicitud) || a.creado-b.creado);
+/* El histórico se conserva: el ciclo activo solo mira sus propias fechas. */
+const periodosDe = (id, y=S.ciclo) => S.periodos.filter(p=>p.trabajadorId===id && delAnio(p.desde,y)).sort((a,b)=>a.desde.localeCompare(b.desde));
+const desprogDe = (id, y=S.ciclo) => S.desprog.filter(d=>d.trabajadorId===id && delAnio(d.dia,y)).sort((a,b)=>a.solicitud.localeCompare(b.solicitud) || a.creado-b.creado);
 function statsTrab(w){
-  const ps = S.periodos.filter(p=>p.trabajadorId===w.id).sort((a,b)=>a.desde.localeCompare(b.desde));
-  const dps = desprogDe(w.id);
+  const ps = periodosDe(w.id), dps = desprogDe(w.id);
   let diasPer=0, bruto=0, largo=false;
   ps.forEach(p=>{ const st=statsRango(p.desde,p.hasta); diasPer+=st.computables; bruto+=st.pts; if(st.naturales>=15) largo=true; });
   if(S.ajustes.desprogPuntua) dps.forEach(d=>{ if(cuentaDia(d.dia)) bruto+=ptsDia(d.dia); });
@@ -409,7 +498,7 @@ function statsTrab(w){
   return { periodos:ps, desprog:dps, diasPer, dias, derecho, pendientes, reservaPosible, bruto, f:factor(w), pts:r2(bruto*factor(w)), avisos };
 }
 function ordenEleccion(k){
-  return S.trabajadores.filter(t=>k===undefined ? visible(t) : (gk(t)===k && (k!==SIN || visible(t)))).sort((a,b)=>
+  return S.trabajadores.filter(t=>visible(t) && (k===undefined || gk(t)===k)).sort((a,b)=>
     (Number(a.ptsAnt)||0)-(Number(b.ptsAnt)||0) ||
     (Number(a.ptsAnt2)||0)-(Number(b.ptsAnt2)||0) ||
     (a.antig||'9999').localeCompare(b.antig||'9999') ||
@@ -422,8 +511,8 @@ function ocupacion(excluirTrab){
   S.periodos.forEach(p=>{ if(p.trabajadorId===excluirTrab) return; for(const s of eachDay(p.desde,p.hasta)) (occ[s] ||= []).push(p.trabajadorId); });
   return occ;
 }
-const reglaAplica = (c,w) => w && (!c.depId || c.depId===depDe(w)) && (!c.grupoId || c.grupoId===w.grupoId) && (!c.tipos.length || tiposDe(w).some(id=>c.tipos.includes(id)));
-const cupoVisible = c => DEP()==='all' || !c.depId || c.depId===DEP() || (c.grupoId && grupoDe(c.grupoId)?.depId===DEP());
+const reglaAplica = (c,w) => w && (!c.depId || c.depId===depDe(w)) && (!c.prodId || c.prodId===prodDe(w)) && (!c.grupoId || c.grupoId===w.grupoId) && (!c.skills.length || skillsDe(w).some(id=>c.skills.includes(id)));
+const cupoVisible = c => (!c.depId || c.depId===S.ctx.dep) && (!c.prodId || c.prodId===S.ctx.prod);
 const usadosCupo = (c, ids) => ids.filter(id=>reglaAplica(c,trabDe(id))).length;
 function conflictosCupo(w, desde, hasta){
   const occ = ocupacion(w.id), res = [];
@@ -442,30 +531,30 @@ function cuposExcedidos(){
   return dias.size;
 }
 const solapePropio = (w,desde,hasta,excepto) => S.periodos.some(p=>p.id!==excepto && p.trabajadorId===w.id && !(hasta<p.desde || desde>p.hasta));
-const ambitoCupo = c => [c.depId ? esc(nombreDep(c.depId)) : '', c.grupoId ? esc(nombreGrupo(c.grupoId)) : (c.depId?'todos sus grupos':'Todos los departamentos'), c.tipos.length ? c.tipos.map(t=>esc(tipoDe(t)?.nombre)).filter(Boolean).join(', ') : 'todos los tipos'].filter(Boolean).join(', ');
+const ambitoCupo = c => [!c.depId ? 'Todos los departamentos' : '', c.grupoId ? esc(nombreGrupo(c.grupoId)) : 'todos los grupos', c.skills.length ? c.skills.map(t=>esc(skillDe(t)?.nombre)).filter(Boolean).join(', ') : 'todas las skills'].filter(Boolean).join(', ');
 
 /* ---------- desprogramaciones (art. 32) ---------- */
 const maxDiaTurno = k => Math.floor(miembros(k).length * Number(S.ajustes.pctTurno) / 100);
 function problemasDesprog(d){
   const w = trabDe(d.trabajadorId); if(!w) return [];
-  const A = S.ajustes, out = [];
-  const propias = desprogDe(w.id), idx = propias.findIndex(x=>x.id===d.id);
+  const A = S.ajustes, out = [], y = d.dia.slice(0,4);
+  const propias = desprogDe(w.id, y), idx = propias.findIndex(x=>x.id===d.id);
   if(idx >= Number(A.maxDesprog)) out.push({nivel:'bad', txt:`Pasa de ${A.maxDesprog} al año`});
   const ant = daysBetween(d.solicitud, d.dia);
   if(ant < Number(A.preaviso)) out.push({nivel:'bad', txt:`Preaviso de ${ant} día(s) (mín. ${A.preaviso})`});
   const k = gk(w), max = maxDiaTurno(k);
-  const mismoDia = S.desprog.filter(x=>x.dia===d.dia && trabDe(x.trabajadorId) && gk(trabDe(x.trabajadorId))===k)
+  const mismoDia = S.desprog.filter(x=>x.dia===d.dia && trabDe(x.trabajadorId) && gk(trabDe(x.trabajadorId))===k && visible(trabDe(x.trabajadorId))===visible(w))
     .sort((a,b)=>a.solicitud.localeCompare(b.solicitud) || a.creado-b.creado);
   const pos = mismoDia.findIndex(x=>x.id===d.id);
   if(pos >= max) out.push({nivel:'bad', txt: max===0 ? `En ${nombreGrupo(k)} (${miembros(k).length} pers.) el ${A.pctTurno} % no llega a 1` : `Fuera del ${A.pctTurno} % del turno (máx. ${max} ese día)`});
   if(S.periodos.some(p=>p.trabajadorId===w.id && enRango(d.dia,p))) out.push({nivel:'warn', txt:'Coincide con sus vacaciones'});
   if(propias.some(x=>x.id!==d.id && x.dia===d.dia)) out.push({nivel:'warn', txt:'Día repetido'});
-  if(!d.dia.startsWith(String(S.ciclo))) out.push({nivel:'warn', txt:`Fuera del ciclo ${S.ciclo}`});
+  if(!delAnio(d.dia,S.ciclo)) out.push({nivel:'warn', txt:`Fuera del ciclo ${S.ciclo}`});
   return out;
 }
 
 /* ---------- turnos por grupo ---------- */
-const tState = k => (S.turnos[k] ||= {ronda:1, hechos:{}});
+const tState = k => (S.turnos[tKey(k)] ||= {ronda:1, hechos:{}});
 const hechosRonda = k => { const t=tState(k); return (t.hechos[t.ronda] ||= []); };
 function turnoActual(k){ const h = hechosRonda(k); return ordenEleccion(k).find(w=>!h.includes(w.id)) || null; }
 function grupoTerminado(k){ return !turnoActual(k) && tState(k).ronda >= Number(S.ajustes.rondas); }
@@ -483,39 +572,51 @@ function deshacerTurno(k){
   save(); render();
 }
 
-/* ---------- navegación por pasos ---------- */
+/* ---------- navegación ---------- */
 const PASOS = [
-  ['reglas','Reglas y puntos','Define el año, cómo se cuentan los días, la ponderación y los puntos del convenio.'],
-  ['grupos','Departamentos y grupos','Pasaje, Rampa y Operaciones, cada uno con sus grupos o turnos. Cada grupo elige por separado, con su propio orden y sus propios cupos.'],
-  ['plantilla','Plantilla','Añade a cada trabajador con su grupo, sus funciones, sus días de vacaciones y los puntos de los dos años anteriores.'],
-  ['cupos','Cupos','Fija cuántas personas pueden estar de vacaciones a la vez, por fechas, departamento, grupo y tipo de trabajador.'],
-  ['eleccion','Elección','Por turnos, cada grupo elige en el orden que marcan los puntos. A mano, apuntas las vacaciones de quien quieras sin seguir el turno.'],
-  ['desprog','Desprogramaciones','Registra los días con cargo a vacaciones (art. 32): máximo 3 al año, preaviso de 15 días y 10 % del turno.'],
-  ['resumen','Resumen y cierre','Revisa que todo cuadra, exporta a Excel o PDF y cierra el ciclo para el año siguiente.'],
+  ['skills','Skills','Las funciones que pueden tener los trabajadores de este departamento y producto. Crea las que necesites y borra las que sobren.'],
+  ['grupos','Grupos','Los equipos o turnos. Cada grupo elige por separado, con su propio orden y sus propios cupos.'],
+  ['trabajadores','Trabajadores','Cada persona con su grupo, sus skills, sus días de vacaciones y los puntos de los dos años anteriores.'],
+  ['cupos','Cupos','Cuántas personas pueden estar de vacaciones a la vez, por fechas, grupo y skill.'],
+  ['eleccion','Elección','Por turnos, cada grupo elige en el orden que marcan los puntos. A mano, apuntas las vacaciones de quien quieras.'],
+  ['desprog','Desprogramaciones','Los días con cargo a vacaciones (art. 32): máximo 3 al año, preaviso de 15 días y 10 % del turno.'],
+  ['resumen','Resumen','Revisa que todo cuadra, exporta a Excel y cierra el ciclo cuando terminéis.'],
 ];
-const EXTRAS = [['calendario','Calendario'],['pdf','Exportar PDF'],['copias','Copias']];
+const EXTRAS = [['calendario','Calendario'],['pdf','Exportar PDF']];
+const VISTAS_CTX = [...PASOS.map(p=>p[0]), ...EXTRAS.map(e=>e[0])];
 function pasoHecho(k){
+  const ok = (S.pasosOk[ctxKey()]||[]);
   switch(k){
-    case 'reglas': return S.pasosOk.includes('reglas');
-    case 'grupos': return S.grupos.length>0;
-    case 'plantilla': return S.trabajadores.length>0 && S.trabajadores.every(t=>t.grupoId);
-    case 'cupos': return S.cupos.length>0;
-    case 'eleccion': return S.trabajadores.length>0 && gruposActivos(true).every(grupoTerminado);
-    case 'desprog': return S.pasosOk.includes('desprog');
+    case 'skills': return skillsVis().length>0;
+    case 'grupos': return gruposVis().length>0;
+    case 'trabajadores': return trabsVis().length>0 && trabsVis().every(t=>t.grupoId && skillsDe(t).length);
+    case 'cupos': return S.cupos.some(c=>cupoVisible(c) && c.depId);
+    case 'eleccion': return trabsVis().length>0 && gruposActivos().every(grupoTerminado);
+    case 'desprog': return ok.includes('desprog');
     default: return false;
   }
 }
-function go(v){ UI.vista=v; render(); window.scrollTo(0,0); }
+function go(v){
+  if(v!=='ajustes' && UI.vista!=='ajustes') UI.volverDe = UI.vista;
+  if(v==='ajustes' && UI.vista!=='ajustes') UI.volverDe = UI.vista;
+  salirPantallaCompleta(); UI.vista=v; render(); window.scrollTo(0,0);
+}
+function irInicio(){ S.ctx={dep:'',prod:''}; save(); go('inicio'); }
+function elegirDep(id){ S.ctx={dep:id, prod:''}; save(); go('producto'); }
+function elegirProd(id){
+  S.ctx.prod=id; save();
+  UI.grupo=null; UI.trab=null; UI.cal.grupo='all'; UI.cal.skill='all'; UI.pdf.grupo='all'; UI.m={...UI.m, filtro:'all', trab:'', edit:null};
+  const destino = !skillsVis().length && !trabsVis().length ? 'skills' : (S.periodos.some(p=>{const t=trabDe(p.trabajadorId); return t&&visible(t);}) ? 'calendario' : 'trabajadores');
+  go(destino);
+}
 function siguiente(){
   const i = PASOS.findIndex(p=>p[0]===UI.vista);
-  if(i>=0 && !S.pasosOk.includes(UI.vista)) { S.pasosOk.push(UI.vista); save(); }
+  const ok = (S.pasosOk[ctxKey()] ||= []); if(i>=0 && !ok.includes(UI.vista)){ ok.push(UI.vista); save(); }
   if(i>=0 && i<PASOS.length-1) go(PASOS[i+1][0]);
 }
-const avisoFiltro = () => DEP()==='all' ? '' : `<div class="filtro">Viendo solo ${esc(nombreDep(DEP()))}<button onclick="cambiarDep('all')" aria-label="Ver todos los departamentos">Ver todos</button></div>`;
 function intro(){
   const i = PASOS.findIndex(p=>p[0]===UI.vista); if(i<0) return '';
-  const filtra = !['reglas'].includes(UI.vista);
-  return `<div class="intro"><div class="k">Paso ${i+1} de ${PASOS.length}</div><h2>${PASOS[i][1]}</h2><p>${PASOS[i][2]}</p>${filtra?avisoFiltro():''}</div>`;
+  return `<div class="intro"><div class="k">Paso ${i+1} de ${PASOS.length}, ${esc(ctxTxt())}</div><h2>${PASOS[i][1]}</h2><p>${PASOS[i][2]}</p></div>`;
 }
 function pie(){
   const i = PASOS.findIndex(p=>p[0]===UI.vista); if(i<0) return '';
@@ -524,42 +625,74 @@ function pie(){
 }
 function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'),2800); }
 function render(){
-  if(DEP()!=='all' && !depDeId(DEP())) S.vistaDep='all';
+  // ¿qué pantalla toca según el contexto?
+  if(UI.vista!=='ajustes'){
+    if(!S.ctx.dep || !depDeId(S.ctx.dep)){ S.ctx={dep:'',prod:''}; UI.vista='inicio'; }
+    else if(!enCtx()) UI.vista='producto';
+    else if(!VISTAS_CTX.includes(UI.vista)) UI.vista='trabajadores';
+  }
+  const p = prodDeId(S.ctx.prod);
+  document.documentElement.style.setProperty('--ctx', p?.color || '#1F5FBF');
   document.getElementById('hdrCiclo').innerHTML = `Ciclo <b>${S.ciclo}</b>`;
-  document.getElementById('hdrDep').innerHTML = `<option value="all">Todos los departamentos</option>` + S.departamentos.map(d=>`<option value="${d.id}" ${d.id===DEP()?'selected':''}>${esc(d.nombre)}</option>`).join('');
-  document.getElementById('pasos').innerHTML =
+  document.getElementById('btnAjustes').classList.toggle('on', UI.vista==='ajustes');
+  document.getElementById('migas').innerHTML = !S.ctx.dep ? '' :
+    `<button class="miga" onclick="irInicio()" title="Cambiar de departamento">${esc(nombreDep(S.ctx.dep))}</button>`
+    + (p ? `<span class="sep-m">›</span><button class="miga prod" onclick="S.ctx.prod='';save();go('producto')" title="Cambiar de producto">${esc(p.nombre)}</button>` : '');
+  const enEspacio = enCtx() && UI.vista!=='ajustes';
+  document.getElementById('pasos').innerHTML = !enEspacio ? '' :
     PASOS.map(([k,n],i)=>`<button class="step ${UI.vista===k?'on':''} ${pasoHecho(k)?'done':''}" onclick="go('${k}')" ${UI.vista===k?'aria-current="step"':''}><span class="num">${pasoHecho(k)&&UI.vista!==k?'✓':i+1}</span>${n}</button>`).join('')
     + '<span class="sep"></span>' + EXTRAS.map(([k,n])=>`<button class="step extra ${UI.vista===k?'on':''}" onclick="go('${k}')">${n}</button>`).join('');
-  const V = {reglas:vReglas, grupos:vGrupos, plantilla:vPlantilla, cupos:vCupos, eleccion:vEleccion, desprog:vDesprog, resumen:vResumen, calendario:vCalendario, pdf:vPDF, copias:vCopias};
+  document.body.classList.toggle('ancho', UI.vista==='calendario' && UI.cal.modo==='anual');
+  const V = {inicio:vInicio, producto:vProducto, ajustes:vAjustes, skills:vSkills, grupos:vGrupos, trabajadores:vTrabajadores, cupos:vCupos, eleccion:vEleccion, desprog:vDesprog, resumen:vResumen, calendario:vCalendario, pdf:vPDF};
+  const an0 = document.getElementById('anual'); if(an0){ UI.cal.sx = an0.scrollLeft; UI.cal.sy = an0.scrollTop; }
   document.getElementById('main').innerHTML = intro() + V[UI.vista]() + pie();
   const on = document.querySelector('.step.on'); if(on) on.scrollIntoView({block:'nearest',inline:'center'});
   if(UI.vista==='pdf') ajustarHoja();
+  if(UI.vista==='calendario' && UI.cal.modo==='anual') ajustarAnual();
 }
-const tipoChip = id => { const t=tipoDe(id); return t ? `<span class="chip" style="background:${t.color}1a;color:${t.color}">${esc(t.nombre)}</span>` : '<span class="chip grey">Sin tipo</span>'; };
-const tiposChips = w => tiposDe(w).length ? tiposDe(w).map(tipoChip).join(' ') : tipoChip(null);
-const depChip = id => { const d=depDeId(id); return d ? `<span class="chip" style="background:${d.color}1f;color:${d.color}">${esc(d.nombre)}</span>` : '<span class="chip warn">Sin departamento</span>'; };
+const skillChip = id => { const t=skillDe(id); return t ? `<span class="chip" style="background:${t.color}1a;color:${t.color}">${esc(t.nombre)}</span>` : '<span class="chip grey">Sin skill</span>'; };
+const skillsChips = w => skillsDe(w).length ? skillsDe(w).map(skillChip).join(' ') : skillChip(null);
 const grupoChip = k => { const g=grupoDe(k); return g ? `<span class="chip grey"><span class="dot" style="background:${g.color};margin-right:5px;width:8px;height:8px"></span>${esc(g.nombre)}</span>` : '<span class="chip warn">Sin grupo</span>'; };
-const cabGrupo = (k, extra) => `${esc(nombreGrupo(k))}${extra||''}${DEP()==='all' && k!==SIN && grupoDe(k)?.depId ? depChip(grupoDe(k).depId) : ''}`;
 const opts = (lista, sel, todos) => (todos?`<option value="${todos[0]}" ${sel===todos[0]?'selected':''}>${todos[1]}</option>`:'') + lista.map(x=>`<option value="${x.id}" ${x.id===sel?'selected':''}>${esc(x.nombre)}</option>`).join('');
-const optsGrupos = (sel, todos) => (todos?`<option value="${todos[0]}" ${sel===todos[0]?'selected':''}>${todos[1]}</option>`:'') +
-  S.departamentos.filter(d=>DEP()==='all'||d.id===DEP()).map(d=>{const gs=S.grupos.filter(g=>g.depId===d.id); return gs.length?`<optgroup label="${esc(d.nombre)}">${gs.map(g=>`<option value="${g.id}" ${g.id===sel?'selected':''}>${esc(g.nombre)}</option>`).join('')}</optgroup>`:'';}).join('') +
-  (DEP()==='all' ? S.grupos.filter(g=>!g.depId).map(g=>`<option value="${g.id}" ${g.id===sel?'selected':''}>${esc(g.nombre)}</option>`).join('') : '');
 const modalidadTxt = w => w.modalidad==='discontinuo' ? `fijo discontinuo (${w.diasContratados||'?'} días)` : w.modalidad==='parcial' ? 'tiempo parcial' : 'tiempo completo';
 function descargar(nombre, contenido, tipo){
   const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([contenido],{type:tipo})); a.download=nombre; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);
 }
-function trabOptions(sel){ // los visibles, agrupados por grupo
+function trabOptions(sel){
   return gruposActivos().map(k=>`<optgroup label="${esc(nombreGrupo(k))}">${ordenEleccion(k).map(t=>`<option value="${t.id}" ${t.id===sel?'selected':''}>${esc(t.nombre)}</option>`).join('')}</optgroup>`).join('');
 }
 const vacio = (txt, boton) => `<div class="card"><p class="help">${txt}</p>${boton||''}</div>`;
 
 /* =========================================================
-   PASO 1 · Reglas y puntos
+   Inicio: departamento → producto
    ========================================================= */
-function vReglas(){
+function vInicio(){
+  const sinDep = S.trabajadores.filter(t=>!depDeId(depDe(t))).length;
+  return `<div class="portada"><p class="k">Ciclo ${S.ciclo}</p><h2>¿Con qué departamento vas a trabajar?</h2></div>
+  <div class="tiles">${S.departamentos.map(d=>{const n=S.trabajadores.filter(t=>depDe(t)===d.id).length;
+    return `<button class="tile" onclick="elegirDep('${d.id}')"><span class="ini" aria-hidden="true">${esc(d.nombre[0])}</span><span><span class="nom">${esc(d.nombre)}</span><span class="dato">${n?`${n} persona${n===1?'':'s'}`:'Sin trabajadores todavía'}</span></span><span class="fl" aria-hidden="true">›</span></button>`}).join('')}</div>
+  ${sinDep?`<div class="card"><h2>${sinDep} trabajador(es) sin departamento</h2><p class="help">Vienen de una versión anterior. Elige a qué departamento y producto pasan.</p>
+    <div class="row"><label>Departamento<select id="mDep">${opts(S.departamentos,'')}</select></label><label>Producto<select id="mProd">${opts(S.productos,'')}</select></label><button class="btn primary" onclick="asignarSinDep()">Asignar</button></div></div>`:''}`;
+}
+function asignarSinDep(){
+  const dep=document.getElementById('mDep').value, prod=document.getElementById('mProd').value;
+  S.trabajadores.filter(t=>!depDeId(depDe(t))).forEach(t=>{ t.depId=dep; t.prodId=prod; const g=grupoDe(t.grupoId); if(g){ g.depId=dep; g.prodId=prod; } });
+  save(); render(); toast('Trabajadores asignados');
+}
+function vProducto(){
+  const d = depDeId(S.ctx.dep);
+  return `<div class="portada"><button class="volver" onclick="irInicio()">‹ Departamentos</button><p class="k">${esc(d.nombre)}</p><h2>¿Con qué producto?</h2></div>
+  <div class="tiles">${S.productos.map(p=>{const n=S.trabajadores.filter(t=>depDe(t)===d.id && prodDe(t)===p.id).length;
+    return `<button class="tile prod" style="--c:${p.color}" onclick="elegirProd('${p.id}')"><span class="ini" aria-hidden="true">${esc(p.nombre[0])}</span><span><span class="nom">${esc(p.nombre)}</span><span class="dato">${n?`${n} persona${n===1?'':'s'} en ${esc(d.nombre)}`:'Sin trabajadores todavía'}</span></span><span class="fl" aria-hidden="true">›</span></button>`}).join('')}</div>`;
+}
+
+/* =========================================================
+   Ajustes generales (valen para todos los departamentos)
+   ========================================================= */
+function vAjustes(){
   const A = S.ajustes;
-  const propias = S.departamentos.filter(d=>Number(d.baseDias)>0);
-  return `<div class="card"><h2>Ciclo y elección</h2>
+  return `<div class="intro"><button class="volver" onclick="go(UI.volverDe||'inicio')">‹ Volver</button><h2>Ajustes generales</h2><p>Reglas del convenio que valen para todos los departamentos y productos.</p></div>
+  <div class="card"><h2>Ciclo y elección</h2>
     <div class="row">
       <label>Año del ciclo<input type="number" value="${S.ciclo}" onchange="cambiarCiclo(this.value)"></label>
       <label>Rondas de elección<input type="number" min="1" max="10" value="${A.rondas}" onchange="S.ajustes.rondas=Math.max(1,Number(this.value)||1);save();render()"></label>
@@ -579,11 +712,11 @@ function vReglas(){
     <p class="help">Quien tiene más días de vacaciones gastaría siempre más puntos. La ponderación lleva los puntos de todos a la misma base de días.</p>
     <div class="row">
       <label class="chk"><input type="checkbox" ${A.ponderar?'checked':''} onchange="S.ajustes.ponderar=this.checked;save();render()">Ponderar los puntos</label>
-      <label style="flex:0 1 220px">Ponderar a (días, general)<input type="number" min="1" value="${A.baseDias}" ${A.ponderar?'':'disabled'} onchange="S.ajustes.baseDias=Math.max(1,Number(this.value)||24);save();render()"></label>
+      <label style="flex:0 1 200px">Base general (días)<input type="number" min="1" value="${A.baseDias}" ${A.ponderar?'':'disabled'} onchange="S.ajustes.baseDias=Math.max(1,Number(this.value)||24);save();render()"></label>
     </div>
+    ${A.ponderar?`<div class="row" style="margin-top:12px">${S.departamentos.map(d=>`<label>${esc(d.nombre)}<input type="number" min="1" value="${esc(d.baseDias)}" placeholder="General: ${A.baseDias}" onchange="depDeId('${d.id}').baseDias=this.value?Math.max(1,Number(this.value)):'';save();render()"></label>`).join('')}</div>`:''}
     <div class="formula">${A.ponderar
-      ? `Puntos del ciclo = puntos brutos × <b>días base ÷ días de vacaciones del trabajador</b>.<br>Con base ${A.baseDias}: 30 días, ×${nf(A.baseDias/30)}; 26 días, ×${nf(A.baseDias/26)}; ${A.baseDias} días, ×1. En los fijos discontinuos esto ya incluye el ajuste 365/días contratados del convenio, así que no se aplica dos veces.<br>
-         ${propias.length?`Bases propias: ${propias.map(d=>`${esc(d.nombre)} a ${d.baseDias} días`).join(', ')}. El resto usa la general.`:'Cada departamento puede tener su propia base en el paso 2.'}`
+      ? `Puntos del ciclo = puntos brutos × <b>días base ÷ días de vacaciones del trabajador</b>. Con base ${A.baseDias}: 30 días, ×${nf(A.baseDias/30)}; 26 días, ×${nf(A.baseDias/26)}; ${A.baseDias} días, ×1. Si un departamento no tiene base propia, usa la general. En los fijos discontinuos ya incluye el ajuste 365/días contratados del convenio.`
       : `Sin ponderación: puntos brutos tal cual. Solo a los fijos discontinuos se les aplica × 365 ÷ días contratados (art. 33).`}</div>
   </div>
   <div class="card"><h2>Puntos por fecha (art. 33)</h2>
@@ -614,31 +747,21 @@ function vReglas(){
       <label>Hasta (opcional)<input id="pHas" type="date" min="${S.ciclo}-01-01" max="${S.ciclo}-12-31"></label>
       <button class="btn primary" onclick="añadirPuente()">Añadir puente</button>
     </div>
+  </div>
+  <div class="card"><h2>Copias de seguridad</h2>
+    <p class="help">Los datos se guardan solo en este navegador. Descarga una copia de vez en cuando y úsala para pasar los datos a otro dispositivo.</p>
+    <div class="row">
+      <button class="btn primary" onclick="copiaJSON()">Descargar copia</button>
+      <label class="btn" style="color:var(--asfalto);font-size:15px;cursor:pointer;flex:0 0 auto">Restaurar copia<input type="file" accept=".json,application/json" style="display:none" onchange="restaurar(this.files[0])"></label>
+      <button class="btn danger" onclick="if(confirm('Se borrarán TODOS los datos de este navegador. ¿Seguro?')){S=estadoInicial();save();go('inicio')}">Empezar de cero</button>
+    </div>
+    <p class="muted" style="margin:14px 0 0">Versión de la app: ${APP_VERSION}</p>
   </div>`;
 }
 function cambiarCiclo(v){
   const y = Number(v); if(!(y>2000&&y<2100)) return;
-  if(S.periodos.length && !confirm('Hay vacaciones asignadas en el ciclo actual. ¿Cambiar el año igualmente? Para pasar de año usa «Cerrar ciclo» en el último paso.')) return render();
-  S.ciclo=y; S.semanaSanta=semanaSantaDefault(y); UI.calMes=null; save(); render();
-}
-function nuevoTipo(n){ const t={id:uid(),nombre:n,color:COLORES[S.tipos.length%COLORES.length]}; S.tipos.push(t); save(); return t; }
-function añadirTipo(){ const inp=document.getElementById('nTipo'), n=inp.value.trim(); if(!n) return;
-  if(S.tipos.some(t=>t.nombre.toLowerCase()===n.toLowerCase())) return toast('Ese tipo ya existe');
-  nuevoTipo(n); render(); toast('Tipo añadido'); }
-function añadirTipoEnFicha(){ // crea el tipo sin perder lo que ya está escrito en la ficha
-  const inp=document.getElementById('fTipoNuevo'), n=inp.value.trim(); if(!n) return;
-  let t = S.tipos.find(x=>x.nombre.toLowerCase()===n.toLowerCase());
-  if(!t){ t = nuevoTipo(n);
-    const l=document.createElement('label'); l.className='chk';
-    l.innerHTML=`<input type="checkbox" class="fTipo" value="${t.id}">${esc(t.nombre)}`;
-    document.getElementById('fTipos').appendChild(l); }
-  document.querySelector(`.fTipo[value="${t.id}"]`).checked = true; inp.value=''; inp.focus();
-}
-function borrarTipo(id){
-  const usados = S.trabajadores.filter(t=>tieneTipo(t,id)).length;
-  if(!confirm(usados ? `${usados} trabajador(es) tienen este tipo. Se les quitará. ¿Borrarlo?` : '¿Borrar este tipo?')) return;
-  S.trabajadores.forEach(t=>{ t.tipos = tiposDe(t).filter(x=>x!==id); t.tipoId = t.tipos[0]||''; });
-  S.tipos=S.tipos.filter(t=>t.id!==id); S.cupos.forEach(c=>c.tipos=c.tipos.filter(x=>x!==id)); save(); render();
+  if(!confirm(`¿Cambiar el ciclo activo a ${y}? Las vacaciones de otros años se conservan. Para pasar de año al terminar, usa «Cerrar ciclo» en Resumen.`)) return render();
+  S.ciclo=y; S.semanaSanta=semanaSantaDefault(y); S.turnos={}; UI.cal.anio=null; save(); render();
 }
 function añadirPuente(){
   const nom=document.getElementById('pNom').value.trim(), d=document.getElementById('pDes').value, h=document.getElementById('pHas').value||d;
@@ -647,46 +770,45 @@ function añadirPuente(){
 }
 
 /* =========================================================
-   PASO 2 · Departamentos y grupos
+   PASO 1 · Skills
    ========================================================= */
-function vGrupos(){
-  const deps = S.departamentos.filter(d=>DEP()==='all'||d.id===DEP());
-  const sinG = trabsVis().filter(t=>!t.grupoId).length;
-  const huerfanos = DEP()==='all' ? S.grupos.filter(g=>!g.depId) : [];
-  const filaGrupo = g => `<div class="gfila">
-      <div class="row" style="align-items:center;flex-wrap:nowrap;gap:8px"><span class="dot" style="background:${g.color}"></span>
-      <input style="margin:0;flex:1;min-width:0" value="${esc(g.nombre)}" aria-label="Nombre del grupo" onchange="grupoDe('${g.id}').nombre=this.value.trim()||grupoDe('${g.id}').nombre;save();render()"></div>
-      <div class="gmeta"><span>${miembros(g.id).length} personas</span>
-      <select aria-label="Departamento del grupo" onchange="moverGrupo('${g.id}',this.value)">${opts(S.departamentos, g.depId, ['','Sin departamento'])}</select>
-      <button class="btn small danger" onclick="borrarGrupo('${g.id}')" aria-label="Borrar grupo">✕</button></div></div>`;
-  return `<div class="deps">${deps.map(d=>{
-    const gs = S.grupos.filter(g=>g.depId===d.id), n = S.trabajadores.filter(t=>depDe(t)===d.id).length;
-    return `<div class="dep" style="--c:${d.color}">
-      <div class="row" style="align-items:center;flex-wrap:nowrap"><input class="nombre" style="border:0;padding:0;margin:0;font-family:var(--cond);font-size:26px;font-weight:700" value="${esc(d.nombre)}" aria-label="Nombre del departamento" onchange="depDeId('${d.id}').nombre=this.value.trim()||depDeId('${d.id}').nombre;save();render()">
-        <button class="btn small danger" onclick="borrarDep('${d.id}')" aria-label="Borrar departamento">✕</button></div>
-      <div class="cifras"><div><b>${gs.length}</b>grupos</div><div><b>${n}</b>personas</div></div>
-      <label style="margin-bottom:12px">Ponderar a (días)<input type="number" min="1" value="${esc(d.baseDias)}" placeholder="General: ${S.ajustes.baseDias}" onchange="depDeId('${d.id}').baseDias=this.value?Math.max(1,Number(this.value)):'';save();render()"></label>
-      ${gs.map(filaGrupo).join('') || '<p class="muted" style="margin:0 0 8px">Sin grupos todavía.</p>'}
-      <div class="row" style="flex-wrap:nowrap;margin-top:8px"><input id="nG_${d.id}" style="margin:0" placeholder="Nuevo grupo, p. ej. Turno A" aria-label="Nuevo grupo en ${esc(d.nombre)}" onkeydown="if(event.key==='Enter')añadirGrupo('${d.id}')"><button class="btn primary small" style="padding:9px 12px" onclick="añadirGrupo('${d.id}')">Añadir</button></div>
-    </div>`}).join('')}</div>
-  ${huerfanos.length?`<div class="card" style="margin-top:16px"><h2>Grupos sin departamento</h2>${huerfanos.map(filaGrupo).join('')}</div>`:''}
-  <div class="card" style="margin-top:16px"><h2>Otro departamento</h2>
-    <div class="row"><label style="flex:1">Nombre<input id="nDep" placeholder="Carga" onkeydown="if(event.key==='Enter')añadirDep()"></label><button class="btn" onclick="añadirDep()">Añadir departamento</button></div>
-    ${sinG?`<p class="chip warn" style="margin-top:12px">${sinG} trabajador(es) sin grupo: asígnalos en Plantilla</p>`:''}
+function nuevaSkill(n){ const t={id:uid(),nombre:n,color:COLORES[skillsVis().length%COLORES.length],depId:S.ctx.dep,prodId:S.ctx.prod}; S.skills.push(t); save(); return t; }
+const buscaSkill = n => skillsVis().find(t=>t.nombre.toLowerCase()===n.toLowerCase());
+function vSkills(){
+  const ks = skillsVis(), sug = (SUGERENCIAS[nombreDep(S.ctx.dep)]||[]).filter(n=>!buscaSkill(n));
+  return `<div class="card"><h2>Skills de ${esc(ctxTxt())} (${ks.length})</h2>
+    ${ks.length?ks.map(t=>{const n=trabsVis().filter(w=>tieneSkill(w,t.id)).length; return `<div class="row" style="margin-bottom:8px;align-items:center;flex-wrap:nowrap"><span class="dot" style="background:${t.color}"></span>
+      <input style="flex:1;margin:0;min-width:0" value="${esc(t.nombre)}" aria-label="Nombre de la skill" onchange="skillDe('${t.id}').nombre=this.value.trim()||skillDe('${t.id}').nombre;save();render()">
+      <span class="muted" style="white-space:nowrap">${n} pers.</span>
+      <button class="btn small danger" onclick="borrarSkill('${t.id}')" aria-label="Eliminar skill">✕</button></div>`}).join(''):'<p class="help">Todavía no hay skills. Crea las funciones que existen en este departamento y producto.</p>'}
+    <div class="row" style="margin-top:12px"><label style="flex:1">Nueva skill<input id="nSkill" placeholder="Agente de rampa" onkeydown="if(event.key==='Enter')añadirSkill()"></label><button class="btn primary" onclick="añadirSkill()">Crear skill</button></div>
+    ${sug.length?`<p class="muted" style="margin:14px 0 6px">Sugerencias (toca para crear):</p><div class="chips">${sug.map(n=>`<button class="pill sug" onclick="nuevaSkill('${esc(n)}');render()">+ ${esc(n)}</button>`).join('')}</div>`:''}
   </div>`;
 }
-function añadirDep(){ const n=document.getElementById('nDep').value.trim(); if(!n) return; S.departamentos.push({id:uid(),nombre:n,color:COLORES[(S.departamentos.length+3)%COLORES.length],baseDias:''}); save(); render(); }
-function borrarDep(id){
-  const gs = S.grupos.filter(g=>g.depId===id).length, n = S.trabajadores.filter(t=>depDe(t)===id).length;
-  if(gs||n) return toast('Este departamento tiene grupos o personas. Muévelos antes de borrarlo.');
-  if(!confirm('¿Borrar este departamento?')) return;
-  S.departamentos = S.departamentos.filter(d=>d.id!==id); S.cupos.forEach(c=>{ if(c.depId===id) c.depId=''; }); save(); render();
+function añadirSkill(){ const inp=document.getElementById('nSkill'), n=inp.value.trim(); if(!n) return;
+  if(buscaSkill(n)) return toast('Esa skill ya existe'); nuevaSkill(n); render(); toast('Skill creada'); document.getElementById('nSkill')?.focus(); }
+function borrarSkill(id){
+  const n = S.trabajadores.filter(t=>tieneSkill(t,id)).length;
+  if(!confirm(n ? `${n} trabajador(es) tienen esta skill. Se les quitará. ¿Eliminarla?` : '¿Eliminar esta skill?')) return;
+  S.skills=S.skills.filter(t=>t.id!==id); S.trabajadores.forEach(t=>{ t.skills = skillsDe(t).filter(x=>x!==id); }); S.cupos.forEach(c=>c.skills=c.skills.filter(x=>x!==id)); save(); render();
 }
-function añadirGrupo(depId){
-  const inp=document.getElementById('nG_'+depId), n=inp.value.trim(); if(!n) return;
-  S.grupos.push({id:uid(),nombre:n,depId,color:COLORES[S.grupos.length%COLORES.length]}); save(); render(); document.getElementById('nG_'+depId)?.focus();
+
+/* =========================================================
+   PASO 2 · Grupos
+   ========================================================= */
+function vGrupos(){
+  const gs = gruposVis(), sinG = trabsVis().filter(t=>!t.grupoId).length;
+  return `<div class="card"><h2>Grupos de ${esc(ctxTxt())} (${gs.length})</h2>
+    ${gs.length ? `<table><tr><th>Grupo</th><th class="num">Personas</th><th class="num hide-m">Máx. desprog. por día</th><th></th></tr>
+      ${gs.map(g=>`<tr><td><div class="row" style="align-items:center;flex-wrap:nowrap"><span class="dot" style="background:${g.color}"></span><input style="margin:0;min-width:0" value="${esc(g.nombre)}" aria-label="Nombre del grupo" onchange="grupoDe('${g.id}').nombre=this.value.trim()||grupoDe('${g.id}').nombre;save();render()"></div></td>
+        <td class="num">${miembros(g.id).length}</td><td class="num hide-m">${maxDiaTurno(g.id)}</td>
+        <td class="num"><button class="btn small danger" onclick="borrarGrupo('${g.id}')" aria-label="Borrar grupo">✕</button></td></tr>`).join('')}</table>`
+      : '<p class="help">Todavía no hay grupos. Si todo el equipo elige junto, crea uno solo.</p>'}
+    <div class="row" style="margin-top:12px"><label style="flex:1">Nuevo grupo<input id="nGrupo" placeholder="Turno A" onkeydown="if(event.key==='Enter')añadirGrupo()"></label><button class="btn primary" onclick="añadirGrupo()">Añadir grupo</button></div>
+    ${sinG?`<p class="chip warn" style="margin-top:12px">${sinG} trabajador(es) sin grupo: asígnalos en Trabajadores</p>`:''}
+  </div>`;
 }
-function moverGrupo(id, depId){ grupoDe(id).depId=depId; S.trabajadores.forEach(t=>{ if(t.grupoId===id) t.depId=depId; }); save(); render(); toast('Grupo movido'); }
+function añadirGrupo(){ const n=document.getElementById('nGrupo').value.trim(); if(!n) return; S.grupos.push({id:uid(),nombre:n,depId:S.ctx.dep,prodId:S.ctx.prod,color:COLORES[S.grupos.length%COLORES.length]}); save(); render(); document.getElementById('nGrupo')?.focus(); }
 function borrarGrupo(id){
   const n = miembros(id).length;
   if(n) return toast(`Hay ${n} persona(s) en este grupo. Muévelas a otro antes de borrarlo.`);
@@ -695,66 +817,59 @@ function borrarGrupo(id){
 }
 
 /* =========================================================
-   PASO 3 · Plantilla
+   PASO 3 · Trabajadores
    ========================================================= */
-function vPlantilla(){
+function vTrabajadores(){
   const e = UI.editTrab ? trabDe(UI.editTrab) : null;
-  const g0 = gruposVis()[0];
-  const v = e || {nombre:'',grupoId:g0?.id||'',depId:g0?.depId||(DEP()!=='all'?DEP():''),tipos:[],modalidad:'completo',diasContratados:'',diasDerecho:S.ajustes.diasDefecto,ptsAnt:0,ptsAnt2:0,antig:''};
+  const v = e || {nombre:'',grupoId:gruposVis()[0]?.id||'',skills:[],modalidad:'completo',diasContratados:'',diasDerecho:S.ajustes.diasDefecto,ptsAnt:0,ptsAnt2:0,antig:''};
   const ks = gruposActivos();
   return `<div class="card"><h2>${e?'Editar trabajador':'Añadir trabajador'}</h2>
     <div class="row">
       <label style="flex-basis:220px">Nombre<input id="fNombre" value="${esc(v.nombre)}"></label>
-      <label>Grupo<select id="fGrupo" onchange="const g=grupoDe(this.value); if(g&&g.depId) document.getElementById('fDep').value=g.depId">${optsGrupos(v.grupoId, ['','Sin grupo'])}</select></label>
-      <label>Departamento<select id="fDep">${opts(S.departamentos, depDe(v)||v.depId, ['','Sin departamento'])}</select></label>
-    </div>
-    <div style="margin-top:14px"><label>Tipo de trabajador <span style="font-weight:400">(marca todas las funciones que hace)</span></label>
-      <div class="row" id="fTipos" style="margin-top:4px;gap:4px 18px">${S.tipos.map(t=>`<label class="chk"><input type="checkbox" class="fTipo" value="${t.id}" ${tiposDe(v).includes(t.id)?'checked':''}>${esc(t.nombre)}</label>`).join('')}</div>
-      <div class="row" style="margin-top:6px;flex-wrap:nowrap;max-width:420px"><input id="fTipoNuevo" style="margin:0" placeholder="Otro tipo, p. ej. Pasarelas" aria-label="Nuevo tipo de trabajador" onkeydown="if(event.key==='Enter'){event.preventDefault();añadirTipoEnFicha()}"><button class="btn small" style="padding:9px 12px;white-space:nowrap" onclick="añadirTipoEnFicha()">Añadir tipo</button></div>
-    </div>
-    <div class="row" style="margin-top:12px">
+      <label>Grupo<select id="fGrupo">${opts(gruposVis(), v.grupoId, ['','Sin grupo'])}</select></label>
       <label>Modalidad<select id="fMod" onchange="document.getElementById('fDCwrap').style.display=this.value==='discontinuo'?'':'none'">
         <option value="completo" ${v.modalidad==='completo'?'selected':''}>Tiempo completo</option>
         <option value="parcial" ${v.modalidad==='parcial'?'selected':''}>Tiempo parcial</option>
         <option value="discontinuo" ${v.modalidad==='discontinuo'?'selected':''}>Fijo discontinuo</option></select></label>
       <label id="fDCwrap" style="${v.modalidad==='discontinuo'?'':'display:none'}">Días contratados al año<input id="fDC" type="number" min="1" max="365" value="${esc(v.diasContratados)}"></label>
-      <label>Días de vacaciones<input id="fDer" type="number" min="0" value="${esc(v.diasDerecho)}"></label>
     </div>
-    <div class="row" style="margin-top:12px">
+    <div style="margin-top:14px"><label>Skills <span style="font-weight:400">(marca todas las funciones que hace)</span></label>
+      <div class="row" id="fSkills" style="margin-top:4px;gap:4px 18px">${skillsVis().map(t=>`<label class="chk"><input type="checkbox" class="fSkill" value="${t.id}" ${skillsDe(v).includes(t.id)?'checked':''}>${esc(t.nombre)}</label>`).join('') || '<span class="muted">Todavía no hay skills: crea la primera aquí abajo.</span>'}</div>
+      <div class="row" style="margin-top:6px;flex-wrap:nowrap;max-width:420px"><input id="fSkillNueva" style="margin:0" placeholder="Otra skill" aria-label="Nueva skill" onkeydown="if(event.key==='Enter'){event.preventDefault();añadirSkillEnFicha()}"><button class="btn small" style="padding:9px 12px;white-space:nowrap" onclick="añadirSkillEnFicha()">Crear skill</button></div>
+    </div>
+    <div class="row" style="margin-top:14px">
+      <label>Días de vacaciones<input id="fDer" type="number" min="0" value="${esc(v.diasDerecho)}"></label>
       <label>Puntos año anterior<input id="fP1" type="number" step="0.01" value="${esc(v.ptsAnt)}"></label>
       <label>Puntos hace 2 años<input id="fP2" type="number" step="0.01" value="${esc(v.ptsAnt2)}"></label>
       <label>Antigüedad (desempate)<input id="fAnt" type="date" value="${esc(v.antig)}"></label>
     </div>
-    <p class="help" style="margin-top:10px">Si el grupo pertenece a un departamento, el trabajador queda en ese departamento. Los puntos de años anteriores van ya ponderados, tal como salieron en su momento.</p>
+    <p class="help" style="margin-top:10px">Los puntos de años anteriores van ya ponderados, tal como salieron en su momento.</p>
     <div class="row"><button class="btn primary" onclick="guardarTrab()">${e?'Guardar cambios':'Añadir trabajador'}</button>${e?`<button class="btn" onclick="UI.editTrab=null;render()">Cancelar</button>`:''}</div>
   </div>
-  <div class="card"><h2>Plantilla (${trabsVis().length})</h2>
-    ${ks.length?`<div class="scroll"><table><tr><th>Nombre</th><th class="hide-m">Tipo</th><th class="num">Días</th><th class="num hide-m">Factor</th><th class="num">Pts ant.</th><th class="num hide-m">Pts −2</th><th></th></tr>
-    ${ks.map(k=>`<tr class="grp"><td colspan="7">${cabGrupo(k, ` (${ordenEleccion(k).length})`)}</td></tr>` + ordenEleccion(k).map((t,i)=>`<tr><td><span class="muted">${i+1}.</span> <b>${esc(t.nombre)}</b><div class="muted">${modalidadTxt(t)}${k===SIN&&DEP()==='all'?', '+esc(nombreDep(depDe(t))):''}<span class="solo-m">, ${esc(tiposTxt(t))}</span></div></td><td class="hide-m">${tiposChips(t)}</td><td class="num">${t.diasDerecho}</td><td class="num hide-m muted">${factorInfo(t).txt}</td><td class="num">${nf(t.ptsAnt||0)}</td><td class="num hide-m">${nf(t.ptsAnt2||0)}</td>
+  <div class="card"><h2>Trabajadores de ${esc(ctxTxt())} (${trabsVis().length})</h2>
+    ${ks.length?`<div class="scroll"><table><tr><th>Nombre</th><th class="hide-m">Skills</th><th class="num">Días</th><th class="num hide-m">Factor</th><th class="num">Pts ant.</th><th class="num hide-m">Pts −2</th><th></th></tr>
+    ${ks.map(k=>`<tr class="grp"><td colspan="7">${esc(nombreGrupo(k))} (${ordenEleccion(k).length})</td></tr>` + ordenEleccion(k).map((t,i)=>`<tr><td><span class="muted">${i+1}.</span> <b>${esc(t.nombre)}</b><div class="muted">${modalidadTxt(t)}<span class="solo-m">, ${esc(skillsTxt(t))}</span></div></td><td class="hide-m">${skillsChips(t)}</td><td class="num">${t.diasDerecho}</td><td class="num hide-m muted">${factorInfo(t).txt}</td><td class="num">${nf(t.ptsAnt||0)}</td><td class="num hide-m">${nf(t.ptsAnt2||0)}</td>
       <td class="num" style="white-space:nowrap"><button class="btn small" onclick="UI.editTrab='${t.id}';render();scrollTo(0,0)">Editar</button> <button class="btn small danger" onclick="borrarTrab('${t.id}')" aria-label="Borrar">✕</button></td></tr>`).join('')).join('')}</table></div>`:'<p class="help">Todavía no hay nadie. Añádelos uno a uno con el formulario o pega la lista desde tu Excel.</p>'}
   </div>
-  <div class="card"><h2>Tipos de trabajador (${S.tipos.length})</h2>
-    <p class="help">Las funciones que puede tener cada persona. Sirven para los cupos y para filtrar el calendario.</p>
-    ${S.tipos.map(t=>{const n=S.trabajadores.filter(w=>tieneTipo(w,t.id)).length; return `<div class="row" style="margin-bottom:8px;align-items:center;flex-wrap:nowrap"><span class="dot" style="background:${t.color}"></span>
-      <input style="flex:1;margin:0;min-width:0" value="${esc(t.nombre)}" aria-label="Nombre del tipo" onchange="tipoDe('${t.id}').nombre=this.value.trim()||tipoDe('${t.id}').nombre;save();render()">
-      <span class="muted" style="white-space:nowrap">${n} pers.</span>
-      <button class="btn small danger" onclick="borrarTipo('${t.id}')" aria-label="Borrar tipo">✕</button></div>`}).join('')}
-    <div class="row" style="margin-top:12px"><label style="flex:1">Nuevo tipo<input id="nTipo" placeholder="Pasarelas" onkeydown="if(event.key==='Enter')añadirTipo()"></label><button class="btn primary" onclick="añadirTipo()">Añadir tipo</button></div>
-  </div>
   <div class="card"><h2>Pegar desde Excel</h2>
-    <p class="help">Copia en tu Excel estas columnas, en este orden, y pégalas aquí: <b>Nombre, Departamento, Grupo, Tipo, Días de vacaciones, Puntos año anterior y Puntos hace 2 años</b>. Desde «Grupo» son opcionales. Si alguien tiene varias funciones, sepáralas con «/» en la columna Tipo (por ejemplo, «Agente de rampa / Coordinador de pista»). Los departamentos, grupos y tipos que no existan se crean solos.</p>
-    <textarea id="fPega" rows="5" placeholder="García López, Ana	Rampa	Turno A	Agente de rampa	30	312	298"></textarea>
+    <p class="help">Copia en tu Excel estas columnas, en este orden, y pégalas aquí: <b>Nombre, Grupo, Skills, Días de vacaciones, Puntos año anterior y Puntos hace 2 años</b>. Desde «Grupo» son opcionales. Si alguien tiene varias skills, sepáralas con «/». Todos entran en ${esc(ctxTxt())}; los grupos y skills que no existan se crean solos.</p>
+    <textarea id="fPega" rows="5" placeholder="García López, Ana	Turno A	Agente de rampa / Conductor	30	312	298"></textarea>
     <div class="row" style="margin-top:12px"><button class="btn primary" onclick="importarPegado()">Importar lista</button></div>
   </div>`;
+}
+function añadirSkillEnFicha(){ // crea la skill sin perder lo que ya está escrito en la ficha
+  const inp=document.getElementById('fSkillNueva'), n=inp.value.trim(); if(!n) return;
+  let t = buscaSkill(n), cont=document.getElementById('fSkills');
+  if(!t){ t = nuevaSkill(n); if(cont.querySelector('.muted')) cont.innerHTML='';
+    const l=document.createElement('label'); l.className='chk'; l.innerHTML=`<input type="checkbox" class="fSkill" value="${t.id}">${esc(t.nombre)}`; cont.appendChild(l); }
+  document.querySelector(`.fSkill[value="${t.id}"]`).checked = true; inp.value=''; inp.focus();
 }
 function guardarTrab(){
   const g = id => document.getElementById(id).value;
   const nombre = g('fNombre').trim(); if(!nombre) return toast('Escribe el nombre');
-  const grupoId = g('fGrupo'), gr = grupoDe(grupoId);
-  const datos = { nombre, grupoId, depId: (gr && gr.depId) || g('fDep'), tipos:[...document.querySelectorAll('.fTipo:checked')].map(x=>x.value), modalidad:g('fMod'), diasContratados:g('fDC'), diasDerecho:Number(g('fDer'))||0, ptsAnt:Number(g('fP1'))||0, ptsAnt2:Number(g('fP2'))||0, antig:g('fAnt') };
+  const datos = { nombre, grupoId:g('fGrupo'), depId:S.ctx.dep, prodId:S.ctx.prod, skills:[...document.querySelectorAll('.fSkill:checked')].map(x=>x.value), modalidad:g('fMod'), diasContratados:g('fDC'), diasDerecho:Number(g('fDer'))||0, ptsAnt:Number(g('fP1'))||0, ptsAnt2:Number(g('fP2'))||0, antig:g('fAnt') };
   if(datos.modalidad==='discontinuo' && !(Number(datos.diasContratados)>0)) return toast('Indica los días contratados del fijo discontinuo');
-  if(!datos.tipos.length) return toast('Marca al menos un tipo de trabajador');
-  datos.tipoId = datos.tipos[0];
+  if(!datos.skills.length) return toast('Marca al menos una skill');
   if(UI.editTrab){
     const w = trabDe(UI.editTrab);
     if(w.grupoId!==datos.grupoId) Object.values(S.turnos).forEach(t=>Object.values(t.hechos).forEach(a=>{const i=a.indexOf(w.id); if(i>=0) a.splice(i,1);}));
@@ -763,7 +878,7 @@ function guardarTrab(){
   UI.editTrab=null; save(); render(); toast('Trabajador guardado');
 }
 function borrarTrab(id){
-  const t=trabDe(id); if(!confirm(`¿Borrar a ${t.nombre} con sus vacaciones y desprogramaciones?`)) return;
+  const t=trabDe(id); if(!confirm(`¿Borrar a ${t.nombre} con sus vacaciones y desprogramaciones de todos los años?`)) return;
   S.trabajadores = S.trabajadores.filter(x=>x.id!==id); S.periodos = S.periodos.filter(p=>p.trabajadorId!==id); S.desprog = S.desprog.filter(d=>d.trabajadorId!==id);
   Object.values(S.turnos).forEach(t=>Object.values(t.hechos).forEach(a=>{ const i=a.indexOf(id); if(i>=0) a.splice(i,1); }));
   save(); render();
@@ -771,21 +886,14 @@ function borrarTrab(id){
 function importarPegado(){
   const txt = document.getElementById('fPega').value.trim(); if(!txt) return;
   const num = x => Number(String(x||'0').replace(/\./g,'').replace(',','.'))||0;
-  const busca = (lista, nombre, extra) => {
-    if(!nombre) return null;
-    let x = lista.find(t=>t.nombre.toLowerCase()===nombre.toLowerCase() && (!extra || !extra.depId || t.depId===extra.depId));
-    if(!x){ x={id:uid(),nombre,color:COLORES[lista.length%COLORES.length],...(extra||{})}; lista.push(x); }
-    return x;
-  };
   let n=0;
   txt.split(/\r?\n/).forEach(l=>{
     const c = l.split(/\t|;/).map(x=>x.trim()); if(!c[0]) return;
-    const d = busca(S.departamentos, c[1], {baseDias:''});
-    const g = busca(S.grupos, c[2], {depId:d?.id||''});
-    const ts = (c[3]||'').split(/[\/+]/).map(x=>x.trim()).filter(Boolean).map(x=>busca(S.tipos, x));
-    if(!ts.length && S.tipos[0]) ts.push(S.tipos[0]);
-    S.trabajadores.push({id:uid(), nombre:c[0], grupoId:g?.id||'', depId:d?.id||'', tipos:ts.map(x=>x.id), tipoId:ts[0]?.id||'', modalidad:'completo', diasContratados:'',
-      diasDerecho: c[4] ? num(c[4]) : S.ajustes.diasDefecto, ptsAnt:num(c[5]), ptsAnt2:num(c[6]), antig:''});
+    let g = c[1] ? gruposVis().find(x=>x.nombre.toLowerCase()===c[1].toLowerCase()) : null;
+    if(c[1] && !g){ g={id:uid(),nombre:c[1],depId:S.ctx.dep,prodId:S.ctx.prod,color:COLORES[S.grupos.length%COLORES.length]}; S.grupos.push(g); }
+    const sk = (c[2]||'').split(/[\/+]/).map(x=>x.trim()).filter(Boolean).map(x=>buscaSkill(x)||nuevaSkill(x));
+    S.trabajadores.push({id:uid(), nombre:c[0], grupoId:g?.id||'', depId:S.ctx.dep, prodId:S.ctx.prod, skills:sk.map(x=>x.id), modalidad:'completo', diasContratados:'',
+      diasDerecho: c[3] ? num(c[3]) : S.ajustes.diasDefecto, ptsAnt:num(c[4]), ptsAnt2:num(c[5]), antig:''});
     n++;
   });
   save(); render(); toast(`${n} trabajador(es) importados`);
@@ -796,30 +904,29 @@ function importarPegado(){
    ========================================================= */
 function vCupos(){
   const e = UI.editCupo ? S.cupos.find(c=>c.id===UI.editCupo) : null;
-  const v = e || {nombre:'',desde:'',hasta:'',depId:DEP()!=='all'?DEP():'',grupoId:'',tipos:[],max:1};
-  const lista = S.cupos.filter(cupoVisible).sort((a,b)=>(nombreDep(a.depId)).localeCompare(nombreDep(b.depId)) || (a.grupoId||'').localeCompare(b.grupoId||'') || a.desde.localeCompare(b.desde));
+  const v = e || {nombre:'',desde:'',hasta:'',grupoId:'',skills:[],max:1};
+  const lista = S.cupos.filter(cupoVisible).sort((a,b)=>(a.grupoId||'').localeCompare(b.grupoId||'') || a.desde.localeCompare(b.desde));
+  const chkSkills = cls => skillsVis().map(t=>`<label class="chk"><input type="checkbox" class="${cls}" value="${t.id}" ${v.skills.includes(t.id)&&cls==='cSkill'?'checked':''}>${esc(t.nombre)}</label>`).join('') || '<span class="muted">No hay skills en este producto.</span>';
   return `<div class="card"><h2>${e?'Editar cupo':'Nuevo cupo'}</h2>
-    <p class="help">Máximo de personas de vacaciones a la vez en esas fechas. Si no eliges departamento, grupo o tipo, cuenta a todos. Si varios cupos se solapan, hay que cumplirlos todos.</p>
+    <p class="help">Máximo de personas de ${esc(ctxTxt())} de vacaciones a la vez en esas fechas. Si no eliges grupo o skill, cuenta a todos. Si varios cupos se solapan, hay que cumplirlos todos.</p>
     <div class="row">
-      <label style="flex-basis:220px">Nombre<input id="cNom" value="${esc(v.nombre)}" placeholder="Verano Rampa"></label>
-      <label>Departamento<select id="cDep">${opts(S.departamentos, v.depId, ['','Todos'])}</select></label>
-      <label>Grupo<select id="cGrupo" onchange="const g=grupoDe(this.value); if(g&&g.depId) document.getElementById('cDep').value=g.depId">${optsGrupos(v.grupoId, ['','Todos sus grupos'])}</select></label>
+      <label style="flex-basis:220px">Nombre<input id="cNom" value="${esc(v.nombre)}" placeholder="Verano"></label>
+      <label>Grupo<select id="cGrupo">${opts(gruposVis(), v.grupoId, ['','Todos los grupos'])}</select></label>
     </div>
     <div class="row" style="margin-top:12px">
       <label>Desde<input id="cDes" type="date" value="${v.desde}" min="${S.ciclo}-01-01" max="${S.ciclo}-12-31"></label>
       <label>Hasta<input id="cHas" type="date" value="${v.hasta}" min="${S.ciclo}-01-01" max="${S.ciclo}-12-31"></label>
       <label style="flex:0 1 130px">Máx. personas<input id="cMax" type="number" min="0" value="${v.max}"></label>
     </div>
-    <div style="margin-top:14px"><label>Tipos de trabajador <span style="font-weight:400">(si no marcas ninguno, cuenta a todos)</span></label>
-      <div class="row" style="margin-top:4px;gap:4px 18px">${S.tipos.map(t=>`<label class="chk"><input type="checkbox" class="cTipo" value="${t.id}" ${v.tipos.includes(t.id)?'checked':''}>${esc(t.nombre)}</label>`).join('')}</div></div>
+    <div style="margin-top:14px"><label>Skills <span style="font-weight:400">(si no marcas ninguna, cuenta a todos)</span></label>
+      <div class="row" style="margin-top:4px;gap:4px 18px">${chkSkills('cSkill')}</div></div>
     <div class="row" style="margin-top:14px"><button class="btn primary" onclick="guardarCupo()">${e?'Guardar cupo':'Añadir cupo'}</button>${e?`<button class="btn" onclick="UI.editCupo=null;render()">Cancelar</button>`:''}</div>
   </div>
   <div class="card"><h2>Crear cupos mes a mes</h2>
-    <p class="help">La empresa fija cuántas personas por departamento y función pueden coger vacaciones cada mes (art. 32). Esto crea un cupo por cada mes del ciclo; luego puedes retocarlos uno a uno.</p>
+    <p class="help">La empresa fija cuántas personas por función pueden coger vacaciones cada mes (art. 32). Esto crea un cupo por cada mes del ciclo; luego puedes retocarlos uno a uno.</p>
     <div class="row">
-      <label>Departamento<select id="mDep">${opts(S.departamentos, DEP()!=='all'?DEP():'', ['','Todos'])}</select></label>
-      <label>Grupo<select id="mGrupo" onchange="const g=grupoDe(this.value); if(g&&g.depId) document.getElementById('mDep').value=g.depId">${optsGrupos('', ['','Todos sus grupos'])}</select></label>
-      <label>Tipo<select id="mTipo">${opts(S.tipos, 'all', ['all','Todos los tipos'])}</select></label>
+      <label>Grupo<select id="mGrupo">${opts(gruposVis(), '', ['','Todos los grupos'])}</select></label>
+      <label>Skill<select id="mSkill">${opts(skillsVis(), 'all', ['all','Todas las skills'])}</select></label>
       <label style="flex:0 1 130px">Máx. personas<input id="mMax" type="number" min="0" value="2"></label>
       <button class="btn primary" onclick="generarMensuales()">Crear 12 cupos</button>
     </div>
@@ -828,13 +935,12 @@ function vCupos(){
     ${lista.length?`<div class="scroll"><table><tr><th>Cupo</th><th>Fechas</th><th class="num">Máx.</th><th></th></tr>
       ${lista.map(c=>`<tr><td><b>${esc(c.nombre||'Cupo')}</b><div class="muted">${ambitoCupo(c)}</div></td><td style="white-space:nowrap">${fmt(c.desde)} – ${fmt(c.hasta)}</td><td class="num">${c.max}</td>
       <td class="num" style="white-space:nowrap"><button class="btn small" onclick="UI.editCupo='${c.id}';render();scrollTo(0,0)">Editar</button> <button class="btn small danger" onclick="borrarCupo('${c.id}')" aria-label="Borrar">✕</button></td></tr>`).join('')}</table></div>
-      <div class="row" style="margin-top:12px"><button class="btn danger" onclick="borrarCuposVisibles()">Borrar ${DEP()==='all'?'todos los cupos':'los cupos de '+esc(nombreDep(DEP()))}</button></div>`:'<p class="help">Sin cupos, cualquiera puede coger cualquier fecha.</p>'}
+      <div class="row" style="margin-top:12px"><button class="btn danger" onclick="borrarCuposVisibles()">Borrar los cupos de ${esc(ctxTxt())}</button></div>`:'<p class="help">Sin cupos, cualquiera puede coger cualquier fecha.</p>'}
   </div>`;
 }
 function guardarCupo(){
   const g = id => document.getElementById(id).value;
-  const gr = grupoDe(g('cGrupo'));
-  const c = { nombre:g('cNom').trim(), depId:(gr&&gr.depId)||g('cDep'), grupoId:g('cGrupo'), desde:g('cDes'), hasta:g('cHas'), max:Number(g('cMax')), tipos:[...document.querySelectorAll('.cTipo:checked')].map(x=>x.value) };
+  const c = { nombre:g('cNom').trim(), depId:S.ctx.dep, prodId:S.ctx.prod, grupoId:g('cGrupo'), desde:g('cDes'), hasta:g('cHas'), max:Number(g('cMax')), skills:[...document.querySelectorAll('.cSkill:checked')].map(x=>x.value) };
   if(!c.desde||!c.hasta||c.hasta<c.desde) return toast('Pon una fecha de inicio y una de fin posterior');
   if(!(c.max>=0)) return toast('El máximo tiene que ser 0 o más');
   if(UI.editCupo) Object.assign(S.cupos.find(x=>x.id===UI.editCupo), c); else S.cupos.push({id:uid(),...c});
@@ -842,26 +948,25 @@ function guardarCupo(){
   const ex = cuposExcedidos(); toast(ex ? `Cupo guardado. Ya hay ${ex} día(s) por encima de algún cupo` : 'Cupo guardado');
 }
 function generarMensuales(){
-  const grupoId = document.getElementById('mGrupo').value, gr=grupoDe(grupoId), depId = (gr&&gr.depId)||document.getElementById('mDep').value;
-  const tipo = document.getElementById('mTipo').value, max = Number(document.getElementById('mMax').value);
+  const grupoId = document.getElementById('mGrupo').value, sk = document.getElementById('mSkill').value, max = Number(document.getElementById('mMax').value);
   if(!(max>=0)) return toast('El máximo tiene que ser 0 o más');
-  const pref = [depId?nombreDep(depId):'', grupoId?nombreGrupo(grupoId):'', tipo!=='all'?tipoDe(tipo).nombre:''].filter(Boolean).join(', ') || 'Todos';
+  const pref = [grupoId?nombreGrupo(grupoId):'', sk!=='all'?skillDe(sk).nombre:''].filter(Boolean).join(', ') || 'Todos';
   for(let m=0;m<12;m++){
     const d=`${S.ciclo}-${String(m+1).padStart(2,'0')}-01`, h=iso(new Date(Date.UTC(S.ciclo,m+1,0)));
-    S.cupos.push({id:uid(), nombre:`${pref}, ${MESES[m]}`, depId, grupoId, desde:d, hasta:h, max, tipos: tipo==='all'?[]:[tipo]});
+    S.cupos.push({id:uid(), nombre:`${pref}, ${MESES[m]}`, depId:S.ctx.dep, prodId:S.ctx.prod, grupoId, desde:d, hasta:h, max, skills: sk==='all'?[]:[sk]});
   }
   save(); render(); toast('12 cupos creados');
 }
 function borrarCupo(id){ S.cupos = S.cupos.filter(c=>c.id!==id); save(); render(); }
-function borrarCuposVisibles(){ if(!confirm('¿Borrar estos cupos?')) return; S.cupos = S.cupos.filter(c=>!cupoVisible(c)); save(); render(); }
+function borrarCuposVisibles(){ if(!confirm('¿Borrar estos cupos?')) return; S.cupos = S.cupos.filter(c=>!(cupoVisible(c) && c.depId)); save(); render(); }
 
 /* =========================================================
    PASO 5 · Elección (por turnos o a mano)
    ========================================================= */
 function vEleccion(){
   const ks = gruposActivos();
-  if(!ks.length) return vacio(DEP()==='all' ? 'Para elegir vacaciones primero tiene que haber gente en la plantilla.' : `No hay nadie en ${esc(nombreDep(DEP()))} todavía.`, `<button class="btn primary" onclick="go('plantilla')">Ir a Plantilla</button>`);
-  const seg = `<div class="seg" role="tablist"><button class="${UI.modo==='turnos'?'on':''}" onclick="UI.modo='turnos';render()">Por turnos</button><button class="${UI.modo==='mano'?'on':''}" onclick="UI.modo='mano';render()">A mano</button></div>`;
+  if(!ks.length) return vacio(`Todavía no hay trabajadores en ${esc(ctxTxt())}.`, `<button class="btn primary" onclick="go('trabajadores')">Ir a Trabajadores</button>`);
+  const seg = `<div class="seg" role="tablist" style="margin-bottom:16px"><button class="${UI.modo==='turnos'?'on':''}" onclick="UI.modo='turnos';render()">Por turnos</button><button class="${UI.modo==='mano'?'on':''}" onclick="UI.modo='mano';render()">A mano</button></div>`;
   return seg + (UI.modo==='mano' ? vMano() : vTurnos(ks));
 }
 function previewHTML(w, desde, hasta, excepto, bloquea){
@@ -869,7 +974,7 @@ function previewHTML(w, desde, hasta, excepto, bloquea){
   if(hasta < desde) return `<div class="preview bad">La fecha de fin es anterior a la de inicio.</div>`;
   const st = statsTrab(w), r = statsRango(desde,hasta), conf = conflictosCupo(w,desde,hasta), sol = solapePropio(w,desde,hasta,excepto);
   let quedan = st.pendientes - r.computables;
-  if(excepto){ const p=S.periodos.find(x=>x.id===excepto); if(p) quedan += statsRango(p.desde,p.hasta).computables; }
+  if(excepto){ const p=S.periodos.find(x=>x.id===excepto); if(p && delAnio(p.desde,S.ciclo)) quedan += statsRango(p.desde,p.hasta).computables; }
   const diasConf = [...new Set(conf.map(c=>c.dia))];
   const cls = (sol || (conf.length && bloquea)) ? 'bad' : (conf.length || quedan<0) ? 'warn' : 'ok';
   return `<div class="preview ${cls}">
@@ -877,20 +982,20 @@ function previewHTML(w, desde, hasta, excepto, bloquea){
     ${sol?'<p><b>Se solapa con otro periodo suyo.</b></p>':''}
     ${conf.length?`<p><b>${bloquea?'No hay cupo':'Supera el cupo'} ${diasConf.length} día(s):</b> ${resumenConflictos(conf)}</p>`:'<p>Hay cupo todos los días.</p>'}
     ${quedan<0?`<p><b>Se pasa ${-quedan} día(s) de su derecho.</b></p>`:''}
+    ${!delAnio(desde,S.ciclo)?`<p><b>Ojo:</b> estas fechas no son del ciclo ${S.ciclo}; no cuentan para sus puntos de este ciclo.</p>`:''}
   </div>`;
 }
 function vTurnos(ks){
   if(!UI.grupo || !ks.includes(UI.grupo)) UI.grupo = ks.find(k=>!grupoTerminado(k)) || ks[0];
   const k = UI.grupo, orden = ordenEleccion(k), actual = turnoActual(k), t = tState(k), h = hechosRonda(k);
-  if(!UI.trab || !trabDe(UI.trab) || gk(trabDe(UI.trab))!==k) { UI.trab = actual?.id || orden[0].id; UI.desde=''; UI.hasta=''; }
+  if(!UI.trab || !trabDe(UI.trab) || gk(trabDe(UI.trab))!==k || !visible(trabDe(UI.trab))) { UI.trab = actual?.id || orden[0].id; UI.desde=''; UI.hasta=''; }
   const w = trabDe(UI.trab), st = statsTrab(w);
-  const depG = k!==SIN ? grupoDe(k)?.depId : '';
-  const selector = ks.length>1 ? `<div class="chips" style="margin-bottom:14px">${ks.map(x=>{const dc=x!==SIN?depDeId(grupoDe(x)?.depId)?.color:null; return `<button class="pill ${x===k?'on':''}" onclick="UI.grupo='${x}';UI.trab=null;render()">${dc?`<span class="dot" style="background:${dc}"></span>`:''}${esc(nombreGrupo(x))} ${grupoTerminado(x)?'✓':`(ronda ${tState(x).ronda})`}</button>`}).join('')}</div>` : '';
+  const selector = ks.length>1 ? `<div class="chips" style="margin-bottom:14px">${ks.map(x=>`<button class="pill ${x===k?'on':''}" onclick="UI.grupo='${x}';UI.trab=null;render()">${esc(nombreGrupo(x))} ${grupoTerminado(x)?'✓':`(ronda ${tState(x).ronda})`}</button>`).join('')}</div>` : '';
   const cartel = actual
     ? `<div class="cartel"><div class="flecha" aria-hidden="true">➜</div><div class="cuerpo"><div class="txt">
-         <div class="ctx">${depG?esc(nombreDep(depG))+', ':''}${esc(nombreGrupo(k))}, ronda ${t.ronda} de ${S.ajustes.rondas}. Le toca a</div>
+         <div class="ctx">${esc(nombreGrupo(k))}, ronda ${t.ronda} de ${S.ajustes.rondas}. Le toca a</div>
          <div class="who">${esc(actual.nombre)}</div>
-         <div class="sub">${esc(tiposTxt(actual))}, ${nf(actual.ptsAnt||0)} puntos el año anterior</div></div>
+         <div class="sub">${esc(skillsTxt(actual))}, ${nf(actual.ptsAnt||0)} puntos el año anterior</div></div>
        <div class="row">${actual.id!==UI.trab?`<button class="btn" onclick="selTrab('${actual.id}')">Ver su elección</button>`:''}
        <button class="btn ink" onclick="terminarTurno('${k}','${actual.id}')">Pasar al siguiente ›</button>
        <button class="btn" onclick="deshacerTurno('${k}')" ${(!h.length&&t.ronda===1)?'disabled':''}>↶ Deshacer</button></div></div></div>`
@@ -913,19 +1018,19 @@ function vTurnos(ks){
     <p class="help">De menos a más puntos del año anterior. Si empatan, cuenta el año previo (art. 33) y después la antigüedad.</p>
     <ol class="list-order">${orden.map((x,i)=>{const done=h.includes(x.id), cur=actual&&actual.id===x.id, s2=statsTrab(x);
       return `<li class="${cur?'cur':''}"><span class="pos">${i+1}</span><span class="nm"><a href="#" onclick="selTrab('${x.id}');return false">${esc(x.nombre)}</a><br><span class="muted">${nf(x.ptsAnt||0)} pts, ${s2.dias} de ${s2.derecho} días</span></span>${done?'<span class="chip ok">Hecho</span>':cur?'<span class="chip mano">Su turno</span>':'<span class="chip grey">Espera</span>'}</li>`}).join('')}</ol>
-    <div class="row" style="margin-top:14px"><button class="btn" onclick="UI.calGrupo='${k}';go('calendario')">Ver calendario del grupo</button></div>
+    <div class="row" style="margin-top:14px"><button class="btn" onclick="UI.cal.grupo='${k}';go('calendario')">Ver en el calendario</button></div>
    </div>
   </div>`;
 }
 function fichaTrab(w, st){
   return `<h3>${esc(w.nombre)}</h3>
-    <div class="muted">${esc(nombreDep(depDe(w)))}, ${esc(tiposTxt(w))}, ${modalidadTxt(w)}, ${st.derecho} días. Factor ${factorInfo(w).txt}</div>
+    <div class="muted">${esc(skillsTxt(w))}, ${modalidadTxt(w)}, ${st.derecho} días. Factor ${factorInfo(w).txt}</div>
     ${(st.periodos.length||st.desprog.length) ? `<div class="scroll"><table><tr><th>Periodo</th><th class="num">Días</th><th class="num">Puntos</th><th></th></tr>
       ${st.periodos.map(p=>{const r=statsRango(p.desde,p.hasta);return `<tr><td>${fmt(p.desde)} – ${fmt(p.hasta)} <span class="muted">(${r.naturales} nat.)</span> ${p.manual?'<span class="chip mano">A mano</span>':''} ${p.forzado?'<span class="chip bad">Sin cupo</span>':''}</td><td class="num">${r.computables}</td><td class="num">${nf(r.pts*st.f)}</td>
         <td class="num" style="white-space:nowrap"><button class="btn small" onclick="editarPeriodo('${p.id}')">Editar</button> <button class="btn small danger" onclick="borrarPeriodo('${p.id}')" aria-label="Borrar">✕</button></td></tr>`}).join('')}
       ${st.desprog.length?`<tr><td>Desprogramaciones <span class="muted">(${st.desprog.map(d=>fmt(d.dia)).join(', ')})</span></td><td class="num">${st.desprog.length}</td><td class="num">${S.ajustes.desprogPuntua?nf(st.desprog.reduce((a,d)=>a+(cuentaDia(d.dia)?ptsDia(d.dia):0),0)*st.f):'—'}</td><td></td></tr>`:''}
-      <tr><th>Total</th><th class="num">${st.dias} / ${st.derecho}</th><th class="num">${nf(st.pts)}</th><th></th></tr></table></div>`
-      : '<p class="muted">Todavía no tiene vacaciones.</p>'}
+      <tr><th>Total ${S.ciclo}</th><th class="num">${st.dias} / ${st.derecho}</th><th class="num">${nf(st.pts)}</th><th></th></tr></table></div>`
+      : `<p class="muted">Todavía no tiene vacaciones en ${S.ciclo}.</p>`}
     ${st.pendientes>0 && st.pendientes<=st.reservaPosible ? `<div class="chip" style="margin:6px 6px 0 0">Le quedan ${st.pendientes}: puede dejarlos para desprogramar</div>`:''}
     ${st.avisos.map(a=>`<div class="chip warn" style="margin:6px 6px 0 0">${a}</div>`).join('')}`;
 }
@@ -951,9 +1056,8 @@ function añadirPeriodo(){
 function borrarPeriodo(id){ if(!confirm('¿Borrar este periodo?')) return; S.periodos = S.periodos.filter(p=>p.id!==id); if(UI.m.edit===id) limpiarMano(); save(); render(); }
 function editarPeriodo(id){
   const p = S.periodos.find(x=>x.id===id); if(!p) return;
-  const w = trabDe(p.trabajadorId); if(w && !visible(w)) S.vistaDep='all';
   UI.m = {...UI.m, trab:p.trabajadorId, desde:p.desde, hasta:p.hasta, nota:p.nota||'', forzar:!!p.forzado, edit:id};
-  UI.modo='mano'; UI.vista='eleccion'; render(); window.scrollTo(0,0);
+  UI.modo='mano'; go('eleccion');
 }
 
 /* ----- a mano ----- */
@@ -964,15 +1068,15 @@ function vMano(){
   const w = trabDe(M.trab);
   const conf = (M.desde && M.hasta && M.hasta>=M.desde) ? conflictosCupo(w,M.desde,M.hasta) : [];
   const puede = M.desde && M.hasta && M.hasta>=M.desde && !solapePropio(w,M.desde,M.hasta,M.edit) && (!conf.length || M.forzar);
-  const lista = S.periodos.filter(p=>{ const t=trabDe(p.trabajadorId); return t && visible(t) && (M.filtro==='all' || gk(t)===M.filtro); })
+  const lista = S.periodos.filter(p=>{ const t=trabDe(p.trabajadorId); return t && visible(t) && delAnio(p.desde,S.ciclo) && (M.filtro==='all' || gk(t)===M.filtro); })
     .sort((a,b)=>a.desde.localeCompare(b.desde) || trabDe(a.trabajadorId).nombre.localeCompare(trabDe(b.trabajadorId).nombre,'es'));
   return `<div class="grid2">
    <div class="card"><h2>${M.edit?'Editar vacaciones':'Añadir vacaciones a mano'}</h2>
     <p class="help">Para apuntar lo que ya está hablado o corregir algo sin pasar por el turno. Los cupos se comprueban igual, pero puedes guardarlas aunque no haya cupo.</p>
     <div class="row">
       <label style="flex-basis:100%">Trabajador<select onchange="UI.m.trab=this.value;render()" ${M.edit?'disabled':''}>${trabOptions(M.trab)}</select></label>
-      <label>Desde<input type="date" value="${M.desde}" min="${S.ciclo}-01-01" max="${S.ciclo}-12-31" onchange="UI.m.desde=this.value; if(!UI.m.hasta||UI.m.hasta<UI.m.desde) UI.m.hasta=this.value; render()"></label>
-      <label>Hasta<input type="date" value="${M.hasta}" min="${M.desde||S.ciclo+'-01-01'}" max="${S.ciclo}-12-31" onchange="UI.m.hasta=this.value; render()"></label>
+      <label>Desde<input type="date" value="${M.desde}" onchange="UI.m.desde=this.value; if(!UI.m.hasta||UI.m.hasta<UI.m.desde) UI.m.hasta=this.value; render()"></label>
+      <label>Hasta<input type="date" value="${M.hasta}" min="${M.desde||''}" onchange="UI.m.hasta=this.value; render()"></label>
       <label style="flex-basis:100%">Nota (opcional)<input value="${esc(M.nota)}" placeholder="Acordado con el jefe de turno" onchange="UI.m.nota=this.value"></label>
     </div>
     ${previewHTML(w, M.desde, M.hasta, M.edit, !M.forzar)}
@@ -981,8 +1085,8 @@ function vMano(){
       ${(M.desde||M.edit)?`<button class="btn" onclick="limpiarMano();render()">${M.edit?'Cancelar':'Limpiar'}</button>`:''}</div>
     ${fichaTrab(w, statsTrab(w))}
    </div>
-   <div class="card"><h2>Vacaciones apuntadas (${lista.length})</h2>
-    <label style="margin-bottom:10px">Grupo<select onchange="UI.m.filtro=this.value;render()">${optsGrupos(M.filtro, ['all','Todos los grupos'])}</select></label>
+   <div class="card"><h2>Vacaciones de ${S.ciclo} (${lista.length})</h2>
+    <label style="margin-bottom:10px">Grupo<select onchange="UI.m.filtro=this.value;render()">${opts(gruposVis(), M.filtro, ['all','Todos los grupos'])}</select></label>
     ${lista.length?`<div class="scroll"><table><tr><th>Trabajador</th><th>Fechas</th><th class="num">Días</th><th></th></tr>
       ${lista.map(p=>{const t=trabDe(p.trabajadorId), r=statsRango(p.desde,p.hasta);return `<tr>
         <td><b>${esc(t.nombre)}</b>${p.manual?' <span class="chip mano">A mano</span>':''}${p.forzado?' <span class="chip bad">Sin cupo</span>':''}${p.nota?`<div class="muted">${esc(p.nota)}</div>`:''}</td>
@@ -1008,17 +1112,17 @@ function guardarMano(){
    ========================================================= */
 function vDesprog(){
   const A = S.ajustes;
-  if(!trabsVis().length) return vacio('Primero añade gente en la plantilla.');
+  if(!trabsVis().length) return vacio(`Todavía no hay trabajadores en ${esc(ctxTxt())}.`);
   let prev = '';
   if(UI.dpTrab && UI.dpDia && UI.dpSol && trabDe(UI.dpTrab)){
     const tmp = {id:'__tmp', trabajadorId:UI.dpTrab, dia:UI.dpDia, solicitud:UI.dpSol, creado:Date.now()};
     S.desprog.push(tmp); const pr = problemasDesprog(tmp); S.desprog.pop();
-    const n = desprogDe(UI.dpTrab).length + 1;
+    const n = desprogDe(UI.dpTrab, UI.dpDia.slice(0,4)).length + 1;
     prev = `<div class="preview ${pr.some(p=>p.nivel==='bad')?'bad':pr.length?'warn':'ok'}">
       <div class="stats"><div><b>${n} de ${A.maxDesprog}</b>del año</div><div><b>${daysBetween(UI.dpSol,UI.dpDia)}</b>días de preaviso</div><div><b>${nf(cuentaDia(UI.dpDia)&&A.desprogPuntua?ptsDia(UI.dpDia)*factor(trabDe(UI.dpTrab)):0)}</b>puntos</div></div>
       ${pr.length?pr.map(p=>`<p>${p.txt}</p>`).join(''):'<p>Cumple los requisitos.</p>'}</div>`;
   }
-  const lista = S.desprog.filter(d=>trabDe(d.trabajadorId) && visible(trabDe(d.trabajadorId))).sort((a,b)=>a.dia.localeCompare(b.dia) || a.solicitud.localeCompare(b.solicitud));
+  const lista = S.desprog.filter(d=>trabDe(d.trabajadorId) && visible(trabDe(d.trabajadorId)) && delAnio(d.dia,S.ciclo)).sort((a,b)=>a.dia.localeCompare(b.dia) || a.solicitud.localeCompare(b.solicitud));
   const ks = gruposActivos();
   return `<div class="card"><h2>Reglas</h2>
     <div class="row">
@@ -1027,7 +1131,7 @@ function vDesprog(){
       <label>% máximo del turno por día<input type="number" min="0" max="100" value="${A.pctTurno}" onchange="S.ajustes.pctTurno=Number(this.value)||0;save();render()"></label>
     </div>
     <div class="row" style="margin-top:10px"><label class="chk"><input type="checkbox" ${A.desprogPuntua?'checked':''} onchange="S.ajustes.desprogPuntua=this.checked;save();render()">Los días desprogramados suman puntos como vacaciones</label></div>
-    <p class="help" style="margin:10px 0 0">El turno es el grupo del trabajador. Si dos personas piden el mismo día y no caben en el ${A.pctTurno} %, tiene preferencia quien lo pidió antes.</p>
+    <p class="help" style="margin:10px 0 0">Estas reglas valen para todos los departamentos. El turno es el grupo del trabajador. Si dos personas piden el mismo día y no caben en el ${A.pctTurno} %, tiene preferencia quien lo pidió antes.</p>
   </div>
   <div class="card"><h2>Registrar desprogramación</h2>
     <div class="row">
@@ -1038,9 +1142,9 @@ function vDesprog(){
     ${prev}
     <div class="row" style="margin-top:14px"><button class="btn primary" onclick="añadirDesprog()" ${UI.dpTrab&&UI.dpDia&&UI.dpSol?'':'disabled'}>Registrar desprogramación</button></div>
   </div>
-  <div class="card"><h2>Recuento por trabajador</h2>
+  <div class="card"><h2>Recuento por trabajador, ${S.ciclo}</h2>
     <div class="scroll"><table><tr><th>Nombre</th><th class="num">Usadas</th><th class="num">Le quedan</th><th class="hide-m">Días</th></tr>
-    ${ks.map(k=>`<tr class="grp"><td colspan="4">${cabGrupo(k, `, máximo ${maxDiaTurno(k)} por día`)}</td></tr>`+
+    ${ks.map(k=>`<tr class="grp"><td colspan="4">${esc(nombreGrupo(k))}, máximo ${maxDiaTurno(k)} por día</td></tr>`+
       [...ordenEleccion(k)].sort((a,b)=>a.nombre.localeCompare(b.nombre,'es')).map(t=>{const d=desprogDe(t.id), q=A.maxDesprog-d.length;
         return `<tr><td>${esc(t.nombre)}</td><td class="num"><span class="chip ${q<0?'bad':q===0?'grey':'ok'}">${d.length} de ${A.maxDesprog}</span></td><td class="num">${Math.max(0,q)}</td><td class="hide-m muted">${d.map(x=>fmt(x.dia)).join(', ')||'—'}</td></tr>`}).join('')).join('')}
     </table></div>
@@ -1069,18 +1173,13 @@ function vResumen(){
   const todos = trabsVis().map(t=>({t,st:statsTrab(t)}));
   const ids = new Set(todos.map(f=>f.t.id));
   const sin = todos.filter(f=>!f.st.periodos.length).length, avisos = todos.filter(f=>f.st.avisos.length).length;
-  const dpMal = S.desprog.filter(d=>ids.has(d.trabajadorId) && problemasDesprog(d).some(p=>p.nivel==='bad')).length;
-  const forz = S.periodos.filter(p=>p.forzado && ids.has(p.trabajadorId)).length;
-  const porDep = DEP()==='all' && S.departamentos.length>1 ? `<div class="deps" style="margin-bottom:16px">${S.departamentos.map(d=>{
-      const ts=S.trabajadores.filter(t=>depDe(t)===d.id); if(!ts.length) return '';
-      const sts=ts.map(statsTrab), dias=sts.reduce((a,s)=>a+s.dias,0), der=sts.reduce((a,s)=>a+s.derecho,0);
-      return `<div class="dep" style="--c:${d.color};background:#fff;cursor:pointer" onclick="cambiarDep('${d.id}')" role="button" tabindex="0"><div class="nombre">${esc(d.nombre)}</div>
-        <div class="cifras"><div><b>${ts.length}</b>personas</div><div><b>${der?Math.round(dias/der*100):0} %</b>días asignados</div><div><b>${sts.filter(s=>s.avisos.length).length}</b>avisos</div></div></div>`}).join('')}</div>` : '';
-  return `${porDep}<div class="card"><h2>${DEP()==='all'?'Ciclo '+S.ciclo:esc(nombreDep(DEP()))+', ciclo '+S.ciclo}</h2>
+  const dpMal = S.desprog.filter(d=>ids.has(d.trabajadorId) && delAnio(d.dia,S.ciclo) && problemasDesprog(d).some(p=>p.nivel==='bad')).length;
+  const forz = S.periodos.filter(p=>p.forzado && ids.has(p.trabajadorId) && delAnio(p.desde,S.ciclo)).length;
+  return `<div class="card"><h2>${esc(ctxTxt())}, ciclo ${S.ciclo}</h2>
     <div class="stats"><div><b>${todos.length}</b>personas</div><div><b>${todos.reduce((a,f)=>a+f.st.periodos.length,0)}</b>periodos</div><div><b>${sin}</b>sin vacaciones</div><div><b>${avisos}</b>con avisos</div><div><b>${cuposExcedidos()}</b>días sobre cupo</div><div><b>${forz}</b>guardadas sin cupo</div><div><b>${dpMal}</b>desprog. con problemas</div></div>
   </div>
   <div class="card"><div class="scroll"><table><tr><th>Nombre</th><th class="hide-m">Periodos</th><th class="num">Días</th><th class="num hide-m">Brutos</th><th class="num hide-m">Factor</th><th class="num">Puntos</th><th class="num">Desp.</th><th>Estado</th></tr>
-    ${ks.map(k=>`<tr class="grp"><td colspan="8">${cabGrupo(k)}</td></tr>`+ordenEleccion(k).map((t,i)=>{const st=statsTrab(t);
+    ${ks.map(k=>`<tr class="grp"><td colspan="8">${esc(nombreGrupo(k))}</td></tr>`+ordenEleccion(k).map((t,i)=>{const st=statsTrab(t);
       return `<tr><td><span class="muted">${i+1}.</span> <b>${esc(t.nombre)}</b></td>
       <td class="hide-m muted" style="font-size:13px">${st.periodos.map(p=>`${fmt(p.desde)}–${fmt(p.hasta)}`).join('<br>')||'—'}</td>
       <td class="num">${st.dias}/${st.derecho}</td><td class="num hide-m">${nf(st.bruto)}</td><td class="num hide-m muted">${factorInfo(t).txt}</td><td class="num"><b>${nf(st.pts)}</b></td><td class="num">${st.desprog.length}/${S.ajustes.maxDesprog}</td>
@@ -1091,76 +1190,184 @@ function vResumen(){
   </table></div>
   <div class="row" style="margin-top:14px"><button class="btn primary" onclick="go('pdf')">Exportar PDF</button><button class="btn" onclick="exportarCSV()">Descargar Excel (CSV)</button></div></div>
   <div class="card"><h2>Cerrar ciclo</h2>
-    <p class="help">Cuando el ciclo ${S.ciclo} esté terminado en todos los departamentos: los puntos finales de este año pasan a «puntos año anterior» (y los de antes a «hace 2 años»), se vacían vacaciones y desprogramaciones, se reinician los turnos, los cupos se trasladan al ${S.ciclo+1} y se recalcula la Semana Santa. Antes se descarga una copia automáticamente.</p>
+    <p class="help">Cuando el ciclo ${S.ciclo} esté terminado en todos los departamentos y productos: los puntos finales de este año pasan a «puntos año anterior» (y los de antes a «hace 2 años»), se reinician los turnos, los cupos se trasladan al ${S.ciclo+1} y se recalcula la Semana Santa. Las vacaciones de ${S.ciclo} se quedan guardadas y se pueden consultar en el calendario. Antes se descarga una copia automáticamente.</p>
     <button class="btn danger" onclick="cerrarCiclo()">Cerrar ${S.ciclo} y abrir ${S.ciclo+1}</button>
   </div>`;
 }
 function exportarCSV(){
   const q = x => `"${String(x??'').replace(/"/g,'""')}"`, dec = n => String(r2(n)).replace('.',',');
-  const rows = [['Departamento','Grupo','Orden','Nombre','Tipo','Modalidad','Días vacaciones','Pts año anterior','Periodo','Desde','Hasta','Días naturales','Días computables','Puntos periodo','A mano','Sin cupo','Nota','Desprogramaciones','Puntos brutos ciclo','Factor','Puntos finales ciclo']];
+  const rows = [['Departamento','Producto','Grupo','Orden','Nombre','Skills','Modalidad','Días vacaciones','Pts año anterior','Periodo','Desde','Hasta','Días naturales','Días computables','Puntos periodo','A mano','Sin cupo','Nota','Desprogramaciones','Puntos brutos ciclo','Factor','Puntos finales ciclo']];
   gruposActivos().forEach(k=>ordenEleccion(k).forEach((t,i)=>{ const st=statsTrab(t);
-    const base = [nombreDep(depDe(t)),nombreGrupo(k),i+1,t.nombre,tiposTxt(t),modalidadTxt(t),t.diasDerecho,t.ptsAnt];
+    const base = [nombreDep(depDe(t)),nombreProd(prodDe(t)),nombreGrupo(k),i+1,t.nombre,skillsTxt(t),modalidadTxt(t),t.diasDerecho,t.ptsAnt];
     const fin = [st.desprog.map(d=>d.dia).join(' '), dec(st.bruto), dec(st.f), dec(st.pts)];
     if(!st.periodos.length) rows.push([...base,'','','','','','','','','',...fin]);
     st.periodos.forEach((p,j)=>{ const r=statsRango(p.desde,p.hasta); rows.push([...base,j+1,p.desde,p.hasta,r.naturales,r.computables,dec(r.pts*st.f),p.manual?'sí':'',p.forzado?'sí':'',p.nota||'',...fin]); });
   }));
-  descargar(`vacaciones-${S.ciclo}${DEP()!=='all'?'-'+nombreDep(DEP()):''}.csv`, '﻿'+rows.map(r=>r.map(q).join(';')).join('\r\n'), 'text/csv;charset=utf-8');
+  descargar(`vacaciones-${S.ciclo}-${nombreDep(S.ctx.dep)}-${nombreProd(S.ctx.prod)}.csv`, '﻿'+rows.map(r=>r.map(q).join(';')).join('\r\n'), 'text/csv;charset=utf-8');
 }
 function copiaJSON(){ descargar('vacaciones-agp-'+S.ciclo+'-'+hoy()+'.json', JSON.stringify(S,null,1), 'application/json'); }
 function cerrarCiclo(){
-  if(!confirm(`Se cerrará el ciclo ${S.ciclo} para todos los departamentos. Antes se descargará una copia. ¿Seguir?`)) return;
+  if(!confirm(`Se cerrará el ciclo ${S.ciclo} para todos los departamentos y productos. Antes se descargará una copia. ¿Seguir?`)) return;
   copiaJSON();
   S.trabajadores.forEach(t=>{ const st=statsTrab(t); t.ptsAnt2=t.ptsAnt||0; t.ptsAnt=st.pts; });
   const mas1 = s => { const d=pd(s), y=d.getUTCFullYear()+1, m=d.getUTCMonth(); const ult=new Date(Date.UTC(y,m+1,0)).getUTCDate(); return iso(new Date(Date.UTC(y,m,Math.min(d.getUTCDate(),ult)))); };
   S.cupos.forEach(c=>{ c.desde=mas1(c.desde); c.hasta=mas1(c.hasta); });
-  S.ciclo++; S.periodos=[]; S.desprog=[]; S.puentes=[]; S.semanaSanta=semanaSantaDefault(S.ciclo); S.turnos={}; S.pasosOk=[];
-  UI.calMes=null; UI.vista='reglas'; save(); render(); toast(`Ciclo ${S.ciclo} abierto. Añade los puentes del nuevo año.`);
+  S.ciclo++; S.puentes=[]; S.semanaSanta=semanaSantaDefault(S.ciclo); S.turnos={}; S.pasosOk={};
+  UI.cal.anio=null; save(); render(); toast(`Ciclo ${S.ciclo} abierto. Añade los puentes del nuevo año en Ajustes.`);
 }
 
 /* =========================================================
-   Calendario
+   Calendario: cuadrante anual a pantalla completa o mes con cupos
    ========================================================= */
 function vCalendario(){
-  if(UI.calMes===null){ const n=new Date(); UI.calMes = n.getFullYear()===S.ciclo ? n.getMonth() : 0; }
-  if(UI.calGrupo!=='all' && !gruposVis().some(g=>g.id===UI.calGrupo)) UI.calGrupo='all';
-  const y=S.ciclo, m=UI.calMes, mm=String(m+1).padStart(2,'0'), first=`${y}-${mm}-01`;
+  if(!trabsVis().length) return `<div class="intro"><h2>Calendario</h2></div>`+vacio(`Todavía no hay trabajadores en ${esc(ctxTxt())}.`, `<button class="btn primary" onclick="go('trabajadores')">Ir a Trabajadores</button>`);
+  if(UI.cal.grupo!=='all' && !gruposVis().some(g=>g.id===UI.cal.grupo)) UI.cal.grupo='all';
+  if(UI.cal.skill!=='all' && !skillsVis().some(s=>s.id===UI.cal.skill)) UI.cal.skill='all';
+  const seg = `<div class="seg"><button class="${UI.cal.modo==='anual'?'on':''}" onclick="UI.cal.modo='anual';render()">Año completo</button><button class="${UI.cal.modo==='mes'?'on':''}" onclick="UI.cal.modo='mes';render()">Mes y cupos</button></div>`;
+  return UI.cal.modo==='mes' ? vCalMes(seg) : vCalAnual(seg);
+}
+const pasaFiltroCal = t => t && visible(t) && (UI.cal.grupo==='all'||gk(t)===UI.cal.grupo) && (UI.cal.skill==='all'||tieneSkill(t,UI.cal.skill))
+  && (!UI.cal.buscar || t.nombre.toLowerCase().includes(UI.cal.buscar.toLowerCase()));
+function aniosDisponibles(){
+  const ys = new Set([S.ciclo-1, S.ciclo, S.ciclo+1]);
+  S.periodos.forEach(p=>{ const t=trabDe(p.trabajadorId); if(t && visible(t)) ys.add(Number(p.desde.slice(0,4))); });
+  return [...ys].sort();
+}
+function vCalAnual(seg){
+  const y = UI.cal.anio ||= S.ciclo;
+  const ys = aniosDisponibles(), iy = ys.indexOf(y);
+  const ini = `${y}-01-01`, dias = daysBetween(ini, `${y+1}-01-01`);
+  const idx = s => daysBetween(ini, s);
+  const clip = (a,b) => { const d = a<ini?ini:a, h = b>`${y}-12-31`?`${y}-12-31`:b; return h<d?null:[idx(d), daysBetween(d,h)+1]; };
+  const ks = gruposActivos().filter(k=>UI.cal.grupo==='all'||k===UI.cal.grupo);
+  const filas = ks.map(k=>({k, ts:ordenEleccion(k).filter(pasaFiltroCal)})).filter(f=>f.ts.length);
+  // ocupación diaria
+  const cuenta = new Array(dias).fill(0);
+  filas.forEach(f=>f.ts.forEach(t=>S.periodos.filter(p=>p.trabajadorId===t.id).forEach(p=>{ const c=clip(p.desde,p.hasta); if(c) for(let i=c[0];i<c[0]+c[1];i++) cuenta[i]++; })));
+  const maxC = Math.max(1, ...cuenta);
+  // capa de fondo: fines de semana, meses, Semana Santa, puentes, hoy
+  const ss = y===S.ciclo ? S.semanaSanta : semanaSantaDefault(y);
+  let capa = '';
+  for(let i=0;i<dias;i++){ const wd = pd(addDays(ini,i)).getUTCDay(); if(wd===6) capa += `<i class="fs" style="left:calc(var(--dw)*${i});width:calc(var(--dw)*2)"></i>`; }
+  for(let m=1;m<12;m++) capa += `<i class="lm" style="left:calc(var(--dw)*${idx(`${y}-${String(m+1).padStart(2,'0')}-01`)})"></i>`;
+  const cs = clip(ss.desde, ss.hasta); if(cs) capa += `<i class="ss" style="left:calc(var(--dw)*${cs[0]});width:calc(var(--dw)*${cs[1]})" title="Semana Santa"></i>`;
+  if(y===S.ciclo) S.puentes.forEach(p=>{ const c=clip(p.desde,p.hasta); if(c) capa += `<i class="pu" style="left:calc(var(--dw)*${c[0]});width:calc(var(--dw)*${c[1]})"></i>`; });
+  const h = hoy(); if(delAnio(h,y)) capa += `<i class="hoy" style="left:calc(var(--dw)*${idx(h)})" title="Hoy"></i>`;
+  // cabecera de meses y días
+  let cab = '';
+  for(let m=0;m<12;m++){ const d0=`${y}-${String(m+1).padStart(2,'0')}-01`, dm=new Date(Date.UTC(y,m+1,0)).getUTCDate();
+    cab += `<span class="an-mes" style="left:calc(var(--dw)*${idx(d0)});width:calc(var(--dw)*${dm})">${MESES[m][0].toUpperCase()+MESES[m].slice(1)}</span>`; }
+  const conDias = UI.cal.zoom!=='ajustar';
+  if(conDias) for(let i=0;i<dias;i++){ const d=pd(addDays(ini,i)), wd=d.getUTCDay(); cab += `<span class="an-dia ${wd===0||wd===6?'fs':''}" style="left:calc(var(--dw)*${i});width:var(--dw)">${d.getUTCDate()}</span>`; }
+  const ocu = cuenta.map((c,i)=>c?`<i class="${c===maxC?'max':''}" style="left:calc(var(--dw)*${i});width:var(--dw);height:${Math.round(c/maxC*24)+2}px" title="${fmt(addDays(ini,i))}: ${c} de vacaciones"></i>`:'').join('');
+  const fila = t => {
+    const ps = S.periodos.filter(p=>p.trabajadorId===t.id).map(p=>({p,c:clip(p.desde,p.hasta)})).filter(x=>x.c);
+    const dps = S.desprog.filter(d=>d.trabajadorId===t.id && delAnio(d.dia,y));
+    return `<div class="an-fila"><div class="an-nom" title="${esc(t.nombre)}, ${esc(skillsTxt(t))}">${esc(t.nombre)}</div>
+      <div class="an-pista" onclick="clicPista(event,'${t.id}',${y})">${ps.map(({p,c})=>{const r=statsRango(p.desde,p.hasta);
+        return `<button class="an-bar ${p.forzado?'forz':''} ${p.manual?'mano':''}" style="left:calc(var(--dw)*${c[0]});width:calc(var(--dw)*${c[1]})" title="${esc(t.nombre)}: ${fmt(p.desde)} – ${fmt(p.hasta)} (${r.naturales} días)${p.nota?'. '+esc(p.nota):''}" onclick="event.stopPropagation();editarPeriodo('${p.id}')">${fmt(p.desde)}–${fmt(p.hasta)}</button>`}).join('')}
+        ${dps.map(d=>`<span class="an-dp" style="left:calc(var(--dw)*${idx(d.dia)});width:var(--dw)" title="Desprogramación: ${fmt(d.dia)}" onclick="event.stopPropagation()"></span>`).join('')}</div></div>`;
+  };
+  const total = filas.reduce((a,f)=>a+f.ts.length,0);
+  return `<div class="intro" style="max-width:none"><h2>Calendario ${y}</h2><p>Quién tiene vacaciones y cuándo, en ${esc(ctxTxt())}. Toca una barra para editarla o un hueco para añadir vacaciones desde ese día.</p></div>
+  <div class="card cal-anual-card">
+    <div class="an-barra">
+      ${seg}
+      <div class="an-anio"><button class="btn small" onclick="UI.cal.anio=${ys[iy-1]??y-1};render()" aria-label="Año anterior">‹</button><b>${y}</b><button class="btn small" onclick="UI.cal.anio=${ys[iy+1]??y+1};render()" aria-label="Año siguiente">›</button></div>
+      <label>Grupo<select onchange="UI.cal.grupo=this.value;render()">${opts(gruposVis(), UI.cal.grupo, ['all','Todos'])}</select></label>
+      <label>Skill<select onchange="UI.cal.skill=this.value;render()">${opts(skillsVis(), UI.cal.skill, ['all','Todas'])}</select></label>
+      <label>Buscar<input value="${esc(UI.cal.buscar)}" placeholder="Nombre" oninput="UI.cal.buscar=this.value;clearTimeout(window._bt);window._bt=setTimeout(()=>{render();const i=document.querySelector('.an-barra input');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}},250)"></label>
+      <span class="esp"></span>
+      <div class="seg" aria-label="Zoom"><button class="${UI.cal.zoom==='ajustar'?'on':''}" onclick="UI.cal.zoom='ajustar';render()">Año</button><button class="${UI.cal.zoom==='semana'?'on':''}" onclick="UI.cal.zoom='semana';render()">Semanas</button><button class="${UI.cal.zoom==='dia'?'on':''}" onclick="UI.cal.zoom='dia';render()">Días</button></div>
+      <button class="btn ink" onclick="pantallaCompleta()">${document.body.classList.contains('cal-full')?'Salir de pantalla completa':'Pantalla completa'}</button>
+    </div>
+    <div class="anual" id="anual" style="--dias:${dias}">
+     ${total?`<div class="an-grid">
+      <div class="an-capa">${capa}</div>
+      <div class="an-cab ${conDias?'con-dias':''}"><div class="an-fila"><div class="an-nom">${total} personas</div><div class="an-pista">${cab}</div></div></div>
+      <div class="an-fila an-ocu"><div class="an-nom">De vacaciones</div><div class="an-pista">${ocu}</div></div>
+      ${filas.map(f=>`<div class="an-fila an-grp"><div class="an-nom">${esc(nombreGrupo(f.k))}</div><div class="an-pista"></div></div>${f.ts.map(fila).join('')}`).join('')}
+     </div>`:'<div class="an-vacio">Nadie coincide con los filtros.</div>'}
+    </div>
+    <div class="legend"><span style="--c:var(--ctx)">Vacaciones</span><span style="--c:repeating-linear-gradient(135deg,#9AB 0 3px,var(--ctx) 3px 6px)">Apuntadas a mano</span><span style="--c:var(--bad)">Sin cupo</span><span style="--c:var(--senal)">Desprogramación</span><span style="--c:rgba(246,195,0,.35)">Semana Santa</span><span style="--c:#F5F6F8;outline:1px solid var(--linea)">Fin de semana</span><span style="--c:var(--bad)">Línea roja: hoy</span></div>
+  </div>`;
+}
+function ajustarAnual(){
+  const a = document.getElementById('anual'); if(!a) return;
+  const dias = Number(getComputedStyle(a).getPropertyValue('--dias')) || 365;
+  const nw = parseFloat(getComputedStyle(a).getPropertyValue('--nw')) || 170;
+  let dw = UI.cal.zoom==='dia' ? 26 : UI.cal.zoom==='semana' ? 12 : Math.max(1.6, (a.clientWidth - nw - 2) / dias);
+  a.style.setProperty('--dw', dw+'px');
+  const clave = UI.cal.zoom+'|'+UI.cal.anio;
+  if(UI.cal.zoomHecho !== clave){ // al cambiar de zoom o de año, colocar en hoy (o en enero)
+    UI.cal.zoomHecho = clave;
+    const h = hoy(), y = UI.cal.anio, ref = delAnio(h,y) ? h : `${y}-01-01`;
+    a.scrollLeft = UI.cal.zoom==='ajustar' ? 0 : Math.max(0, daysBetween(`${y}-01-01`, ref)*dw - (a.clientWidth-nw)/3);
+    a.scrollTop = 0;
+  } else { a.scrollLeft = UI.cal.sx||0; a.scrollTop = UI.cal.sy||0; }
+}
+window.addEventListener('resize',()=>{ if(UI.vista==='calendario' && UI.cal.modo==='anual') ajustarAnual(); if(UI.vista==='pdf') ajustarHoja(); });
+function clicPista(e, trabId, y){
+  const a = document.getElementById('anual'), dw = parseFloat(a.style.getPropertyValue('--dw')) || 3;
+  const r = e.currentTarget.getBoundingClientRect(), i = Math.floor((e.clientX - r.left)/dw);
+  const dia = addDays(`${y}-01-01`, Math.max(0, i));
+  salirPantallaCompleta();
+  UI.m = {...UI.m, trab:trabId, desde:dia, hasta:dia, edit:null, forzar:false, nota:''}; UI.modo='mano'; go('eleccion');
+  toast(`Añadiendo vacaciones desde el ${fmt(dia)}`);
+}
+function pantallaCompleta(){
+  const on = !document.body.classList.contains('cal-full');
+  document.body.classList.toggle('cal-full', on);
+  try{ if(on && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(()=>{}); else if(!on && document.fullscreenElement) document.exitFullscreen(); }catch(e){}
+  render();
+}
+function salirPantallaCompleta(){
+  if(!document.body.classList.contains('cal-full')) return;
+  document.body.classList.remove('cal-full');
+  try{ if(document.fullscreenElement) document.exitFullscreen(); }catch(e){}
+}
+document.addEventListener('fullscreenchange', ()=>{ if(!document.fullscreenElement && document.body.classList.contains('cal-full')){ document.body.classList.remove('cal-full'); if(UI.vista==='calendario') render(); } });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape' && document.body.classList.contains('cal-full') && !document.getElementById('bloqueo')){ salirPantallaCompleta(); render(); } });
+
+function vCalMes(seg){
+  const y = S.ciclo;
+  if(UI.cal.mes===null){ const n=new Date(); UI.cal.mes = n.getFullYear()===y ? n.getMonth() : 0; }
+  const m=UI.cal.mes, mm=String(m+1).padStart(2,'0'), first=`${y}-${mm}-01`;
   const dim = new Date(Date.UTC(y,m+1,0)).getUTCDate(), offset=(pd(first).getUTCDay()+6)%7;
-  const occ = ocupacion(null), FT = UI.calTipo, FG = UI.calGrupo;
-  const pasaFiltro = id => { const t=trabDe(id); return t && visible(t) && (FG==='all'||gk(t)===FG) && (FT==='all'||tieneTipo(t,FT)); };
-  const reglasVisibles = s => S.cupos.filter(c=>enRango(s,c) && cupoVisible(c) && (FG==='all'||!c.grupoId||c.grupoId===FG) && (FT==='all'||!c.tipos.length||c.tipos.includes(FT)));
+  const occ = ocupacion(null), FT = UI.cal.skill, FG = UI.cal.grupo;
+  const pasa = id => pasaFiltroCal(trabDe(id));
+  const reglasVisibles = s => S.cupos.filter(c=>enRango(s,c) && cupoVisible(c) && (FG==='all'||!c.grupoId||c.grupoId===FG) && (FT==='all'||!c.skills.length||c.skills.includes(FT)));
   const cell = s => {
-    const ids = (occ[s]||[]).filter(pasaFiltro), reglas = reglasVisibles(s);
+    const ids = (occ[s]||[]).filter(pasa), reglas = reglasVisibles(s);
     let lv=0, txt = ids.length ? `${ids.length}` : '';
     if(reglas.length){
       let peor=null;
       reglas.forEach(c=>{ const u=usadosCupo(c,occ[s]||[]), ratio=u/Math.max(1,Number(c.max)); if(!peor||ratio>peor.ratio) peor={u,c,ratio}; });
       txt = `${peor.u}/${peor.c.max}`; lv = peor.u>=Number(peor.c.max)?3 : peor.ratio>=.75?2 : 1;
     }
-    const cls = ['d','lv'+lv, esSS(s)?'ss':'', esPuente(s)?'pu':'', UI.calDia===s?'sel':''].join(' ');
-    return `<div class="${cls}" role="button" tabindex="0" onclick="UI.calDia='${s}';render()" onkeydown="if(event.key==='Enter'){UI.calDia='${s}';render()}"><span class="n">${pd(s).getUTCDate()}</span><span class="p">${ptsDia(s)} pts</span><span class="o">${txt}</span></div>`;
+    const cls = ['d','lv'+lv, esSS(s)?'ss':'', esPuente(s)?'pu':'', UI.cal.dia===s?'sel':''].join(' ');
+    return `<div class="${cls}" role="button" tabindex="0" onclick="UI.cal.dia='${s}';render()" onkeydown="if(event.key==='Enter'){UI.cal.dia='${s}';render()}"><span class="n">${pd(s).getUTCDate()}</span><span class="p">${ptsDia(s)} pts</span><span class="o">${txt}</span></div>`;
   };
   let grid = DOW.map(d=>`<div class="dow">${d}</div>`).join('') + '<div class="d empty"></div>'.repeat(offset);
   for(let d=1; d<=dim; d++) grid += cell(`${y}-${mm}-${String(d).padStart(2,'0')}`);
-
   let det = '';
-  if(UI.calDia){
-    const s=UI.calDia, ids=(occ[s]||[]).filter(id=>visible(trabDe(id))), reglas=S.cupos.filter(c=>enRango(s,c)&&cupoVisible(c)), dps=S.desprog.filter(d=>d.dia===s && trabDe(d.trabajadorId) && visible(trabDe(d.trabajadorId)));
+  if(UI.cal.dia && delAnio(UI.cal.dia,y)){
+    const s=UI.cal.dia, ids=(occ[s]||[]).filter(id=>visible(trabDe(id))), reglas=S.cupos.filter(c=>enRango(s,c)&&cupoVisible(c)), dps=S.desprog.filter(d=>d.dia===s && trabDe(d.trabajadorId) && visible(trabDe(d.trabajadorId)));
     det = `<div class="card"><h2>${fmtL(s)}</h2><p class="muted" style="margin-top:-6px">${ptsDia(s)} puntos por día${esSS(s)?', Semana Santa':''}${esPuente(s)?', puente':''}</p>
       ${reglas.length?`<h3>Cupos</h3>${reglas.map(c=>{const u=usadosCupo(c,occ[s]||[]), cl=u>=c.max?'bad':u/c.max>=.75?'warn':'ok';return `<div style="margin-bottom:6px"><span class="chip ${cl}">${u} de ${c.max}</span> ${esc(c.nombre||'Cupo')} <span class="muted">(${ambitoCupo(c)})</span></div>`}).join('')}`:'<p class="muted">Ningún cupo cubre este día.</p>'}
-      <h3>De vacaciones (${ids.length})</h3>${ids.length?ids.map(id=>{const t=trabDe(id);return `<div style="margin-bottom:6px">${esc(t?.nombre)} ${DEP()==='all'?depChip(depDe(t)):''} ${grupoChip(gk(t))} ${tiposChips(t)}</div>`}).join(''):'<p class="muted">Nadie.</p>'}
+      <h3>De vacaciones (${ids.length})</h3>${ids.length?ids.map(id=>{const t=trabDe(id);return `<div style="margin-bottom:6px">${esc(t?.nombre)} ${grupoChip(gk(t))} ${skillsChips(t)}</div>`}).join(''):'<p class="muted">Nadie.</p>'}
       ${dps.length?`<h3>Desprogramaciones (${dps.length})</h3>${dps.map(d=>{const t=trabDe(d.trabajadorId);return `<div style="margin-bottom:6px">${esc(t?.nombre)} ${grupoChip(gk(t))}</div>`}).join('')}`:''}
-      ${trabsVis().length?`<div class="row" style="margin-top:14px"><button class="btn primary" onclick="UI.m={...UI.m,desde:'${s}',hasta:'${s}',edit:null,forzar:false,nota:''};UI.modo='mano';go('eleccion')">Añadir vacaciones desde este día</button></div>`:''}</div>`;
+      <div class="row" style="margin-top:14px"><button class="btn primary" onclick="UI.m={...UI.m,desde:'${s}',hasta:'${s}',edit:null,forzar:false,nota:''};UI.modo='mano';go('eleccion')">Añadir vacaciones desde este día</button></div></div>`;
   }
-  return `<div class="intro"><h2>Calendario ${S.ciclo}</h2><p>Ocupación de cada día frente a su cupo. Toca un día para ver quién está fuera.</p>${avisoFiltro()}</div>
+  return `<div class="intro"><h2>Calendario ${y}</h2><p>Ocupación de cada día frente a su cupo en ${esc(ctxTxt())}. Toca un día para ver quién está fuera.</p></div>
   <div class="card">
+    <div class="an-barra">${seg}
+      <label>Grupo<select onchange="UI.cal.grupo=this.value;render()">${opts(gruposVis(), FG, ['all','Todos'])}</select></label>
+      <label>Skill<select onchange="UI.cal.skill=this.value;render()">${opts(skillsVis(), FT, ['all','Todas'])}</select></label></div>
     <div class="row" style="margin-bottom:14px;align-items:center;flex-wrap:nowrap">
-      <button class="btn" onclick="UI.calMes=Math.max(0,UI.calMes-1);UI.calDia=null;render()" ${m===0?'disabled':''} aria-label="Mes anterior">‹</button>
+      <button class="btn" onclick="UI.cal.mes=Math.max(0,UI.cal.mes-1);UI.cal.dia=null;render()" ${m===0?'disabled':''} aria-label="Mes anterior">‹</button>
       <h2 style="margin:0;flex:1;text-align:center;font-size:28px;text-transform:capitalize">${MESES[m]}</h2>
-      <button class="btn" onclick="UI.calMes=Math.min(11,UI.calMes+1);UI.calDia=null;render()" ${m===11?'disabled':''} aria-label="Mes siguiente">›</button>
-    </div>
-    <div class="row" style="margin-bottom:14px">
-      <label>Grupo<select onchange="UI.calGrupo=this.value;render()">${optsGrupos(FG, ['all','Todos los grupos'])}</select></label>
-      <label>Tipo<select onchange="UI.calTipo=this.value;render()">${opts(S.tipos, FT, ['all','Todos los tipos'])}</select></label>
+      <button class="btn" onclick="UI.cal.mes=Math.min(11,UI.cal.mes+1);UI.cal.dia=null;render()" ${m===11?'disabled':''} aria-label="Mes siguiente">›</button>
     </div>
     <div class="cal">${grid}</div>
     <div class="legend"><span style="--c:var(--ok-soft)">Con hueco</span><span style="--c:var(--warn-soft)">Al 75 % o más</span><span style="--c:var(--bad-soft)">Lleno</span><span style="--c:var(--linea)">Sin cupo: nº de personas</span><span>SS Semana Santa, P puente</span></div>
@@ -1174,10 +1381,9 @@ function vPDF(){
   const P = UI.pdf;
   if(P.grupo!=='all' && !gruposVis().some(g=>g.id===P.grupo)) P.grupo='all';
   const chk = (k,txt) => `<label class="chk"><input type="checkbox" ${P[k]?'checked':''} onchange="UI.pdf.${k}=this.checked;render()">${txt}</label>`;
-  return `<div class="intro"><h2>Exportar PDF</h2><p>Elige qué incluir y pulsa «Guardar PDF». En la ventana de impresión, escoge «Guardar como PDF» como destino.</p>${avisoFiltro()}</div>
+  return `<div class="intro"><h2>Exportar PDF</h2><p>Informe de ${esc(ctxTxt())}, ciclo ${S.ciclo}. Elige qué incluir y pulsa «Guardar PDF». En la ventana de impresión, escoge «Guardar como PDF» como destino.</p></div>
   <div class="card"><div class="row">
-      <label>Departamento<select onchange="cambiarDep(this.value)"><option value="all">Todos</option>${S.departamentos.map(d=>`<option value="${d.id}" ${d.id===DEP()?'selected':''}>${esc(d.nombre)}</option>`).join('')}</select></label>
-      <label>Grupo<select onchange="UI.pdf.grupo=this.value;render()">${optsGrupos(P.grupo, ['all','Todos los grupos'])}</select></label>
+      <label>Grupo<select onchange="UI.pdf.grupo=this.value;render()">${opts(gruposVis(), P.grupo, ['all','Todos los grupos'])}</select></label>
       <label>Orientación<select onchange="UI.pdf.orient=this.value;render()"><option value="landscape" ${P.orient==='landscape'?'selected':''}>Horizontal</option><option value="portrait" ${P.orient==='portrait'?'selected':''}>Vertical</option></select></label>
     </div>
     <div class="row" style="margin-top:10px;gap:4px 20px">${chk('cuadrante','Cuadrante anual')}${chk('tabla','Tabla de vacaciones')}${chk('puntos','Puntos')}${chk('desprog','Desprogramaciones')}${chk('firma','Columna de firma «Conforme»')}</div>
@@ -1185,15 +1391,13 @@ function vPDF(){
   </div>
   <div class="hoja-wrap"><div class="hoja ${P.orient==='portrait'?'vertical':''}" id="hoja">${informeHTML(P)}</div></div>`;
 }
-function ajustarHoja(){ // encoge la vista previa para que quepa en la pantalla
+function ajustarHoja(){
   const h=document.getElementById('hoja'); if(!h) return;
   const wrap=h.parentElement; h.style.transform=''; wrap.style.height='';
-  const disp=wrap.clientWidth-36, real=h.offsetWidth;
-  const k = Math.min(1, disp/real);
+  const disp=wrap.clientWidth-36, real=h.offsetWidth, k = Math.min(1, disp/real);
   h.style.transform=`scale(${k})`; h.style.marginLeft = k<1 ? '0' : ((disp-real)/2)+'px';
   wrap.style.height=(h.offsetHeight*k+36)+'px';
 }
-window.addEventListener('resize',()=>{ if(UI.vista==='pdf') ajustarHoja(); });
 function informeHTML(P){
   const ks = gruposActivos().filter(k=>P.grupo==='all' || k===P.grupo);
   const y = S.ciclo, lenY = daysBetween(`${y}-01-01`,`${y+1}-01-01`);
@@ -1202,29 +1406,28 @@ function informeHTML(P){
   let acc=0; const lineas=[]; for(let m=0;m<11;m++){ acc+=dim(m); lineas.push(acc/lenY*100); }
   const rejilla = `linear-gradient(to right, ${lineas.map(p=>`transparent calc(${p}% - .5px), #D9DDE3 calc(${p}% - .5px), #D9DDE3 calc(${p}% + .5px), transparent calc(${p}% + .5px)`).join(', ')})`;
   const ss = S.semanaSanta;
-  const ssBand = (ss.desde && ss.hasta && ss.desde.startsWith(String(y))) ? `<span class="ss" style="left:${pos(ss.desde)}%;width:${(daysBetween(ss.desde,ss.hasta)+1)/lenY*100}%"></span>` : '';
-  const titulo = DEP()==='all' ? `Programación de vacaciones ${y}` : `Vacaciones ${y}, ${esc(nombreDep(DEP()))}`;
-  const cab = `<div class="inf-cab"><span class="logo">✈</span><h1>${titulo}</h1>
-    <div class="meta">${P.grupo==='all'?(DEP()==='all'?'Todos los departamentos':'Todos los grupos'):esc(nombreGrupo(P.grupo))}<br>Generado el ${fmtL(hoy())}</div></div>`;
+  const ssBand = (ss.desde && ss.hasta && delAnio(ss.desde,y)) ? `<span class="ss" style="left:${pos(ss.desde)}%;width:${(daysBetween(ss.desde,ss.hasta)+1)/lenY*100}%"></span>` : '';
+  const cab = `<div class="inf-cab"><span class="logo">✈</span><h1>Vacaciones ${y}, ${esc(ctxTxt())}</h1>
+    <div class="meta">${P.grupo==='all'?'Todos los grupos':esc(nombreGrupo(P.grupo))}<br>Generado el ${fmtL(hoy())}</div></div>`;
   if(!ks.length) return `<div class="inf">${cab}<p>No hay trabajadores en la selección.</p></div>`;
   const secciones = ks.map((k,i)=>{
-    const orden = ordenEleccion(k), dep = k!==SIN ? depDeId(grupoDe(k)?.depId) : null;
-    let html = `<h2 style="--c:${dep?.color||'var(--senal)'}"><span class="barra"></span>${dep&&DEP()==='all'?esc(dep.nombre)+', ':''}${esc(nombreGrupo(k))} <small>${orden.length} personas</small></h2>`;
+    const orden = ordenEleccion(k);
+    let html = `<h2><span class="barra"></span>${esc(nombreGrupo(k))} <small>${orden.length} personas</small></h2>`;
     if(P.cuadrante){
       html += `<div class="gantt" style="--nw:38mm;--rejilla:${rejilla}">
         <div class="meses">${MESES.map((n,m)=>`<div style="flex:${dim(m)}">${n.slice(0,3)}</div>`).join('')}</div>
         ${orden.map(t=>{const st=statsTrab(t);
           return `<div class="fila"><div class="nom">${esc(t.nombre)}</div><div class="pista">${ssBand}
             ${st.periodos.map(p=>`<span class="per ${p.forzado?'forz':''}" style="left:${pos(p.desde)}%;width:${Math.max(.25,(daysBetween(p.desde,p.hasta)+1)/lenY*100)}%"></span>`).join('')}
-            ${P.desprog?st.desprog.filter(d=>d.dia.startsWith(String(y))).map(d=>`<span class="dp" style="left:calc(${pos(d.dia)}% - 1px)"></span>`).join(''):''}
+            ${P.desprog?st.desprog.map(d=>`<span class="dp" style="left:calc(${pos(d.dia)}% - 1px)"></span>`).join(''):''}
           </div></div>`}).join('')}
-        <div class="leyenda"><span><i style="background:var(--pista)"></i>Vacaciones</span><span><i style="background:var(--bad)"></i>Guardadas sin cupo</span>${P.desprog?'<span><i style="background:var(--senal);border:1px solid #9A7A00"></i>Desprogramación</span>':''}<span><i style="background:rgba(246,195,0,.3)"></i>Semana Santa</span></div>
+        <div class="leyenda"><span><i style="background:var(--ctx)"></i>Vacaciones</span><span><i style="background:var(--bad)"></i>Guardadas sin cupo</span>${P.desprog?'<span><i style="background:var(--senal);border:1px solid #9A7A00"></i>Desprogramación</span>':''}<span><i style="background:rgba(246,195,0,.3)"></i>Semana Santa</span></div>
       </div>`;
     }
     if(P.tabla){
-      html += `<table><tr><th>#</th><th>Nombre</th><th>Tipo</th><th>Periodos</th><th class="num">Días</th>${P.desprog?'<th>Desprogramaciones</th>':''}${P.puntos?'<th class="num">Pts año ant.</th><th class="num">Pts ciclo</th>':''}${P.firma?'<th>Conforme</th>':''}</tr>
+      html += `<table><tr><th>#</th><th>Nombre</th><th>Skills</th><th>Periodos</th><th class="num">Días</th>${P.desprog?'<th>Desprogramaciones</th>':''}${P.puntos?'<th class="num">Pts año ant.</th><th class="num">Pts ciclo</th>':''}${P.firma?'<th>Conforme</th>':''}</tr>
         ${orden.map((t,j)=>{const st=statsTrab(t);
-          return `<tr><td>${j+1}</td><td><b>${esc(t.nombre)}</b></td><td>${esc(tiposTxt(t))}</td>
+          return `<tr><td>${j+1}</td><td><b>${esc(t.nombre)}</b></td><td>${esc(skillsTxt(t))}</td>
           <td>${st.periodos.map(p=>`${fmt(p.desde)} – ${fmt(p.hasta)}${p.forzado?' *':''}`).join('<br>')||'—'}</td>
           <td class="num">${st.dias}/${st.derecho}</td>
           ${P.desprog?`<td>${st.desprog.map(d=>fmt(d.dia)).join(', ')||'—'}</td>`:''}
@@ -1235,7 +1438,7 @@ function informeHTML(P){
     return `<section class="${i>0?'salto':''}">${html}</section>`;
   }).join('');
   const notas = [
-    P.puntos ? (S.ajustes.ponderar ? 'Puntos ponderados según la base de días de cada departamento.' : 'Puntos sin ponderar.') : '',
+    P.puntos ? (S.ajustes.ponderar ? `Puntos ponderados a ${baseDe({depId:S.ctx.dep})} días.` : 'Puntos sin ponderar.') : '',
     P.tabla && S.periodos.some(p=>p.forzado) ? '* Periodo guardado por encima del cupo.' : '',
     'Orden de elección según el art. 33 del convenio.'
   ].filter(Boolean).join(' ');
@@ -1246,28 +1449,17 @@ function imprimir(){
   document.getElementById('pageStyle').textContent = `@page{size:A4 ${P.orient};margin:12mm}`;
   document.getElementById('print').innerHTML = informeHTML(P);
   const t = document.title;
-  document.title = `Vacaciones ${S.ciclo}${DEP()!=='all'?' - '+nombreDep(DEP()):''}${P.grupo!=='all'?' - '+nombreGrupo(P.grupo):''}`;
+  document.title = `Vacaciones ${S.ciclo} - ${nombreDep(S.ctx.dep)} - ${nombreProd(S.ctx.prod)}${P.grupo!=='all'?' - '+nombreGrupo(P.grupo):''}`;
   setTimeout(()=>{ window.print(); document.title = t; }, 50);
-}
-
-/* =========================================================
-   Copias de seguridad
-   ========================================================= */
-function vCopias(){
-  return `<div class="intro"><h2>Copias de seguridad</h2><p>Los datos se guardan solo en este navegador. Descarga una copia de vez en cuando y úsala para pasar los datos a otro dispositivo.</p></div>
-  <div class="card"><div class="row">
-      <button class="btn primary" onclick="copiaJSON()">Descargar copia</button>
-      <label class="btn" style="color:var(--asfalto);font-size:15px;cursor:pointer">Restaurar copia<input type="file" accept=".json,application/json" style="display:none" onchange="restaurar(this.files[0])"></label>
-      <button class="btn danger" onclick="if(confirm('Se borrarán TODOS los datos de este navegador. ¿Seguro?')){S=estadoInicial();save();UI.vista='reglas';render()}">Empezar de cero</button>
-  </div><p class="muted" style="margin:14px 0 0">Versión de la app: ${APP_VERSION}</p></div>`;
 }
 function restaurar(f){
   if(!f) return; const r=new FileReader();
-  r.onload=()=>{ try{ const d=JSON.parse(r.result); if(!d.trabajadores||!d.tramos) throw 0; if(!confirm('Esto sustituye todos los datos actuales. ¿Continuar?')) return; S=normalizar(d); save(); UI.vista='reglas'; render(); toast('Copia restaurada'); }catch(e){ toast('Ese archivo no es una copia de esta app'); } };
+  r.onload=()=>{ try{ const d=JSON.parse(r.result); if(!d.trabajadores||!d.tramos) throw 0; if(!confirm('Esto sustituye todos los datos actuales. ¿Continuar?')) return; S=normalizar(d); save(); go('inicio'); toast('Copia restaurada'); }catch(e){ toast('Ese archivo no es una copia de esta app'); } };
   r.readAsText(f);
 }
 
-if(S.trabajadores.length && !S.pasosOk.length) UI.vista='eleccion';
+UI.vista = enCtx() ? 'trabajadores' : (S.ctx.dep ? 'producto' : 'inicio');
+if(enCtx() && S.periodos.some(p=>{const t=trabDe(p.trabajadorId); return t&&visible(t);})) UI.vista='calendario';
 render();
 
 /* =========================================================
@@ -1278,21 +1470,31 @@ render();
    Para publicar: subir APP_VERSION, añadir sus pasos a NOVEDADES y poner la misma versión en version.json.
    ========================================================= */
 const NOVEDADES = {
-  '3.3.0': [
-    { titulo:'Varias funciones por persona', donde:'Paso 3, Plantilla',
-      texto:'En la ficha de cada trabajador ahora marcas todos sus tipos con casillas, porque hay quien hace más de una función. Si falta alguno, lo creas ahí mismo con «Añadir tipo».' },
-    { titulo:'Tipos dentro de Plantilla', donde:'Paso 3, Plantilla',
-      texto:'La lista de tipos de trabajador ha pasado de «Reglas y puntos» a «Plantilla», con cuántas personas tiene cada uno. Quien tiene varias funciones cuenta en los cupos de todas ellas.' },
-  ],
   '3.2.0': [
-    { titulo:'Departamentos', donde:'Cabecera y paso 2',
-      texto:'Pasaje, Rampa y Operaciones tienen cada uno sus grupos, sus cupos y su propia base de ponderación. Con el selector de arriba trabajas con un departamento o con todos a la vez.' },
-    { titulo:'Vacaciones a mano', donde:'Paso 5, Elección',
-      texto:'Además de elegir por turnos, ahora puedes apuntar o editar las vacaciones de cualquiera con «A mano». Si no hay cupo, puedes guardarlas igual y quedan marcadas en rojo.' },
+    { titulo:'Departamentos', donde:'Pantalla de inicio',
+      texto:'Pasaje, Rampa y Operaciones tienen cada uno sus grupos, sus cupos y su propia base de ponderación.' },
+    { titulo:'Vacaciones a mano', donde:'Elección',
+      texto:'Además de elegir por turnos, puedes apuntar o editar las vacaciones de cualquiera con «A mano». Si no hay cupo, puedes guardarlas igual y quedan marcadas en rojo.' },
     { titulo:'Exportar a PDF', donde:'Exportar PDF',
-      texto:'Saca un informe con el cuadrante anual, la tabla de vacaciones, los puntos, las desprogramaciones y una columna de firma. Elige qué incluir, revisa la vista previa y guárdalo como PDF.' },
+      texto:'Saca un informe con el cuadrante anual, la tabla de vacaciones, los puntos, las desprogramaciones y una columna de firma.' },
     { titulo:'Actualizaciones automáticas', donde:'Toda la app',
       texto:'Cuando se publique una versión nueva, la app te avisará sola y te pedirá actualizar. Después te enseñará lo que ha cambiado, como ahora.' },
+  ],
+  '3.3.0': [
+    { titulo:'Varias funciones por persona', donde:'Trabajadores',
+      texto:'En la ficha de cada trabajador marcas todas sus funciones con casillas. Quien tiene varias cuenta en los cupos de todas ellas.' },
+  ],
+  '4.0.0': [
+    { titulo:'Empieza por el departamento', donde:'Pantalla de inicio',
+      texto:'Al abrir la app eliges Pasaje, Rampa u Operaciones. Arriba verás siempre en qué departamento y producto estás; tócalo para cambiar.' },
+    { titulo:'GroundHandling y RedBull', donde:'Después de elegir departamento',
+      texto:'Dentro de cada departamento eliges el producto: GroundHandling (azul) o RedBull (naranja). Trabajadores, grupos, cupos y elección van por separado en cada uno.' },
+    { titulo:'Los tipos ahora son skills', donde:'Paso 1, Skills',
+      texto:'Cada departamento y producto tiene sus propias skills. Créalas, renómbralas o elimínalas cuando quieras; hay sugerencias para crearlas de un toque.' },
+    { titulo:'Calendario anual', donde:'Calendario',
+      texto:'Todo el año en una sola vista, con una fila por persona. Elige el año, filtra por grupo o skill, acerca por semanas o días y ábrelo a pantalla completa. Al cerrar un ciclo, las vacaciones se guardan para consultarlas después.' },
+    { titulo:'Ajustes generales', donde:'Botón ⚙ de la cabecera',
+      texto:'Los puntos del convenio, la Semana Santa, los puentes, la ponderación de cada departamento y las copias de seguridad están ahora en el engranaje de arriba.' },
   ],
 };
 let avisoActualizacion = false;
@@ -1306,7 +1508,7 @@ function bloquear(html){
   d.innerHTML = html;
   document.body.classList.add('bloqueada');
   document.querySelectorAll('header.app, nav.pasos, main, #toast').forEach(e=>e.setAttribute('inert',''));
-  d.onkeydown = e => { // el foco no sale del cuadro y Escape no lo cierra
+  d.onkeydown = e => {
     if(e.key==='Escape'){ e.preventDefault(); return; }
     if(e.key!=='Tab') return;
     const f=[...d.querySelectorAll('button:not([disabled])')]; if(!f.length) return;
@@ -1320,7 +1522,6 @@ function desbloquear(){
   document.body.classList.remove('bloqueada');
   document.querySelectorAll('[inert]').forEach(e=>e.removeAttribute('inert'));
 }
-
 async function comprobarVersion(){
   if(avisoActualizacion || !/^https?:$/.test(location.protocol)) return;
   try{
@@ -1331,7 +1532,7 @@ async function comprobarVersion(){
   }catch(e){ /* sin conexión: se vuelve a intentar más tarde */ }
 }
 function mostrarActualizacion(v){
-  avisoActualizacion = true;
+  avisoActualizacion = true; salirPantallaCompleta();
   const nov = Array.isArray(v.novedades) ? v.novedades : [];
   const d = bloquear(`<div class="act-caja">
     <div class="act-cab"><span class="flecha" aria-hidden="true">↻</span><div class="tit"><div class="ctx">Versión ${esc(v.version)}</div><h2 id="bTit">Hay una versión nueva</h2></div></div>
@@ -1345,15 +1546,13 @@ function mostrarActualizacion(v){
     location.replace(location.pathname + '?v=' + encodeURIComponent(v.version) + '&t=' + Date.now()); });
   b.focus();
 }
-
-/* ----- recorrido de novedades ----- */
 function novedadesPendientes(){
   const vista = S.versionVista || '0';
   return Object.keys(NOVEDADES).filter(v=>esMasNueva(v,vista) && !esMasNueva(v,APP_VERSION)).sort(cmpVer)
     .flatMap(v=>NOVEDADES[v].map(n=>({...n, version:v})));
 }
 function mostrarRecorrido(items, i){
-  if(avisoActualizacion) return;              // si ya hay otra versión esperando, primero se actualiza
+  if(avisoActualizacion) return;
   const n = items[i], ultimo = i===items.length-1;
   const d = bloquear(`<div class="act-caja">
     <div class="act-cab"><span class="flecha" aria-hidden="true">${i+1}</span><div class="tit"><div class="ctx">Versión ${esc(n.version)}, novedad ${i+1} de ${items.length}</div><h2 id="bTit">Lo que ha cambiado</h2></div></div>
@@ -1376,7 +1575,7 @@ function mostrarRecorrido(items, i){
 function iniciarActualizaciones(){
   if(/[?&]v=/.test(location.search)) history.replaceState(null,'',location.pathname+location.hash);
   const conDatos = S.trabajadores.length || S.periodos.length || S.grupos.length;
-  if(!conDatos && !S.versionVista){ S.versionVista = APP_VERSION; save(); }   // quien empieza de cero no necesita el recorrido
+  if(!conDatos && !S.versionVista){ S.versionVista = APP_VERSION; save(); }
   const pend = novedadesPendientes();
   if(pend.length) mostrarRecorrido(pend, 0);
   else if(!S.versionVista || esMasNueva(APP_VERSION, S.versionVista)){ S.versionVista = APP_VERSION; save(); }
