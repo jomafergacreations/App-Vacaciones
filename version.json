@@ -1,10 +1,7 @@
 {
-  "version": "5.0.0",
+  "version": "5.0.1",
   "fecha": "2026-11-23",
   "novedades": [
-    "Menú por producto y asignación de vacaciones por pasos",
-    "Rotaciones de 3 semanas por grupo",
-    "Transformaciones de contrato con prorrateo de días",
-    "Desprogramaciones por persona con su ficha en PDF"
+    "La app aprovecha todo el ancho de las pantallas grandes y se ve más grande"
   ]
 }
