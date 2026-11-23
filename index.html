@@ -187,6 +187,23 @@ td .chip{white-space:normal}
 .inf .salto{break-before:page;page-break-before:always}
 .inf .pie-inf{margin-top:12px;font-size:8pt;color:var(--gris)}
 #print{display:none}
+/* aviso de actualización: bloquea la app hasta actualizar */
+body.bloqueada{overflow:hidden}
+#actualizacion{position:fixed;inset:0;z-index:100;background:rgba(34,38,46,.74);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);display:grid;place-items:center;padding:20px}
+.act-caja{background:var(--papel);border-radius:14px;overflow:hidden;max-width:440px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.35);animation:actEntra .25s ease-out}
+@keyframes actEntra{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+.act-cab{display:flex;align-items:stretch;background:var(--senal);color:var(--asfalto)}
+.act-cab .flecha{background:var(--asfalto);color:var(--senal);font-family:var(--cond);font-weight:700;font-size:40px;display:grid;place-items:center;padding:0 18px;line-height:1}
+.act-cab .tit{padding:14px 18px}
+.act-cab .ctx{font-size:14px;font-weight:600}
+.act-cab h2{font-family:var(--cond);font-size:30px;font-weight:700;line-height:1.05;margin:2px 0 0}
+.act-cuerpo{padding:18px}
+.act-cuerpo p{margin:0 0 12px}
+.act-cuerpo h3{font-family:var(--cond);font-size:18px;font-weight:600;margin:0 0 4px}
+.act-cuerpo ul{margin:0 0 16px;padding-left:20px;color:var(--gris);font-size:14px}
+.act-btn{width:100%;justify-content:center;font-size:17px;padding:14px}
+.act-pie{font-size:12.5px;color:var(--gris);text-align:center;margin-top:10px}
+
 
 @media (max-width:760px){
   .hide-m{display:none} .grid2{grid-template-columns:1fr}
@@ -222,6 +239,7 @@ td .chip{white-space:normal}
    Reglas base: Convenio Menzies (BOE-A-2023-25956), arts. 32 y 33
    Datos guardados en el navegador (localStorage). Haz copias.
    ========================================================= */
+const APP_VERSION = '3.1.0';   // súbela junto con version.json en cada publicación
 const LS_KEY = 'vacaciones-agp-v1';
 const SIN = '_'; // clave interna para «sin grupo»
 
@@ -1206,7 +1224,7 @@ function vCopias(){
       <button class="btn primary" onclick="copiaJSON()">Descargar copia</button>
       <label class="btn" style="color:var(--asfalto);font-size:15px;cursor:pointer">Restaurar copia<input type="file" accept=".json,application/json" style="display:none" onchange="restaurar(this.files[0])"></label>
       <button class="btn danger" onclick="if(confirm('Se borrarán TODOS los datos de este navegador. ¿Seguro?')){S=estadoInicial();save();UI.vista='reglas';render()}">Empezar de cero</button>
-  </div></div>`;
+  </div><p class="muted" style="margin:14px 0 0">Versión de la app: ${APP_VERSION}</p></div>`;
 }
 function restaurar(f){
   if(!f) return; const r=new FileReader();
@@ -1216,6 +1234,50 @@ function restaurar(f){
 
 if(S.trabajadores.length && !S.pasosOk.length) UI.vista='eleccion';
 render();
+
+/* =========================================================
+   Aviso de actualización
+   La app consulta version.json del repositorio. Si hay una versión más nueva,
+   bloquea la pantalla hasta que se actualice. Los datos no se tocan.
+   ========================================================= */
+let avisoActualizacion = false;
+const esMasNueva = (a,b) => { const pa=String(a).split('.').map(Number), pb=String(b).split('.').map(Number);
+  for(let i=0;i<3;i++){ if((pa[i]||0)!==(pb[i]||0)) return (pa[i]||0)>(pb[i]||0); } return false; };
+async function comprobarVersion(){
+  if(avisoActualizacion || !/^https?:$/.test(location.protocol)) return;
+  try{
+    const r = await fetch('version.json?t='+Date.now(), {cache:'no-store'});
+    if(!r.ok) return;
+    const v = await r.json();
+    if(v && v.version && esMasNueva(v.version, APP_VERSION)) mostrarActualizacion(v);
+  }catch(e){ /* sin conexión: se vuelve a intentar más tarde */ }
+}
+function mostrarActualizacion(v){
+  avisoActualizacion = true;
+  const d = document.createElement('div');
+  d.id='actualizacion'; d.setAttribute('role','alertdialog'); d.setAttribute('aria-modal','true'); d.setAttribute('aria-labelledby','actTit');
+  const nov = Array.isArray(v.novedades) ? v.novedades : [];
+  d.innerHTML = `<div class="act-caja">
+    <div class="act-cab"><span class="flecha" aria-hidden="true">↻</span><div class="tit"><div class="ctx">Versión ${esc(v.version)}</div><h2 id="actTit">Hay una versión nueva</h2></div></div>
+    <div class="act-cuerpo"><p>Actualiza para seguir usando la app. Tus datos se quedan como están.</p>
+      ${nov.length?`<h3>Novedades</h3><ul>${nov.map(n=>`<li>${esc(n)}</li>`).join('')}</ul>`:''}
+      <button class="btn primary act-btn" id="actBtn">Actualizar ahora</button>
+      <div class="act-pie">Tienes la versión ${APP_VERSION}</div></div></div>`;
+  document.body.appendChild(d);
+  document.body.classList.add('bloqueada');
+  document.querySelectorAll('header.app, nav.pasos, main, #toast').forEach(e=>e.setAttribute('inert',''));
+  const b = d.querySelector('#actBtn');
+  b.addEventListener('click', ()=>{ b.disabled=true; b.textContent='Actualizando…'; save();
+    location.replace(location.pathname + '?v=' + encodeURIComponent(v.version) + '&t=' + Date.now()); });
+  d.addEventListener('keydown', e=>{ if(e.key==='Tab'||e.key==='Escape'){ e.preventDefault(); b.focus(); } });
+  b.focus();
+}
+if(/[?&]v=/.test(location.search)){ history.replaceState(null,'',location.pathname+location.hash); setTimeout(()=>toast(`App actualizada a la versión ${APP_VERSION}`),300); }
+comprobarVersion();
+setInterval(comprobarVersion, 5*60*1000);
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) comprobarVersion(); });
+window.addEventListener('focus', comprobarVersion);
+
 </script>
 </body>
 </html>
