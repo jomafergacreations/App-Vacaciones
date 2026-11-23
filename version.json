@@ -1,8 +1,8 @@
 {
-  "version": "3.2.0",
+  "version": "3.3.0",
   "fecha": "2026-11-23",
   "novedades": [
-    "Recorrido obligatorio por las novedades después de cada actualización",
-    "La app detecta las versiones nuevas sola, cada minuto"
+    "Cada trabajador puede tener varios tipos o funciones",
+    "Los tipos de trabajador se gestionan ahora en Plantilla"
   ]
 }
