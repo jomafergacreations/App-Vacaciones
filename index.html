@@ -208,6 +208,26 @@ body.cal-full{overflow:hidden}
 body.cal-full .cal-anual-card{position:fixed;inset:0;z-index:40;margin:0;border-radius:0;display:flex;flex-direction:column;border:0}
 body.cal-full .anual{flex:1;max-height:none}
 
+.selcal{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:14px 18px;user-select:none;-webkit-user-select:none}
+.smes-t{font-family:var(--cond);font-weight:700;font-size:17px;margin-bottom:4px}
+.sgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.sdow{font-size:10.5px;color:var(--gris);text-align:center;font-weight:600}
+.ed{position:relative;display:grid;place-items:center;aspect-ratio:1;border-radius:5px;font-size:12.5px;font-variant-numeric:tabular-nums;cursor:pointer;background:#fff;border:1px solid var(--linea)}
+.ed.we{background:#F6F7F9}
+.ed.ss{background:var(--senal-soft)}
+.ed.pu{box-shadow:inset 0 -3px 0 var(--pista-soft)}
+.ed.libre:hover{border-color:var(--asfalto)}
+.ed.og::after{content:"";position:absolute;top:3px;right:3px;width:5px;height:5px;border-radius:50%;background:var(--gris)}
+.ed.casi{border-color:var(--warn)}
+.ed.hoy{font-weight:800;text-decoration:underline}
+.ed.propio{background:var(--ctx);color:#fff;border-color:var(--ctx);cursor:default}
+.ed.blk{background:repeating-linear-gradient(135deg,#D3D7DE 0 3px,#EEF0F3 3px 7px);color:#8A919D;cursor:not-allowed;border-color:#E1E4E9}
+.ed.blk.lleno{background:repeating-linear-gradient(135deg,#F2C3BE 0 3px,#FBE4E1 3px 7px);color:var(--bad)}
+.ed.sel{background:var(--senal);color:var(--asfalto);border-color:var(--asfalto);font-weight:800}
+.legend .lg-og::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;background:var(--gris)}
+.selbar{position:sticky;bottom:0;z-index:3;display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;margin:14px -18px -18px;padding:12px 18px;background:#fff;border-top:1px solid var(--linea);border-radius:0 0 14px 14px}
+.selbar.on{background:var(--senal-soft);border-top:3px solid var(--senal)}
+.selbar b{font-family:var(--cond);font-size:22px}
 .list-order{list-style:none;padding:0;margin:0;max-height:420px;overflow:auto}
 .list-order li{padding:7px 6px;border-bottom:1px solid var(--linea);display:flex;gap:10px;align-items:center}
 .list-order .pos{width:28px;text-align:right;font-family:var(--cond);font-weight:700;font-size:18px;color:var(--gris)}
@@ -290,7 +310,8 @@ body.bloqueada{overflow:hidden}
   .cartel .flecha{font-size:34px;padding:0 12px} .cartel .who{font-size:30px}
   header.app{padding:0 10px;gap:8px} .marca h1{display:none} .ciclo{display:none} .miga{font-size:16px;padding:3px 8px}
   .portada h2{font-size:36px} .tile .nom{font-size:34px} .tile.prod .nom{font-size:38px} .tile{min-height:110px;padding:18px}
-  .anual{--nw:112px;max-height:65vh} .an-nom{font-size:12.5px;padding:0 6px}
+  .anual{--nw:112px;max-height:65vh}
+  .selcal{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px} .ed{font-size:11.5px} .an-nom{font-size:12.5px;padding:0 6px}
 }
 @media print{
   body{background:#fff}
@@ -319,7 +340,7 @@ body.bloqueada{overflow:hidden}
    Reglas base: Convenio Menzies (BOE-A-2023-25956), arts. 32 y 33
    Datos guardados en el navegador (localStorage). Haz copias.
    ========================================================= */
-const APP_VERSION = '4.1.0';   // súbela junto con version.json en cada publicación
+const APP_VERSION = '4.2.0';   // súbela junto con version.json en cada publicación
 const LS_KEY = 'vacaciones-agp-v1';
 const SIN = '_'; // clave interna para «sin grupo»
 
@@ -373,7 +394,7 @@ const SUGERENCIAS = { // ideas para crear skills rápido; se pueden ignorar
   Operaciones:['Agente administrativo','Auxiliar administrativo','Coordinador de operaciones','Control de carga','Jefe de turno','Supervisor'],
 };
 const AJUSTES_DEF = { computo:'naturales', bloquear:true, rondas:3, ptsSS:8, ptsPuente:2, diasDefecto:24,
-  ponderar:true, baseDias:24, maxDesprog:3, preaviso:15, pctTurno:10, desprogPuntua:true };
+  ponderar:true, baseDias:24, bloqueoGrupo:true, maxDesprog:3, preaviso:15, pctTurno:10, desprogPuntua:true };
 const depsIniciales = () => ['Pasaje','Rampa','Operaciones'].map(n=>({id:uid(), nombre:n, baseDias:''}));
 
 function estadoInicial(){
@@ -552,6 +573,14 @@ function cuposExcedidos(){
   const occ = ocupacion(null), dias = new Set();
   S.cupos.filter(cupoVisible).forEach(c=>{ for(const s of eachDay(c.desde,c.hasta)) if(usadosCupo(c,occ[s]||[])>c.max) dias.add(s); });
   return dias.size;
+}
+/* días que ya tiene alguien del mismo grupo (dentro del mismo departamento y producto) */
+function companerosEnFechas(w, desde, hasta, excepto){
+  if(!S.ajustes.bloqueoGrupo) return [];
+  const k = gk(w), out = new Set();
+  S.periodos.forEach(p=>{ if(p.id===excepto || p.trabajadorId===w.id) return; const t=trabDe(p.trabajadorId);
+    if(t && visible(t)===visible(w) && depDe(t)===depDe(w) && prodDe(t)===prodDe(w) && gk(t)===k && !(hasta<p.desde || desde>p.hasta)) out.add(t.nombre); });
+  return [...out];
 }
 const solapePropio = (w,desde,hasta,excepto) => S.periodos.some(p=>p.id!==excepto && p.trabajadorId===w.id && !(hasta<p.desde || desde>p.hasta));
 const ambitoCupo = c => [!c.depId ? 'Todos los departamentos' : '', c.grupoId ? esc(nombreGrupo(c.grupoId)) : 'todos los grupos', c.skills.length ? c.skills.map(t=>esc(skillDe(t)?.nombre)).filter(Boolean).join(', ') : 'todas las skills'].filter(Boolean).join(', ');
@@ -732,6 +761,7 @@ function vAjustes(){
         <option value="1" ${A.bloquear?'selected':''}>No dejar asignar</option>
         <option value="0" ${!A.bloquear?'selected':''}>Dejar asignar con aviso</option></select></label>
     </div>
+    <div class="row" style="margin-top:12px"><label class="chk"><input type="checkbox" ${A.bloqueoGrupo?'checked':''} onchange="S.ajustes.bloqueoGrupo=this.checked;save();render()">No dejar coger días que ya tiene alguien de su mismo grupo (los de otros grupos no bloquean)</label></div>
   </div>
   <div class="card"><h2>Ponderación</h2>
     <p class="help">Quien tiene más días de vacaciones gastaría siempre más puntos. La ponderación lleva los puntos de todos a la misma base de días.</p>
@@ -1009,15 +1039,16 @@ function vEleccion(){
 function previewHTML(w, desde, hasta, excepto, bloquea){
   if(!desde || !hasta) return '';
   if(hasta < desde) return `<div class="preview bad">La fecha de fin es anterior a la de inicio.</div>`;
-  const st = statsTrab(w), r = statsRango(desde,hasta), conf = conflictosCupo(w,desde,hasta), sol = solapePropio(w,desde,hasta,excepto), ces = solapaCese(w,desde,hasta);
+  const st = statsTrab(w), r = statsRango(desde,hasta), conf = conflictosCupo(w,desde,hasta), sol = solapePropio(w,desde,hasta,excepto), ces = solapaCese(w,desde,hasta), comp = companerosEnFechas(w,desde,hasta,excepto);
   let quedan = st.pendientes - r.computables;
   if(excepto){ const p=S.periodos.find(x=>x.id===excepto); if(p && delAnio(p.desde,S.ciclo)) quedan += statsRango(p.desde,p.hasta).computables; }
   const diasConf = [...new Set(conf.map(c=>c.dia))];
-  const cls = (sol || ces || (conf.length && bloquea)) ? 'bad' : (conf.length || quedan<0) ? 'warn' : 'ok';
+  const cls = (sol || ces || ((conf.length||comp.length) && bloquea)) ? 'bad' : (conf.length || comp.length || quedan<0) ? 'warn' : 'ok';
   return `<div class="preview ${cls}">
     <div class="stats"><div><b>${r.computables}</b>días${r.computables!==r.naturales?` (${r.naturales} naturales)`:''}</div><div><b>${nf(r.pts)}</b>puntos brutos</div><div><b>${nf(r.pts*st.f)}</b>puntos finales</div><div><b>${quedan}</b>días le quedarían</div></div>
     ${sol?'<p><b>Se solapa con otro periodo suyo.</b></p>':''}
     ${ces?`<p><b>Cae dentro de su periodo de cese</b> (${esc(ceseTxt(w))}).</p>`:''}
+    ${comp.length?`<p><b>Coincide con alguien de su grupo:</b> ${esc(comp.join(', '))}.</p>`:''}
     ${conf.length?`<p><b>${bloquea?'No hay cupo':'Supera el cupo'} ${diasConf.length} día(s):</b> ${resumenConflictos(conf)}</p>`:'<p>Hay cupo todos los días.</p>'}
     ${quedan<0?`<p><b>Se pasa ${-quedan} día(s) de su derecho.</b></p>`:''}
     ${!delAnio(desde,S.ciclo)?`<p><b>Ojo:</b> estas fechas no son del ciclo ${S.ciclo}; no cuentan para sus puntos de este ciclo.</p>`:''}
@@ -1038,20 +1069,24 @@ function vTurnos(ks){
        <button class="btn ink" onclick="terminarTurno('${k}','${actual.id}')">Pasar al siguiente ›</button>
        <button class="btn" onclick="deshacerTurno('${k}')" ${(!h.length&&t.ronda===1)?'disabled':''}>↶ Deshacer</button></div></div></div>`
     : `<div class="cartel fin"><div class="flecha" aria-hidden="true">✓</div><div class="cuerpo"><div class="txt"><div class="who">${esc(nombreGrupo(k))} ha terminado</div><div class="sub">Todas las rondas están cerradas.</div></div><button class="btn" onclick="deshacerTurno('${k}')">↶ Deshacer</button></div></div>`;
-  const puede = UI.desde && UI.hasta && UI.hasta>=UI.desde && !solapePropio(w,UI.desde,UI.hasta) && !solapaCese(w,UI.desde,UI.hasta) && !(S.ajustes.bloquear && conflictosCupo(w,UI.desde,UI.hasta).length);
+  const puede = UI.desde && UI.hasta && UI.hasta>=UI.desde && !solapePropio(w,UI.desde,UI.hasta) && !solapaCese(w,UI.desde,UI.hasta) && !companerosEnFechas(w,UI.desde,UI.hasta).length && !(S.ajustes.bloquear && conflictosCupo(w,UI.desde,UI.hasta).length);
+  const sel = UI.desde && UI.hasta ? statsRango(UI.desde,UI.hasta) : null;
   return `${selector}${cartel}
-  <div class="grid2">
-   <div class="card"><h2>Asignar vacaciones</h2>
-    <div class="row">
-      <label style="flex-basis:100%">Trabajador<select onchange="selTrab(this.value)">${orden.map((x,i)=>`<option value="${x.id}" ${x.id===UI.trab?'selected':''}>${i+1}. ${esc(x.nombre)}</option>`).join('')}</select></label>
-      <label>Desde<input type="date" value="${UI.desde}" min="${S.ciclo}-01-01" max="${S.ciclo}-12-31" onchange="UI.desde=this.value; if(!UI.hasta||UI.hasta<UI.desde) UI.hasta=this.value; render()"></label>
-      <label>Hasta<input type="date" value="${UI.hasta}" min="${UI.desde||S.ciclo+'-01-01'}" max="${S.ciclo}-12-31" onchange="UI.hasta=this.value; render()"></label>
+  <div class="card">
+    <div class="row" style="align-items:flex-end;margin-bottom:12px">
+      <label style="flex:1 1 240px">Eligiendo para<select onchange="selTrab(this.value)">${orden.map((x,i)=>`<option value="${x.id}" ${x.id===UI.trab?'selected':''}>${i+1}. ${esc(x.nombre)}</option>`).join('')}</select></label>
+      <div class="muted" style="flex:2 1 300px;padding-bottom:6px">${matchMedia('(pointer:coarse)').matches?'Toca el primer día y luego el último.':'Pincha un día, o pincha y arrastra para marcar varios seguidos.'} Los días rayados no se pueden coger.</div>
+    </div>
+    ${selectorAnual(w)}
+    <div class="selbar ${sel?'on':''}">
+      ${sel?`<div><b>${fmt(UI.desde)}${UI.hasta!==UI.desde?' – '+fmt(UI.hasta):''}</b><span class="muted"> ${sel.computables} día(s), ${nf(sel.pts*st.f)} puntos</span></div>
+        <div class="row"><button class="btn primary" onclick="añadirPeriodo()" ${puede?'':'disabled'}>Asignar a ${esc(w.nombre.split(' ')[0])}</button><button class="btn" onclick="UI.desde='';UI.hasta='';render()">Quitar selección</button></div>`
+        :`<span class="muted">Todavía no has marcado días.</span>`}
     </div>
     ${previewHTML(w, UI.desde, UI.hasta, null, S.ajustes.bloquear)}
-    <div class="row" style="margin-top:14px"><button class="btn primary" onclick="añadirPeriodo()" ${puede?'':'disabled'}>Añadir periodo</button>
-    ${UI.desde?`<button class="btn" onclick="UI.desde='';UI.hasta='';render()">Limpiar fechas</button>`:''}</div>
-    ${fichaTrab(w, st)}
-   </div>
+  </div>
+  <div class="grid2">
+   <div class="card">${fichaTrab(w, st)}</div>
    <div class="card"><h2>Orden de ${esc(nombreGrupo(k))}</h2>
     <p class="help">De menos a más puntos del año anterior. Si empatan, cuenta el año previo (art. 33) y después la antigüedad.</p>
     <ol class="list-order">${orden.map((x,i)=>{const done=h.includes(x.id), cur=actual&&actual.id===x.id, s2=statsTrab(x);
@@ -1060,6 +1095,73 @@ function vTurnos(ks){
    </div>
   </div>`;
 }
+/* ----- calendario de elección: pinchar o arrastrar días ----- */
+let selLibres = new Set(), selArrastre = null, selTipo = 'mouse';
+function selectorAnual(w){
+  const y = S.ciclo, occ = ocupacion(w.id), k = gk(w), hoyS = hoy();
+  const propios = new Set(); S.periodos.filter(p=>p.trabajadorId===w.id).forEach(p=>{ for(const d of eachDay(p.desde,p.hasta)) propios.add(d); });
+  selLibres = new Set();
+  let html = '<div class="selcal" id="selcal">';
+  for(let m=0;m<12;m++){
+    const mm=String(m+1).padStart(2,'0'), first=`${y}-${mm}-01`, dim=new Date(Date.UTC(y,m+1,0)).getUTCDate(), off=(pd(first).getUTCDay()+6)%7;
+    html += `<div class="smes"><div class="smes-t">${MESES[m][0].toUpperCase()+MESES[m].slice(1)}</div><div class="sgrid">${DOW.map(d=>`<span class="sdow">${d}</span>`).join('')}${'<span></span>'.repeat(off)}`;
+    for(let d=1; d<=dim; d++){
+      const s=`${y}-${mm}-${String(d).padStart(2,'0')}`, wd=pd(s).getUTCDay();
+      const otros = (occ[s]||[]).map(trabDe).filter(t=>t && visible(t));
+      const mismos = S.ajustes.bloqueoGrupo ? otros.filter(t=>gk(t)===k) : [];
+      const deOtros = otros.filter(t=>gk(t)!==k);
+      const cupoLleno = S.cupos.some(c=>enRango(s,c) && reglaAplica(c,w) && usadosCupo(c, occ[s]||[])+1 > Number(c.max));
+      let st='libre', motivo='';
+      if(propios.has(s)){ st='propio'; motivo='Ya son vacaciones suyas'; }
+      else if(enCese(w,s)){ st='blk ces'; motivo='Periodo de cese'; }
+      else if(mismos.length){ st='blk'; motivo=`Lo tiene ${mismos.map(t=>t.nombre).join(', ')} (mismo grupo)`; }
+      else if(cupoLleno && S.ajustes.bloquear){ st='blk lleno'; motivo='Sin cupo'; }
+      if(st==='libre') selLibres.add(s);
+      const cls = ['ed', st, (wd===0||wd===6)?'we':'', esSS(s)?'ss':'', esPuente(s)?'pu':'', deOtros.length?'og':'', cupoLleno&&!S.ajustes.bloquear&&st==='libre'?'casi':'', s===hoyS?'hoy':'', (UI.desde&&s>=UI.desde&&s<=UI.hasta)?'sel':''].filter(Boolean).join(' ');
+      const tit = `${fmt(s)}: ${ptsDia(s)} pts${esSS(s)?', Semana Santa':''}${esPuente(s)?', puente':''}${motivo?'. '+motivo:''}${deOtros.length?`. De otros grupos: ${deOtros.map(t=>t.nombre).join(', ')}`:''}`;
+      html += `<span class="${cls}" data-d="${s}" data-m="${esc(motivo)}" title="${esc(tit)}">${d}</span>`;
+    }
+    html += '</div></div>';
+  }
+  return html + `</div><div class="legend"><span style="--c:var(--senal)">Seleccionado</span><span style="--c:var(--ctx)">Sus vacaciones</span><span style="--c:repeating-linear-gradient(135deg,#C9CED6 0 2px,#EEF0F3 2px 4px)">No disponible</span><span class="lg-og">Alguien de otro grupo</span><span style="--c:var(--senal-soft)">Semana Santa</span></div>`;
+}
+function selLimitar(a, b){ // avanza desde a hacia b y se para antes del primer día no disponible
+  const paso = b>=a ? 1 : -1; let fin = a;
+  for(let s=addDays(a,paso); paso>0 ? s<=b : s>=b; s=addDays(s,paso)){ if(!selLibres.has(s)) break; fin = s; }
+  return fin;
+}
+function selPintar(a, b){
+  const [d,h] = a<=b ? [a,b] : [b,a];
+  document.querySelectorAll('#selcal .ed[data-d]').forEach(e=>e.classList.toggle('sel', e.dataset.d>=d && e.dataset.d<=h));
+}
+function selFijar(a, b){ const [d,h] = a<=b ? [a,b] : [b,a]; UI.desde=d; UI.hasta=h; render(); }
+function selToque(s, el){
+  if(!selLibres.has(s)) return toast(el?.dataset.m || 'Ese día no está disponible');
+  if(UI.desde && UI.desde===UI.hasta && s!==UI.desde && selLibres.has(UI.desde)) return selFijar(UI.desde, selLimitar(UI.desde, s));
+  if(UI.desde===s && UI.hasta===s){ UI.desde=''; UI.hasta=''; return render(); }
+  selFijar(s, s);
+}
+document.addEventListener('pointerdown', e=>{
+  const el = e.target.closest && e.target.closest('#selcal .ed[data-d]'); if(!el) return;
+  selTipo = e.pointerType || 'mouse';
+  if(selTipo==='touch') return;               // en táctil se marca con dos toques
+  e.preventDefault();
+  if(!selLibres.has(el.dataset.d)) return toast(el.dataset.m || 'Ese día no está disponible');
+  selArrastre = {a:el.dataset.d, b:el.dataset.d, movido:false}; selPintar(el.dataset.d, el.dataset.d);
+});
+document.addEventListener('pointerover', e=>{
+  if(!selArrastre) return; const el = e.target.closest && e.target.closest('#selcal .ed[data-d]'); if(!el) return;
+  const b = selLimitar(selArrastre.a, el.dataset.d);
+  if(b!==selArrastre.b){ selArrastre.b=b; selArrastre.movido=true; selPintar(selArrastre.a, b); }
+});
+document.addEventListener('pointerup', ()=>{
+  if(!selArrastre) return; const {a,b,movido} = selArrastre; selArrastre=null;
+  if(movido) selFijar(a,b); else selToque(a, document.querySelector(`#selcal .ed[data-d="${a}"]`));
+});
+document.addEventListener('click', e=>{
+  const el = e.target.closest && e.target.closest('#selcal .ed[data-d]'); if(!el || selTipo!=='touch') return;
+  selToque(el.dataset.d, el);
+});
 function fichaTrab(w, st){
   return `<h3>${esc(w.nombre)}</h3>
     <div class="muted">${esc(skillsTxt(w))}, ${modalidadTxt(w)}, ${st.derecho} días. Factor ${factorInfo(w).txt}</div>
@@ -1087,6 +1189,7 @@ function añadirPeriodo(){
   const w = trabDe(UI.trab); if(!w) return;
   if(solapePropio(w,UI.desde,UI.hasta)) return toast('Se solapa con otro periodo suyo');
   if(solapaCese(w,UI.desde,UI.hasta)) return toast('Esas fechas caen en su periodo de cese');
+  if(companerosEnFechas(w,UI.desde,UI.hasta).length) return toast('Esos días ya los tiene alguien de su grupo');
   if(S.ajustes.bloquear && conflictosCupo(w,UI.desde,UI.hasta).length) return toast('No hay cupo en esas fechas');
   const forz = conflictosCupo(w,UI.desde,UI.hasta).length>0;
   S.periodos.push({id:uid(), trabajadorId:w.id, desde:UI.desde, hasta:UI.hasta, ronda:tState(gk(w)).ronda, forzado:forz});
@@ -1105,7 +1208,8 @@ function vMano(){
   const M = UI.m;
   if(!M.trab || !trabDe(M.trab) || !visible(trabDe(M.trab))) M.trab = ordenEleccion(gruposActivos()[0])[0].id;
   const w = trabDe(M.trab);
-  const conf = (M.desde && M.hasta && M.hasta>=M.desde) ? conflictosCupo(w,M.desde,M.hasta) : [];
+  const rango = M.desde && M.hasta && M.hasta>=M.desde;
+  const conf = rango ? [...conflictosCupo(w,M.desde,M.hasta), ...companerosEnFechas(w,M.desde,M.hasta,M.edit)] : [];
   const puede = M.desde && M.hasta && M.hasta>=M.desde && !solapePropio(w,M.desde,M.hasta,M.edit) && !solapaCese(w,M.desde,M.hasta) && (!conf.length || M.forzar);
   const lista = S.periodos.filter(p=>{ const t=trabDe(p.trabajadorId); return t && visible(t) && delAnio(p.desde,S.ciclo) && (M.filtro==='all' || gk(t)===M.filtro); })
     .sort((a,b)=>a.desde.localeCompare(b.desde) || trabDe(a.trabajadorId).nombre.localeCompare(trabDe(b.trabajadorId).nombre,'es'));
@@ -1119,7 +1223,7 @@ function vMano(){
       <label style="flex-basis:100%">Nota (opcional)<input value="${esc(M.nota)}" placeholder="Acordado con el jefe de turno" onchange="UI.m.nota=this.value"></label>
     </div>
     ${previewHTML(w, M.desde, M.hasta, M.edit, !M.forzar)}
-    ${conf.length?`<div class="row" style="margin-top:10px"><label class="chk"><input type="checkbox" ${M.forzar?'checked':''} onchange="UI.m.forzar=this.checked;render()">Guardar aunque no haya cupo</label></div>`:''}
+    ${conf.length?`<div class="row" style="margin-top:10px"><label class="chk"><input type="checkbox" ${M.forzar?'checked':''} onchange="UI.m.forzar=this.checked;render()">Guardar aunque no haya cupo o coincida con su grupo</label></div>`:''}
     <div class="row" style="margin-top:14px"><button class="btn primary" onclick="guardarMano()" ${puede?'':'disabled'}>${M.edit?'Guardar cambios':'Añadir vacaciones'}</button>
       ${(M.desde||M.edit)?`<button class="btn" onclick="limpiarMano();render()">${M.edit?'Cancelar':'Limpiar'}</button>`:''}</div>
     ${fichaTrab(w, statsTrab(w))}
@@ -1140,8 +1244,8 @@ function guardarMano(){
   if(!(M.desde&&M.hasta&&M.hasta>=M.desde)) return toast('Pon una fecha de inicio y una de fin posterior');
   if(solapePropio(w,M.desde,M.hasta,M.edit)) return toast('Se solapa con otro periodo suyo');
   if(solapaCese(w,M.desde,M.hasta)) return toast('Esas fechas caen en su periodo de cese');
-  const forz = conflictosCupo(w,M.desde,M.hasta).length>0;
-  if(forz && !M.forzar) return toast('No hay cupo. Marca «Guardar aunque no haya cupo» si quieres apuntarlas igual');
+  const forz = conflictosCupo(w,M.desde,M.hasta).length>0 || companerosEnFechas(w,M.desde,M.hasta,M.edit).length>0;
+  if(forz && !M.forzar) return toast('No hay cupo o coincide con alguien de su grupo. Marca la casilla si quieres apuntarlas igual');
   if(M.edit){ Object.assign(S.periodos.find(p=>p.id===M.edit), {desde:M.desde, hasta:M.hasta, nota:M.nota, forzado:forz, manual:true}); toast('Vacaciones actualizadas'); }
   else { S.periodos.push({id:uid(), trabajadorId:w.id, desde:M.desde, hasta:M.hasta, nota:M.nota, manual:true, forzado:forz, ronda:null}); toast('Vacaciones añadidas'); }
   limpiarMano(); save(); render();
@@ -1513,6 +1617,14 @@ render();
    Para publicar: subir APP_VERSION, añadir sus pasos a NOVEDADES y poner la misma versión en version.json.
    ========================================================= */
 const NOVEDADES = {
+  '4.2.0': [
+    { titulo:'Elige en el calendario', donde:'Elección, por turnos',
+      texto:'La elección se hace ahora sobre el año completo. Con ratón, pincha un día o pincha y arrastra para marcar varios seguidos. En el móvil, toca el primer día y luego el último. Después pulsa «Asignar».' },
+    { titulo:'Días bloqueados por grupo', donde:'Elección',
+      texto:'Los días que ya tiene alguien de su mismo grupo salen rayados y no se pueden coger. Los de otros grupos no bloquean: solo llevan un puntito para que sepas que hay alguien. También se bloquean su cese, sus propias vacaciones y los días sin cupo.' },
+    { titulo:'Se puede desactivar', donde:'Ajustes generales ⚙',
+      texto:'Si en algún momento hace falta, la regla del mismo grupo se quita en los ajustes. En «A mano» puedes saltártela puntualmente marcando la casilla de forzar.' },
+  ],
   '4.1.0': [
     { titulo:'Fijos discontinuos sin trabas', donde:'Trabajadores',
       texto:'Ya puedes crear la ficha de un fijo discontinuo sin saber sus días trabajados al año. Son opcionales y puedes rellenarlos después.' },

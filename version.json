@@ -1,8 +1,8 @@
 {
-  "version": "4.1.0",
+  "version": "4.2.0",
   "fecha": "2026-11-23",
   "novedades": [
-    "Los días trabajados de los fijos discontinuos ya no son obligatorios",
-    "Periodos de cese editables en la ficha de cada fijo discontinuo"
+    "La elección se hace sobre el calendario del año: pincha o arrastra para marcar días",
+    "Los días que ya tiene alguien del mismo grupo quedan bloqueados; los de otros grupos no"
   ]
 }
