@@ -1,7 +1,9 @@
 {
-  "version": "5.1.0",
+  "version": "5.2.0",
   "fecha": "2026-11-23",
   "novedades": [
-    "Rotaciones: las 3 semanas a la vista; pulsa cada día para decir si es libre, festivo o turno"
+    "Plantilla: trabajadores y cupos de plantilla juntos, editables en cualquier momento",
+    "Los grupos de la asignación pasan a llamarse grupos de elección",
+    "Rotación específica por persona"
   ]
 }
