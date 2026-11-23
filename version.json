@@ -1,7 +1,7 @@
 {
-  "version": "5.4.0",
+  "version": "5.4.1",
   "fecha": "2026-11-23",
   "novedades": [
-    "Rotaciones: enero a la vista para elegir en qué semana empieza cada grupo el día 1"
+    "El calendario anual muestra los turnos de la rotación de cada persona"
   ]
 }

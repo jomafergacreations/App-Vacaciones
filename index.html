@@ -210,6 +210,9 @@ td .chip{white-space:normal}
 .cese-fila{gap:6px!important}
 .cese-fila input{flex:1 1 0;min-width:0}
 .cese-fila .muted{flex:0 0 auto}
+.an-rot{position:absolute;top:0;bottom:0;box-shadow:inset 0 -3px 0 var(--tc);font-family:var(--cond);font-weight:700;font-size:11px;color:var(--tc);display:flex;align-items:flex-start;justify-content:center;padding-top:1px;pointer-events:none}
+.an-rot.lib{background:color-mix(in srgb,var(--tc) 22%,transparent);box-shadow:none;color:var(--tc)}
+.an-bar,.an-dp,.an-cese{z-index:1}
 .an-cese{position:absolute;top:4px;bottom:4px;border-radius:4px;background:repeating-linear-gradient(135deg,#C9CED6 0 3px,#EEF0F3 3px 7px);cursor:pointer}
 .an-dp{position:absolute;top:7px;bottom:7px;background:var(--senal);border:1px solid #9A7A00;border-radius:2px;min-width:3px;pointer-events:auto;cursor:help}
 .an-capa{position:absolute;top:0;bottom:0;left:var(--nw);right:0;pointer-events:none;z-index:0}
@@ -455,7 +458,7 @@ body.bloqueada{overflow:hidden}
    Reglas base: Convenio Menzies (BOE-A-2023-25956), arts. 32 y 33
    Datos guardados en el navegador (localStorage). Haz copias.
    ========================================================= */
-const APP_VERSION = '5.4.0';   // súbela junto con version.json en cada publicación
+const APP_VERSION = '5.4.1';   // súbela junto con version.json en cada publicación
 const LS_KEY = 'vacaciones-agp-v1';
 const SIN = '_'; // clave interna para «sin grupo»
 
@@ -1727,8 +1730,8 @@ function vCalAnual(seg){
     const ps = S.periodos.filter(p=>p.trabajadorId===t.id).map(p=>({p,c:clip(p.desde,p.hasta)})).filter(x=>x.c);
     const dps = S.desprog.filter(d=>d.trabajadorId===t.id && delAnio(d.dia,y));
     const ces = ceseDe(t).map(c=>clip(c.desde,c.hasta)).filter(Boolean);
-    return `<div class="an-fila"><div class="an-nom" title="${esc(t.nombre)}, ${esc(skillsTxt(t))}">${esc(t.nombre)}</div>
-      <div class="an-pista" onclick="clicPista(event,'${t.id}',${y})">${ces.map(c=>`<span class="an-cese" style="left:calc(var(--dw)*${c[0]});width:calc(var(--dw)*${c[1]})" title="${esc(t.nombre)}: periodo de cese" onclick="event.stopPropagation();UI.editTrab='${t.id}';go('trabajadores')"></span>`).join('')}${ps.map(({p,c})=>{const r=statsRango(p.desde,p.hasta);
+    return `<div class="an-fila"><div class="an-nom" title="${esc(t.nombre)}, ${esc(skillsTxt(t))}${rotDe(t)?', rotación '+esc(rotDe(t).nombre):''}">${esc(t.nombre)}</div>
+      <div class="an-pista" onclick="clicPista(event,'${t.id}',${y})">${UI.cal.turnos!==false?franjaTurnos(t, y, dias, conDias):''}${ces.map(c=>`<span class="an-cese" style="left:calc(var(--dw)*${c[0]});width:calc(var(--dw)*${c[1]})" title="${esc(t.nombre)}: periodo de cese" onclick="event.stopPropagation();UI.editTrab='${t.id}';go('trabajadores')"></span>`).join('')}${ps.map(({p,c})=>{const r=statsRango(p.desde,p.hasta);
         return `<button class="an-bar ${p.forzado?'forz':''} ${p.manual?'mano':''}" style="left:calc(var(--dw)*${c[0]});width:calc(var(--dw)*${c[1]})" title="${esc(t.nombre)}: ${fmt(p.desde)} – ${fmt(p.hasta)} (${r.naturales} días)${p.nota?'. '+esc(p.nota):''}" onclick="event.stopPropagation();editarPeriodo('${p.id}')">${fmt(p.desde)}–${fmt(p.hasta)}</button>`}).join('')}
         ${dps.map(d=>`<span class="an-dp" style="left:calc(var(--dw)*${idx(d.dia)});width:var(--dw)" title="Desprogramación: ${fmt(d.dia)}" onclick="event.stopPropagation()"></span>`).join('')}</div></div>`;
   };
@@ -1743,6 +1746,7 @@ function vCalAnual(seg){
       <label>Buscar<input value="${esc(UI.cal.buscar)}" placeholder="Nombre" oninput="UI.cal.buscar=this.value;clearTimeout(window._bt);window._bt=setTimeout(()=>{render();const i=document.querySelector('.an-barra input');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}},250)"></label>
       <span class="esp"></span>
       <div class="seg" aria-label="Zoom"><button class="${UI.cal.zoom==='ajustar'?'on':''}" onclick="UI.cal.zoom='ajustar';render()">Año</button><button class="${UI.cal.zoom==='semana'?'on':''}" onclick="UI.cal.zoom='semana';render()">Semanas</button><button class="${UI.cal.zoom==='dia'?'on':''}" onclick="UI.cal.zoom='dia';render()">Días</button></div>
+      <label class="chk" style="flex:0 0 auto"><input type="checkbox" ${UI.cal.turnos!==false?'checked':''} onchange="UI.cal.turnos=this.checked;render()">Turnos</label>
       <button class="btn ink" onclick="pantallaCompleta()">${document.body.classList.contains('cal-full')?'Salir de pantalla completa':'Pantalla completa'}</button>
     </div>
     <div class="anual" id="anual" style="--dias:${dias}">
@@ -1753,8 +1757,24 @@ function vCalAnual(seg){
       ${filas.map(f=>`<div class="an-fila an-grp"><div class="an-nom">${esc(nombreGrupo(f.k))}</div><div class="an-pista"></div></div>${f.ts.map(fila).join('')}`).join('')}
      </div>`:'<div class="an-vacio">Nadie coincide con los filtros.</div>'}
     </div>
-    <div class="legend"><span style="--c:var(--ctx)">Vacaciones</span><span style="--c:repeating-linear-gradient(135deg,#9AB 0 3px,var(--ctx) 3px 6px)">Apuntadas a mano</span><span style="--c:var(--bad)">Sin cupo</span><span style="--c:var(--senal)">Desprogramación</span><span style="--c:repeating-linear-gradient(135deg,#C9CED6 0 2px,#EEF0F3 2px 4px)">Cese</span><span style="--c:rgba(246,195,0,.35)">Semana Santa</span><span style="--c:#F5F6F8;outline:1px solid var(--linea)">Fin de semana</span><span style="--c:var(--bad)">Línea roja: hoy</span></div>
+    <div class="legend"><span style="--c:var(--ctx)">Vacaciones</span><span style="--c:repeating-linear-gradient(135deg,#9AB 0 3px,var(--ctx) 3px 6px)">Apuntadas a mano</span><span style="--c:var(--bad)">Sin cupo</span><span style="--c:var(--senal)">Desprogramación</span><span style="--c:repeating-linear-gradient(135deg,#C9CED6 0 2px,#EEF0F3 2px 4px)">Cese</span><span style="--c:rgba(246,195,0,.35)">Semana Santa</span><span style="--c:#F5F6F8;outline:1px solid var(--linea)">Fin de semana</span><span style="--c:var(--bad)">Línea roja: hoy</span>${UI.cal.turnos!==false?S.turnosTipos.map(t=>`<span style="--c:${t.libre?t.color:'#fff'};${t.libre?'':`box-shadow:inset 0 -3px 0 ${t.color}`}">${esc(t.cod)} ${esc(t.nombre)}</span>`).join(''):''}</div>
   </div>`;
+}
+/* turnos de la rotación de una persona en el cuadrante anual: tramos seguidos del mismo turno */
+function franjaTurnos(w, y, dias, conLetra){
+  const r = rotDe(w); if(!r) return '';
+  const ini = inicioRot(w, r), y0 = `${y}-01-01`; let html = '', i = 0;
+  while(i < dias){
+    const c = codEnFecha(r, ini, addDays(y0,i)); let j = i+1;
+    while(j < dias && codEnFecha(r, ini, addDays(y0,j))===c) j++;
+    const t = tipoTurno(c);
+    if(t){
+      if(conLetra) for(let k=i;k<j;k++) html += `<span class="an-rot ${t.libre?'lib':''}" style="--tc:${t.color};left:calc(var(--dw)*${k});width:var(--dw)" title="${fmt(addDays(y0,k))}: ${esc(t.nombre)}">${esc(t.cod)}</span>`;
+      else html += `<span class="an-rot ${t.libre?'lib':''}" style="--tc:${t.color};left:calc(var(--dw)*${i});width:calc(var(--dw)*${j-i})" title="${esc(t.nombre)}: ${fmt(addDays(y0,i))}${j-i>1?' – '+fmt(addDays(y0,j-1)):''}"></span>`;
+    }
+    i = j;
+  }
+  return html;
 }
 function ajustarAnual(){
   const a = document.getElementById('anual'); if(!a) return;
@@ -2162,6 +2182,10 @@ render();
    Para publicar: subir APP_VERSION, añadir sus pasos a NOVEDADES y poner la misma versión en version.json.
    ========================================================= */
 const NOVEDADES = {
+  '5.4.1': [
+    { titulo:'Turnos en el calendario del año', donde:'Menú › Calendario',
+      texto:'El cuadrante anual muestra ya la rotación de cada persona: los libres y festivos sombreados en su color y una línea del color del turno en los días de trabajo. Con el zoom «Días» ves la letra de cada día. La casilla «Turnos» los oculta si te estorban.' },
+  ],
   '5.4.0': [
     { titulo:'Enero en Rotaciones', donde:'Menú › Rotaciones',
       texto:'Debajo de las 3 semanas ves enero entero, con una fila por grupo. Para cada uno eliges en qué semana de la rotación cae el 1 de enero (1, 2 o 3) y la fila se repinta al momento. Desde ahí la rotación sigue sin cortes.' },
