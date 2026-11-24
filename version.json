@@ -1,8 +1,9 @@
 {
-  "version": "8.1.0",
+  "version": "8.2.0",
   "fecha": "2026-11-24",
   "novedades": [
-    "Ahora se llama Control Planning",
-    "Se puede instalar en el escritorio con el icono del avión"
+    "Vacaciones con dos botones: Consultar calendario y Editar",
+    "Calendario de todo el año en celdas con nombres fijos",
+    "Hoja anual por trabajador para asignar vacaciones, AJ, X, bajas y desprogramaciones"
   ]
 }
