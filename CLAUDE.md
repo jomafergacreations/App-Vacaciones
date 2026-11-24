@@ -1,43 +1,34 @@
-# Control Planning (antes PlanningApp y Vacaciones AGP)
+# Control Planning
 
-App personal en un único `index.html` (HTML + CSS + JS, sin dependencias) para gestionar la elección de vacaciones en Menzies AGP según el convenio (BOE-A-2023-25956, arts. 32 y 33) y la jornada anual de cada persona. La clave de `localStorage` sigue siendo `vacaciones-agp-v1` para no perder datos. Se publica con GitHub Pages desde `main`. Es instalable como app de escritorio: `manifest.webmanifest`, iconos del avión (`icono-192.png`, `icono-512.png`, `icono-maskable-512.png`, `apple-touch-icon.png`, `favicon-32.png`) y un `sw.js` mínimo sin caché, para no romper el aviso de actualización. Los datos viven en el `localStorage` del navegador del usuario: nunca subir copias `.json` de datos al repositorio.
+App personal para Menzies AGP en un único `index.html` (HTML + CSS + JS, sin dependencias). Se publica con GitHub Pages desde `main`. Es instalable como app de escritorio (`manifest.webmanifest`, iconos del avión, `sw.js` mínimo sin caché).
+
+Desde la versión 10 la app se rehace desde cero, por partes. La versión anterior (Vacaciones AGP / PlanningApp, hasta la 9.1.4) está congelada en `antigua/`, con su propio `version.json`, para consultar sus datos; no se toca.
+
+Los datos viven en el `localStorage` del navegador (clave `control-planning-v10`; la versión anterior usa `vacaciones-agp-v1`). Nunca subir copias `.json` de datos al repositorio.
 
 ## Cómo publicar una versión
 
-Cada publicación tiene que hacer estas tres cosas a la vez, en el mismo commit:
+En el mismo commit:
 
-1. Subir `APP_VERSION` en `index.html` (semver: 3.2.0 → 3.3.0 para funciones nuevas, 3.2.1 para arreglos).
-2. Añadir en `NOVEDADES` (en `index.html`) una entrada con la nueva versión y sus pasos `{ titulo, donde, texto }`. Es el recorrido obligatorio que el usuario ve después de actualizar. Texto en español, en frases claras y desde el punto de vista del usuario.
-3. Poner la misma versión en `version.json`, con un resumen corto en `novedades`. La app abierta consulta este archivo cada minuto y bloquea la pantalla hasta que se actualice.
+1. Subir `APP_VERSION` en `index.html` (semver: funciones nuevas suben el segundo número; arreglos, el tercero).
+2. Añadir en `NOVEDADES` una entrada con la nueva versión y sus pasos `{ titulo, donde, texto }`: es el recorrido que el usuario ve al actualizar. En español, claro y desde su punto de vista.
+3. Poner la misma versión en `version.json`, con un resumen corto en `novedades`. La app abierta lo consulta cada minuto y bloquea la pantalla hasta que se actualice.
 
-Si `version.json` lleva una versión mayor que la de `index.html`, la app entrará en bucle de actualización: subirlas siempre juntas.
+Si `version.json` lleva una versión mayor que la de `index.html`, la app entra en bucle de actualización: subirlas siempre juntas.
 
-## Estructura
+## Estructura actual
 
-- Inicio: departamento (Pasaje, Rampa, Operaciones) → producto (GroundHandling azul, RedBull naranja) → menú del producto (`vMenu`). Todo lo de dentro se filtra por ese contexto (`S.ctx`).
-- Menú del producto (`vMenu`): tres globos.
-  - Personal (vista `personal`): lista y ficha por pestañas (`PER_TABS`: Datos con `formTrab`, Jornada con `fichaJornada`, Vacaciones con `fichaVacaciones`, Contrato con `vTransformaciones(id)`), y modo Tabla (`tablaPersonal`) con el pegado desde Excel (`pegarCard`).
-  - Grupos (vista `gestion`): pestañas `G_TABS` que reutilizan `vEquipos`, `vSkills`, `vRotaciones` y `vCupos`.
-  - Vacaciones (vista `vacaciones`): al entrar, dos botones: «Consultar calendario» y «Asignación de vacaciones» del año siguiente al ciclo de trabajo (`anioAsignacion` = `S.ciclo + 1`; `empezarAsignacion` va al paso que toca de `PASOS`: Grupos de elección › Elección › Resumen y cierre). `UI.vacModo` = `consultar` (`vConsultar`: tabla del año entero, una celda por persona y día, cabecera y nombres fijos, botones de mes, ZIP; tocar un día o un nombre abre `editar` con `clicCons`) o `editar` (`vEditar`: barra del trabajador `.ed-cab` en verde si ya tiene todos sus días asignados y en rojo si le faltan; hoja anual de un trabajador como la del Excel, 12 meses × 31 días; al tocar un día, `hojaAcciones` ofrece asignar vacaciones, desprogramar, AJ, X o baja, o cambiar/quitar lo que haya; rangos pinchando y arrastrando con el ratón (`arrIni`, abre el menú «rango») o con «Elegir el final en la hoja» en táctil; el menú (`hojaAcciones`) flota junto al último día tocado (`colocarHoja`, `UI.ed.ancla`) y se cierra con Esc). La pestaña «A mano» de la Elección (`vMano`) usa esta misma hoja; `abrirPeriodoEnHoja(p)` abre un periodo concreto en ella. Letras de los días: `COD_DIA` (H, R, F, X, AJ, D, B), con colores fijos en `PAL_DIA` (los mismos en Consultar, Editar y PDF) y clases de `claseDia`: fin de semana con barra oscura arriba y fondo gris, Semana Santa con borde amarillo. El informe del producto es la vista `pdf`.
-  - Las secciones antiguas (plantilla, jornada, desprog, equipos, rotaciones, calendario…) se redirigen a su globo con `ALIAS`.
-- PDF y ZIP se generan en la app sin librerías: `nuevoPDF()` (Helvetica, WinAnsi) y `hacerZIP()` (sin compresión). Nombre de cada ficha: «Nombre - año.pdf».
-- Categorías: una skill puede ser «de super» (`skill.super`); quien tenga alguna es super, el resto agente (`catDe`). Cada grupo tiene cupo por categoría (`cupoAg`, `cupoSup`): cuántos agentes y supers del grupo pueden estar fuera a la vez (`companerosEnFechas`).
-- Días de vacaciones: no se puede pasar de `derechoCiclo` (`excedeDias`). Los descansos y festivos de la rotación (`esDescanso`) no se pueden coger y, si un periodo los cruza, no cuentan (`statsRango(desde, hasta, w)`).
-- Grupos de elección ≠ cupos de plantilla: los grupos solo marcan quién elige con quién y en qué orden (y el 10 % de desprogramaciones); los cupos limitan cuántos pueden estar fuera a la vez.
-- Rotaciones: plantilla de 3 semanas (L-D) por departamento y producto; se asigna a grupos (`grupo.rotacionId`) o a una persona concreta (`trabajador.rotacionId`, que manda sobre la del grupo); `turnoDia(w, fecha)` da el turno de cada persona. La fase se fija por grupo o persona eligiendo en qué semana cae el 1 de enero (`rotAnio`, `rotSemana`, ver `inicioRot`); si no hay, se usa `rotacion.inicio`.
-- Jornada (vista `jornada`): jornada garantizada por persona en horas o en % de `S.ajustes.jornadaBase` (1.700 h; `jornadaModo`, `jornadaValor`; un tiempo completo sin valor usa 1.700). `jornadaInfo(w)` cuenta los días del año: R, F, X, AJ (libres), H (vacaciones y desprogramaciones), baja y D.T. Con bajas, cómputo = jornada × (x − b) / x, donde x son los días de trabajo previstos y b los de baja; media = jornada / x; hechas = días trabajados hasta hoy × media.
-- Leyenda del cuadrante: R descanso, F festivo, X festivo de empresa, AJ ajuste de jornada (para no pasar de la jornada anual), H vacaciones, PR y PNR permisos (aún sin usar), D.T. días de trabajo.
-- Marcas por persona y día (`S.marcas`: AJ, X) mandan sobre la rotación en `turnoDia` y cuentan como libres. Bajas por rangos en `S.bajas`.
-- Transformaciones: cambios de contrato con fecha (`S.transf`); `derechoCiclo(w, año)` prorratea los días de vacaciones por tramos. Solo se deshace la última de cada persona.
-- Ajustes generales (convenio, Semana Santa, puentes, ponderación, reglas de desprogramación, copias) en el botón ⚙.
-- Las vacaciones no se borran al cerrar ciclo: el histórico se consulta en el calendario anual. Los cálculos del ciclo filtran por año (`periodosDe`, `desprogDe`).
-- Año de trabajo: `S.ciclo` es el ciclo de la barra superior (las vacaciones de ese año se meten a mano). La asignación es siempre de `S.ciclo + 1`. Todo el código lee el año con `CIC()`, que suma 1 dentro de los `PASOS` (`enProceso()`) o dentro de `conAsig(f)`; no leer `S.ciclo` directamente salvo para cambiarlo. «Terminar y pasar al ciclo» (`cerrarCiclo`, en Resumen) pasa los puntos del año asignado a `ptsAnt`, mueve los cupos un año y deja `S.ciclo` en el año asignado. `S.turnos` es el estado de la asignación y se reinicia si cambia el ciclo (`S.asigAnio`). Semana Santa por año con `ssDe(y)`.
-- Cualquier cambio de formato de datos debe migrarse en `normalizar()`.
+- Inicio: departamento (`DEPARTAMENTOS`: Pasaje, Rampa, Operaciones) → producto (`PRODUCTOS`: GroundHandling azul, RedBull naranja) → menú del producto (globos). Todo se filtra por `UI.dep` y `UI.prod` (`plantilla()`).
+- Año de cálculo `S.anio` en la cabecera.
+- Personal (vista `personal`): resumen por contrato, tabla de trabajadores (tarjetas en móvil), búsqueda, filtro por contrato, ficha en diálogo (`abrirFicha`, `pintarFicha`, `guardarFicha`) y «Pegar lista» desde Excel (nombre, contrato, horas semanales).
+- Contratos (`CONTRATOS`): `completo`, `parcial` y `discontinuo`.
+- Jornada: cada trabajador guarda la jornada tal como se escribió (`modo`: `semana` | `pct` | `anio`, y `valor`). `pctDe`, `semanaDe` y `anualBase` convierten con `S.ajustes.hSemana` (40) y `S.ajustes.hAnio` (1.700). Un tiempo completo es siempre el 100 %. Los fijos discontinuos tienen periodos de actividad (`actividad: [{desde, hasta}]`), y su jornada anual es la base × días de actividad del año / días del año (`anualDe`, `diasActividad`).
+- Ajustes (⚙): horas de un tiempo completo, copia de seguridad (descargar y restaurar) y enlace a la versión anterior.
+- Cualquier cambio de formato de datos se migra en `normalizar()`.
 
 ## Convenciones
 
 - Todo el texto de la interfaz en español, en tono claro y directo.
-- Identidad visual: señalética de aeropuerto (asfalto `#22262E`, hormigón `#ECEEF1`, amarillo señal `#F6C300`, azul pista `#1F5FBF`; Barlow y Barlow Condensed).
-- Calendarios: pantallas de calendario a todo el ancho (`body.ancho`, sin máximo); en escritorio la hoja anual y el cuadro de Consultar llenan justo el alto de la ventana, sin desplazar ni dejar hueco (`ajustarAltos` mide el hueco que queda y ajusta `--egh`, filas de 26 a 96 px, y `--cgh`); las letras de la hoja son proporcionales a `--egh`; leyenda común `leyendaDias()`. Los colores de R y F de la rotación son los de `PAL_DIA` (migrado en `normalizar` con `paleta9`). Los estilos nuevos van en el `<style>` principal, nunca en `#pageStyle` (se sobrescribe al imprimir).
+- Identidad visual: señalética de aeropuerto (asfalto `#22262E`, hormigón `#ECEEF1`, amarillo señal `#F6C300`, azul pista `#1F5FBF`; Barlow y Barlow Condensed). Contratos: completo azul, parcial morado, discontinuo naranja.
 - Animación: solo una entrada escalonada al cambiar de pantalla (`main.entrando` + `.anim` con `--i`) y respuestas a lo que se toca; respetar `prefers-reduced-motion`.
 - Probar en móvil (390 px) y escritorio antes de publicar.

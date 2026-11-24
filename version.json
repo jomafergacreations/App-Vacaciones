@@ -1,5 +1,9 @@
 {
-  "version": "9.1.4",
+  "version": "10.0.0",
   "fecha": "2026-11-24",
-  "novedades": ["Barra del trabajador más grande: verde si tiene todos sus días asignados y roja si le faltan"]
+  "novedades": [
+    "Control Planning empieza de cero, más sencilla y por partes",
+    "Primera parte: Personal, con el contrato y la jornada anual de cada trabajador",
+    "Los datos empiezan en blanco; la versión anterior sigue en Ajustes"
+  ]
 }
