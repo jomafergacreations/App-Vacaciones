@@ -601,7 +601,7 @@ body.bloqueada{overflow:hidden}
    Reglas base: Convenio Menzies (BOE-A-2023-25956), arts. 32 y 33
    Datos guardados en el navegador (localStorage). Haz copias.
    ========================================================= */
-const APP_VERSION = '8.4.0';   // súbela junto con version.json en cada publicación
+const APP_VERSION = '8.5.0';   // súbela junto con version.json en cada publicación
 const LS_KEY = 'vacaciones-agp-v1';
 const SIN = '_'; // clave interna para «sin grupo»
 
@@ -717,9 +717,7 @@ const marcaDe = (id, s) => { if(!_marcasIdx){ _marcasIdx = new Map(); S.marcas.f
 const save = () => { _marcasIdx = null; try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch(e){ toast('No se ha podido guardar en este navegador'); } };
 
 let UI = { vista:'inicio', volverDe:'inicio', modo:'turnos', grupo:null, trab:null, desde:'', hasta:'', editTrab:null, editCupo:null,
-  cal:{modo:'anual', anio:null, zoom:'meses', grupo:'all', skill:'all', buscar:'', mes:null, dia:null},
   dpTrab:'', dpDia:'', dpSol:hoy(),
-  m:{trab:'', desde:'', hasta:'', forzar:false, nota:'', edit:null, filtro:'all'},
   pdf:{grupo:'all', cuadrante:true, tabla:true, puntos:true, desprog:true, firma:false, orient:'landscape'} };
 
 /* ---------- iconos de línea (24×24, trazo) ---------- */
@@ -1062,7 +1060,7 @@ function irInicio(){ S.ctx={dep:'',prod:''}; save(); go('inicio'); }
 function elegirDep(id){ S.ctx={dep:id, prod:''}; save(); go('producto'); }
 function elegirProd(id){
   S.ctx.prod=id; save();
-  UI.grupo=null; UI.trab=null; UI.cal.grupo='all'; UI.cal.skill='all'; UI.pdf.grupo='all'; UI.m={...UI.m, filtro:'all', trab:'', edit:null}; UI.dpTrab=''; UI.dpDia='';
+  UI.grupo=null; UI.trab=null; UI.pdf.grupo='all'; UI.cons=null; UI.ed=null; UI.edTrab=''; UI.dpTrab=''; UI.dpDia='';
   go('menu');
 }
 function siguiente(){
@@ -1105,7 +1103,6 @@ function render(){
     `<button class="step extra" onclick="go('vacaciones')">‹ Vacaciones</button><span class="sep"></span>` +
     PASOS.map(([k,n],i)=>`<button class="step ${UI.vista===k?'on':''} ${pasoHecho(k)?'done':''}" onclick="go('${k}')" ${UI.vista===k?'aria-current="step"':''}><span class="num">${pasoHecho(k)&&UI.vista!==k?'✓':i+1}</span>${n}</button>`).join('');
   const V = {menu:vMenu, personal:vPersonal, gestion:vGestion, vacaciones:vVacaciones, inicio:vInicio, producto:vProducto, ajustes:vAjustes, grupos:vGrupos, eleccion:vEleccion, resumen:vResumen, pdf:vPDF};
-  const an0 = document.getElementById('anual'); if(an0){ UI.cal.sx = an0.scrollLeft; UI.cal.sy = an0.scrollTop; }
   const main = document.getElementById('main'), cambia = UI._vistaPintada !== UI.vista;
   main.innerHTML = intro() + V[UI.vista]() + pie();
   if(cambia){ UI._vistaPintada = UI.vista; main.classList.remove('entrando'); void main.offsetWidth; main.classList.add('entrando'); clearTimeout(render._t); render._t = setTimeout(()=>main.classList.remove('entrando'), 900); }
@@ -1313,8 +1310,8 @@ function fichaVacaciones(w){
       ${calendarioFicha(w, S.ciclo, true)}
     </div>`;
 }
-function añadirVacDesdeFicha(id){ UI.m = {...UI.m, trab:id, desde:'', hasta:'', edit:null, forzar:false, nota:''}; UI.modo='mano'; go('eleccion'); }
-function editarPeriodoDesdeFicha(pid){ const p = S.periodos.find(x=>x.id===pid); if(!p) return; UI.m = {...UI.m, trab:p.trabajadorId, desde:p.desde, hasta:p.hasta, edit:p.id, forzar:!!p.forzado, nota:p.nota||''}; UI.modo='mano'; go('eleccion'); }
+function añadirVacDesdeFicha(id){ UI.edTrab = id; UI.ed = null; UI.vacModo='editar'; go('vacaciones'); }
+function editarPeriodoDesdeFicha(pid){ const p = S.periodos.find(x=>x.id===pid); if(!p) return; abrirPeriodoEnHoja(p); UI.vacModo='editar'; go('vacaciones'); }
 
 /* =========================================================
    Grupos: grupos, skills, rotaciones y cupos
@@ -1460,8 +1457,9 @@ function hojaAcciones(w, E){
     if(solapaCese(w,d,h)) prob.push(['bad','Cae en su periodo de cese.']);
     if(excedeDias(w,d,h,E.edit)) prob.push(['bad',`No le quedan días suficientes: le quedan ${quedanDias(w,E.edit)}.`]);
     if(!st.computables) prob.push(['bad','Todos esos días son descanso o festivo.']);
-    const conf = [...conflictosCupo(w,d,h), ...companerosEnFechas(w,d,h,E.edit)];
-    if(conf.length) prob.push(['warn', 'No hay cupo o coincide con alguien de su grupo. Puedes guardarlas igualmente marcando la casilla.']);
+    const cc = conflictosCupo(w,d,h), comp = companerosEnFechas(w,d,h,E.edit), conf = [...cc, ...comp];
+    if(comp.length) prob.push(['warn', `Coincide con ${comp.join(', ')}, de su grupo, y el cupo de ${catDe(w)==='super'?'supers':'agentes'} es ${cupoGrupo(w)}.`]);
+    if(cc.length){ const dias = [...new Set(cc.map(x=>x.dia))]; prob.push(['warn', `Sin cupo de plantilla ${dias.length===1?'el '+fmt(dias[0]):`en ${dias.length} días (del ${fmt(dias[0])} al ${fmt(dias[dias.length-1])})`}: «${esc(cc[0].cupo.nombre||'cupo')}».`]); }
     const bloqueo = prob.some(p=>p[0]==='bad') || (conf.length && !E.forzar);
     cuerpo = `<h3>${E.edit?'Cambiar vacaciones':'Asignar vacaciones'}</h3>
       <div class="row"><label>Desde<input type="date" value="${d}" min="${S.ciclo}-01-01" max="${S.ciclo}-12-31" onchange="UI.ed.desde=this.value;if(UI.ed.hasta&&UI.ed.hasta<this.value)UI.ed.hasta=this.value;render()"></label>
@@ -1469,7 +1467,7 @@ function hojaAcciones(w, E){
         <button class="btn" style="align-self:flex-end" onclick="UI.ed.paso='fin';render()">Elegir el final en la hoja</button></div>
       <p style="margin:10px 0 0"><b>${st.computables}</b> día${st.computables===1?'':'s'} de vacaciones${st.descansos?`, sin contar ${st.descansos} de descanso o festivo`:''}. <b>${nf(st.pts*factor(w))}</b> puntos.</p>
       ${prob.map(p=>`<p class="aviso ${p[0]}">${p[1]}</p>`).join('')}
-      ${conf.length?`<label class="chk"><input type="checkbox" ${E.forzar?'checked':''} onchange="UI.ed.forzar=this.checked;render()">Guardar aunque no haya cupo</label>`:''}
+      ${conf.length?`<label class="chk" style="margin-top:8px"><input type="checkbox" ${E.forzar?'checked':''} onchange="UI.ed.forzar=this.checked;render()">Guardar igualmente, aunque no haya cupo</label>`:''}
       <div class="row" style="margin-top:12px"><button class="btn primary" onclick="guardarVacEd()" ${bloqueo?'disabled':''}>Guardar vacaciones</button>${cerrar}</div>`;
   } else if(E.accion==='baja'){
     const d = E.desde, h = E.hasta || E.desde, solapa = S.bajas.some(b=>b.trabajadorId===w.id && d<=b.hasta && h>=b.desde);
@@ -1761,7 +1759,7 @@ function vAjustes(){
 function cambiarCiclo(v){
   const y = Number(v); if(!(y>2000&&y<2100)) return;
   if(!confirm(`¿Cambiar el ciclo activo a ${y}? Las vacaciones de otros años se conservan. Para pasar de año al terminar, usa «Cerrar ciclo» en Resumen.`)) return render();
-  S.ciclo=y; S.semanaSanta=semanaSantaDefault(y); S.turnos={}; UI.cal.anio=null; save(); render();
+  S.ciclo=y; S.semanaSanta=semanaSantaDefault(y); S.turnos={}; save(); render();
 }
 function añadirPuente(){
   const nom=document.getElementById('pNom').value.trim(), d=document.getElementById('pDes').value, h=document.getElementById('pHas').value||d;
@@ -2130,7 +2128,7 @@ function vTurnos(ks){
     <p class="help">De menos a más puntos del año anterior. Si empatan, cuenta el año previo (art. 33) y después la antigüedad.</p>
     <ol class="list-order">${orden.map((x,i)=>{const done=h.includes(x.id), cur=actual&&actual.id===x.id, s2=statsTrab(x);
       return `<li class="${cur?'cur':''}"><span class="pos">${i+1}</span><span class="nm"><a href="#" onclick="selTrab('${x.id}');return false">${esc(x.nombre)}</a><br><span class="muted">${nf(x.ptsAnt||0)} pts, ${s2.dias} de ${s2.derecho} días</span></span>${done?'<span class="chip ok">Hecho</span>':cur?'<span class="chip mano">Su turno</span>':'<span class="chip grey">Espera</span>'}</li>`}).join('')}</ol>
-    <div class="row" style="margin-top:14px"><button class="btn" onclick="UI.cal.grupo='${k}';go('calendario')">Ver en el calendario</button></div>
+    <div class="row" style="margin-top:14px"><button class="btn" onclick="UI.cons={grupo:'${k}',buscar:''};go('calendario')">Ver en el calendario</button></div>
    </div>
   </div>`;
 }
@@ -2246,63 +2244,18 @@ function añadirPeriodo(){
   S.periodos.push({id:uid(), trabajadorId:w.id, desde:UI.desde, hasta:UI.hasta, ronda:tState(gk(w)).ronda, forzado:forz});
   UI.desde=''; UI.hasta=''; save(); render(); toast('Periodo añadido');
 }
-function borrarPeriodo(id){ if(!confirm('¿Borrar este periodo?')) return; S.periodos = S.periodos.filter(p=>p.id!==id); if(UI.m.edit===id) limpiarMano(); save(); render(); }
+function borrarPeriodo(id){ if(!confirm('¿Borrar este periodo?')) return; S.periodos = S.periodos.filter(p=>p.id!==id); if(UI.ed && UI.ed.edit===id) UI.ed=null; save(); render(); }
 function editarPeriodo(id){
   const p = S.periodos.find(x=>x.id===id); if(!p) return;
-  UI.m = {...UI.m, trab:p.trabajadorId, desde:p.desde, hasta:p.hasta, nota:p.nota||'', forzar:!!p.forzado, edit:id};
-  UI.modo='mano'; go('eleccion');
+  abrirPeriodoEnHoja(p); UI.modo='mano'; go('eleccion');
 }
 
-/* ----- a mano ----- */
-function limpiarMano(){ UI.m = {...UI.m, desde:'', hasta:'', nota:'', forzar:false, edit:null}; }
+/* ----- a mano: la misma hoja anual interactiva que en Editar ----- */
 function vMano(){
-  const M = UI.m;
-  if(!M.trab || !trabDe(M.trab) || !visible(trabDe(M.trab))) M.trab = ordenEleccion(gruposActivos()[0])[0].id;
-  const w = trabDe(M.trab);
-  const rango = M.desde && M.hasta && M.hasta>=M.desde;
-  const conf = rango ? [...conflictosCupo(w,M.desde,M.hasta), ...companerosEnFechas(w,M.desde,M.hasta,M.edit)] : [];
-  const puede = M.desde && M.hasta && M.hasta>=M.desde && !solapePropio(w,M.desde,M.hasta,M.edit) && !solapaCese(w,M.desde,M.hasta) && !excedeDias(w,M.desde,M.hasta,M.edit) && statsRango(M.desde,M.hasta,w).computables>0 && (!conf.length || M.forzar);
-  const lista = S.periodos.filter(p=>{ const t=trabDe(p.trabajadorId); return t && visible(t) && delAnio(p.desde,S.ciclo) && (M.filtro==='all' || gk(t)===M.filtro); })
-    .sort((a,b)=>a.desde.localeCompare(b.desde) || trabDe(a.trabajadorId).nombre.localeCompare(trabDe(b.trabajadorId).nombre,'es'));
-  return `<div class="grid2">
-   <div class="card"><h2>${M.edit?'Editar vacaciones':'Añadir vacaciones a mano'}</h2>
-    <p class="help">Para apuntar lo que ya está hablado o corregir algo sin pasar por el turno. Los cupos se comprueban igual, pero puedes guardarlas aunque no haya cupo.</p>
-    <div class="row">
-      <label style="flex-basis:100%">Trabajador<select onchange="UI.m.trab=this.value;render()" ${M.edit?'disabled':''}>${trabOptions(M.trab)}</select></label>
-      <label>Desde<input type="date" value="${M.desde}" onchange="UI.m.desde=this.value; if(!UI.m.hasta||UI.m.hasta<UI.m.desde) UI.m.hasta=this.value; render()"></label>
-      <label>Hasta<input type="date" value="${M.hasta}" min="${M.desde||''}" onchange="UI.m.hasta=this.value; render()"></label>
-      <label style="flex-basis:100%">Nota (opcional)<input value="${esc(M.nota)}" placeholder="Acordado con el jefe de turno" onchange="UI.m.nota=this.value"></label>
-    </div>
-    ${previewHTML(w, M.desde, M.hasta, M.edit, !M.forzar)}
-    ${conf.length?`<div class="row" style="margin-top:10px"><label class="chk"><input type="checkbox" ${M.forzar?'checked':''} onchange="UI.m.forzar=this.checked;render()">Guardar aunque no haya cupo o coincida con su grupo</label></div>`:''}
-    <div class="row" style="margin-top:14px"><button class="btn primary" onclick="guardarMano()" ${puede?'':'disabled'}>${M.edit?'Guardar cambios':'Añadir vacaciones'}</button>
-      ${(M.desde||M.edit)?`<button class="btn" onclick="limpiarMano();render()">${M.edit?'Cancelar':'Limpiar'}</button>`:''}</div>
-    ${fichaTrab(w, statsTrab(w))}
-   </div>
-   <div class="card"><h2>Vacaciones de ${S.ciclo} (${lista.length})</h2>
-    <label style="margin-bottom:10px">Grupo<select onchange="UI.m.filtro=this.value;render()">${opts(gruposVis(), M.filtro, ['all','Todos los grupos'])}</select></label>
-    ${lista.length?`<div class="scroll"><table><tr><th>Trabajador</th><th>Fechas</th><th class="num">Días</th><th></th></tr>
-      ${lista.map(p=>{const t=trabDe(p.trabajadorId), r=statsRango(p.desde,p.hasta,t);return `<tr>
-        <td><b>${esc(t.nombre)}</b>${p.manual?' <span class="chip mano">A mano</span>':''}${p.forzado?' <span class="chip bad">Sin cupo</span>':''}${p.nota?`<div class="muted">${esc(p.nota)}</div>`:''}</td>
-        <td style="white-space:nowrap">${fmt(p.desde)} – ${fmt(p.hasta)}</td><td class="num">${r.computables}</td>
-        <td class="num" style="white-space:nowrap"><button class="btn small" onclick="editarPeriodo('${p.id}')">Editar</button> <button class="btn small danger" onclick="borrarPeriodo('${p.id}')" aria-label="Borrar">✕</button></td></tr>`}).join('')}</table></div>`
-      :'<p class="help">Todavía no hay vacaciones apuntadas.</p>'}
-   </div>
-  </div>`;
+  return `<p class="help" style="margin:0 0 12px">Elige al trabajador y toca un día para asignar vacaciones fuera de su turno, o para cambiar o quitar las que ya tiene. Se comprueban sus días y los cupos igual que en la elección.</p>` + vEditar();
 }
-function guardarMano(){
-  const M = UI.m, w = trabDe(M.trab); if(!w) return;
-  if(!(M.desde&&M.hasta&&M.hasta>=M.desde)) return toast('Pon una fecha de inicio y una de fin posterior');
-  if(solapePropio(w,M.desde,M.hasta,M.edit)) return toast('Se solapa con otro periodo suyo');
-  if(solapaCese(w,M.desde,M.hasta)) return toast('Esas fechas caen en su periodo de cese');
-  if(excedeDias(w,M.desde,M.hasta,M.edit)) return toast('No le quedan días suficientes');
-  if(!statsRango(M.desde,M.hasta,w).computables) return toast('Esos días son descanso o festivo según su rotación');
-  const forz = conflictosCupo(w,M.desde,M.hasta).length>0 || companerosEnFechas(w,M.desde,M.hasta,M.edit).length>0;
-  if(forz && !M.forzar) return toast('No hay cupo o coincide con alguien de su grupo. Marca la casilla si quieres apuntarlas igual');
-  if(M.edit){ Object.assign(S.periodos.find(p=>p.id===M.edit), {desde:M.desde, hasta:M.hasta, nota:M.nota, forzado:forz, manual:true}); toast('Vacaciones actualizadas'); }
-  else { S.periodos.push({id:uid(), trabajadorId:w.id, desde:M.desde, hasta:M.hasta, nota:M.nota, manual:true, forzado:forz, ronda:null}); toast('Vacaciones añadidas'); }
-  limpiarMano(); save(); render();
-}
+/* abrir la hoja en un periodo concreto (desde la ficha, la tabla o la elección) */
+function abrirPeriodoEnHoja(p){ UI.edTrab = p.trabajadorId; UI.ed = {dia:p.desde, accion:'vac', desde:p.desde, hasta:p.hasta, edit:p.id, forzar:!!p.forzado, paso:'form'}; }
 
 /* =========================================================
    PASO 6 · Desprogramaciones
@@ -2443,7 +2396,7 @@ function cerrarCiclo(){
   const mas1 = s => { const d=pd(s), y=d.getUTCFullYear()+1, m=d.getUTCMonth(); const ult=new Date(Date.UTC(y,m+1,0)).getUTCDate(); return iso(new Date(Date.UTC(y,m,Math.min(d.getUTCDate(),ult)))); };
   S.cupos.forEach(c=>{ c.desde=mas1(c.desde); c.hasta=mas1(c.hasta); });
   S.ciclo++; S.puentes=[]; S.semanaSanta=semanaSantaDefault(S.ciclo); S.turnos={};
-  UI.cal.anio=null; save(); render(); toast(`Ciclo ${S.ciclo} abierto. Añade los puentes del nuevo año en Ajustes.`);
+  save(); render(); toast(`Ciclo ${S.ciclo} abierto. Añade los puentes del nuevo año en Ajustes.`);
 }
 
 /* =========================================================
@@ -2740,6 +2693,12 @@ render();
    Para publicar: subir APP_VERSION, añadir sus pasos a NOVEDADES y poner la misma versión en version.json.
    ========================================================= */
 const NOVEDADES = {
+  '8.5.0': [
+    { titulo:'«A mano» con el calendario', donde:'Asignación de vacaciones › Elección › A mano',
+      texto:'Ya no hay que escribir los periodos con fechas: elige al trabajador en el desplegable y toca los días en su hoja del año, igual que al editar desde el calendario.' },
+    { titulo:'Avisos más claros', donde:'Al asignar vacaciones',
+      texto:'Si no hay cupo, te dice con quién coincide y cuál es el cupo de su grupo, o qué cupo de plantilla se pasa y en qué días.' },
+  ],
   '8.4.0': [
     { titulo:'Dos botones en Vacaciones', donde:'Globo Vacaciones',
       texto:'Ahora son «Consultar calendario» y «Asignación de vacaciones» del año que viene. El botón Editar desaparece porque se edita desde el propio calendario.' },

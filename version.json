@@ -1,8 +1,8 @@
 {
-  "version": "8.4.0",
+  "version": "8.5.0",
   "fecha": "2026-11-24",
   "novedades": [
-    "Vacaciones: Consultar calendario y Asignación de vacaciones del año siguiente",
-    "Toca un día del calendario para editarlo"
+    "«A mano» usa la hoja del año con desplegable de trabajador",
+    "Avisos de cupo que dicen con quién coincide"
   ]
 }
