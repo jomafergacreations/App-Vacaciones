@@ -597,7 +597,7 @@ body.bloqueada{overflow:hidden}
   .inf tr,.gantt .fila{break-inside:avoid}
 }
 /* ---- calendarios: a todo el ancho, ajustados al alto de la pantalla, tamaño moderado ---- */
-body.ancho main{max-width:1900px}
+body.ancho main{max-width:none}
 .ley-dias{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:10px;padding:8px 12px;background:#F4F5F8;border-radius:10px;font-size:13.5px;font-weight:600;color:var(--asfalto)}
 .ley-dias .li{display:inline-flex;align-items:center;gap:7px}
 .ley-dias .li b{display:inline-grid;place-items:center;min-width:24px;height:20px;padding:0 4px;border-radius:5px;font-size:11.5px;font-weight:800}
@@ -607,13 +607,13 @@ body.ancho main{max-width:1900px}
 .legend{font-size:13.5px;color:var(--asfalto);gap:8px 18px;margin-top:12px}
 .legend span::before{width:13px;height:13px;border-radius:4px;vertical-align:-2px;margin-right:6px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
 /* hoja anual (Editar y «A mano»): la altura de fila la calcula ajustarAltos() para que quepa sin desplazar */
-.eg-mes{width:100px;font-size:16px!important;font-weight:700}
-.eg thead th{font-size:13px;font-weight:700;color:var(--asfalto);padding:2px 0}
+.eg-mes{width:clamp(96px, calc(var(--egh,40px) * 2.6), 150px);font-size:clamp(15px, calc(var(--egh,40px) * .34), 24px)!important;font-weight:700}
+.eg thead th{font-size:clamp(13px, calc(var(--egh,40px) * .3), 20px);font-weight:700;color:var(--asfalto);padding:2px 0}
 .eg td{height:var(--egh,40px);padding:0!important;line-height:1}
 .eg thead th{padding:2px 0!important}
 .eg tbody th.eg-mes{padding:0 6px 0 0!important;line-height:1}
-.eg td b{font-size:clamp(12px, .9vw, 15px)}
-.eg td small{font-size:9px;top:2px;left:3px}
+.eg td b{font-size:clamp(12px, calc(var(--egh,40px) * .36), 26px)}
+.eg td small{font-size:clamp(9px, calc(var(--egh,40px) * .2), 14px);top:2px;left:4px}
 /* consultar: el alto del cuadro también se ajusta a la pantalla */
 .cg-scroll{max-height:none;height:var(--cgh,calc(100vh - 260px));min-height:280px}
 .cg-d{width:var(--cw,30px);min-width:var(--cw,30px);height:36px;font-size:12.5px}
@@ -664,7 +664,7 @@ body.ancho main{max-width:1900px}
    Reglas base: Convenio Menzies (BOE-A-2023-25956), arts. 32 y 33
    Datos guardados en el navegador (localStorage). Haz copias.
    ========================================================= */
-const APP_VERSION = '9.1.1';   // súbela junto con version.json en cada publicación
+const APP_VERSION = '9.1.2';   // súbela junto con version.json en cada publicación
 const LS_KEY = 'vacaciones-agp-v1';
 const SIN = '_'; // clave interna para «sin grupo»
 
@@ -1539,12 +1539,15 @@ function arrIni(ev){
 /* hoja anual y cuadro de consultar: que quepan en el alto de la ventana sin desplazar la página */
 function ajustarAltos(){
   if(innerWidth < 760) return;   // en el móvil se desplaza con normalidad
-  const sobra = () => document.documentElement.scrollHeight - innerHeight;
+  const main = document.getElementById('main');
+  const libre = () => innerHeight - (main.getBoundingClientRect().bottom + scrollY);   // >0 sobra hueco, <0 se sale
   const eg = document.querySelector('.eg'), cg = document.getElementById('cgScroll');
-  if(eg){ let h = 44; eg.style.setProperty('--egh', h+'px');
-    for(let k=0; k<8 && sobra()>0 && h>26; k++){ h = Math.max(26, h - Math.ceil(sobra()/12) - 1); eg.style.setProperty('--egh', h+'px'); } }
-  if(cg){ let h = Math.max(280, Math.floor(innerHeight - cg.getBoundingClientRect().top - scrollY - 90)); cg.style.setProperty('--cgh', h+'px');
-    for(let k=0; k<3 && sobra()>0 && h>280; k++){ h = Math.max(280, h - sobra()); cg.style.setProperty('--cgh', h+'px'); } }
+  if(eg){   // filas que llenan justo el alto de la ventana
+    let h = 36; eg.style.setProperty('--egh', h+'px');
+    for(let k=0; k<6; k++){ const d = libre(); if(Math.abs(d) < 6) break; h = Math.max(26, Math.min(96, h + Math.floor(d/12))); eg.style.setProperty('--egh', h+'px'); if(h===26 && d<0) break; }
+  }
+  if(cg){ let h = 400; cg.style.setProperty('--cgh', h+'px');
+    for(let k=0; k<4; k++){ const d = libre(); if(Math.abs(d) < 6) break; h = Math.max(280, h + Math.floor(d)); cg.style.setProperty('--cgh', h+'px'); if(h===280 && d<0) break; } }
 }
 function colocarHoja(){
   const h = document.querySelector('.hoja-acc'), E = UI.ed; if(!h || !E) return;
@@ -2816,6 +2819,10 @@ render();
    Para publicar: subir APP_VERSION, añadir sus pasos a NOVEDADES y poner la misma versión en version.json.
    ========================================================= */
 const NOVEDADES = {
+  '9.1.2': [
+    { titulo:'A la medida de cualquier pantalla', donde:'Calendario y Editar',
+      texto:'La hoja del año ocupa todo el ancho y todo el alto de la ventana, sea cual sea tu monitor, y las letras crecen en proporción. Si haces la ventana más pequeña, se ajusta sola.' },
+  ],
   '9.1.1': [
     { titulo:'Calendarios a la medida de tu pantalla', donde:'Calendario y Editar',
       texto:'La hoja del año y el calendario de todos se ajustan al alto de la ventana: caben enteros sin desplazar la página y con un tamaño más contenido. En el calendario de todos, desliza dentro del cuadro para ver más personas o más días.' },

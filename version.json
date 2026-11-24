@@ -1,5 +1,5 @@
 {
-  "version": "9.1.1",
+  "version": "9.1.2",
   "fecha": "2026-11-24",
-  "novedades": ["Calendarios ajustados al alto de la pantalla, sin desplazar"]
+  "novedades": ["La hoja del año ocupa todo el ancho y el alto de cualquier pantalla"]
 }
