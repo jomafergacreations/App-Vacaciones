@@ -215,7 +215,15 @@ table.cg{border-collapse:separate;border-spacing:0;width:max-content;font-size:1
 .ed-cab{display:flex;flex-wrap:wrap;gap:10px 24px;align-items:flex-end;padding-top:14px;padding-bottom:14px}
 .eg-card{padding:10px 14px} .ley-ayuda{margin-left:auto;font-weight:500;color:var(--gris)}
 body.ancho main{padding-top:14px}
-.ed-cab{padding:10px 16px!important;margin-bottom:10px} .ed-cab .per-mini b{font-size:18px} .ed-cab .per-mini{font-size:12px;gap:4px 20px} .ed-cab label{font-size:12.5px}
+.ed-cab{padding:clamp(12px,1.6vh,22px) 20px!important;margin-bottom:12px;align-items:center!important;border-width:2px;transition:background .2s,border-color .2s}
+.ed-cab .per-mini b{font-size:clamp(20px, 2.6vh, 32px)} .ed-cab .per-mini{font-size:clamp(12.5px, 1.4vh, 16px);gap:6px 28px}
+.ed-cab label{font-size:clamp(13px, 1.4vh, 16px)} .ed-cab select{font-size:clamp(15px, 1.7vh, 20px);padding:10px 12px;font-weight:600}
+.ed-sel{flex:0 1 380px!important}
+.ed-cab.ok{background:#E3F3E9;border-color:#23864F} .ed-cab.falta{background:#FBE7E5;border-color:#C23B30}
+.ed-estado{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;font-weight:700;font-size:clamp(13px, 1.5vh, 17px);color:#fff;white-space:nowrap}
+.ed-estado .ico{width:18px;height:18px;stroke-width:2.6}
+.ed-cab.ok .ed-estado{background:#23864F} .ed-cab.falta .ed-estado{background:#C23B30}
+.ed-cab .btn{background:#fff}
 .vac-modos{margin-bottom:8px} .vm-t{font-size:24px!important}
 .eg-card .ley-dias{margin-top:8px;padding:calc(var(--egh,40px) * .2) 14px;gap:6px 28px;font-size:clamp(13px, calc(var(--egh,40px) * .34), 26px)}
 .eg-card .ley-dias .li{gap:calc(var(--egh,40px) * .18)}
@@ -667,7 +675,7 @@ body.ancho main{max-width:none}
    Reglas base: Convenio Menzies (BOE-A-2023-25956), arts. 32 y 33
    Datos guardados en el navegador (localStorage). Haz copias.
    ========================================================= */
-const APP_VERSION = '9.1.3';   // súbela junto con version.json en cada publicación
+const APP_VERSION = '9.1.4';   // súbela junto con version.json en cada publicación
 const LS_KEY = 'vacaciones-agp-v1';
 const SIN = '_'; // clave interna para «sin grupo»
 
@@ -1499,8 +1507,10 @@ function vEditar(){
     }
     filas += `<tr><th class="eg-mes">${MESES[m][0].toUpperCase()+MESES[m].slice(1)}</th>${celdas}</tr>`;
   }
-  return `<div class="card ed-cab">
+  const completo = st.derecho>0 && st.pendientes<=0;
+  return `<div class="card ed-cab ${completo?'ok':'falta'}">
       <label class="ed-sel">Trabajador${sel}</label>
+      <span class="ed-estado">${completo?ico('ok')+' Vacaciones asignadas':`Le ${st.pendientes===1?'falta 1 día':`faltan ${st.pendientes} días`}`}</span>
       <div class="per-mini" style="margin:0">
         <span><b>${st.dias} / ${st.derecho}</b>días de vacaciones</span><span><b>${st.pendientes}</b>pendientes</span><span><b>${nf(st.pts)}</b>puntos</span>
         <span><b>${st.desprog.length} / ${S.ajustes.maxDesprog}</b>desprogramaciones</span><span><b>${j.AJ}</b>AJ</span><span><b>${j.X}</b>X</span><span><b>${j.baja}</b>días de baja</span>
@@ -2824,6 +2834,10 @@ render();
    Para publicar: subir APP_VERSION, añadir sus pasos a NOVEDADES y poner la misma versión en version.json.
    ========================================================= */
 const NOVEDADES = {
+  '9.1.4': [
+    { titulo:'Barra del trabajador más clara', donde:'Editar',
+      texto:'La barra con el trabajador y sus datos es más grande. Se pinta de verde cuando ya tiene todos sus días de vacaciones asignados y de rojo cuando le faltan, con el número de días que le quedan.' },
+  ],
   '9.1.3': [
     { titulo:'Leyenda más grande', donde:'Calendario y Editar',
       texto:'La leyenda de colores ocupa el doble y crece con la pantalla, igual que las celdas.' },
