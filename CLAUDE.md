@@ -23,6 +23,7 @@ Si `version.json` lleva una versión mayor que la de `index.html`, la app entra 
 - Personal (vista `personal`): resumen por contrato, barra con búsqueda, filtro por contrato y año de cálculo (`S.anio`), tabla de trabajadores (tarjetas en móvil), ficha en diálogo (`abrirFicha`, `pintarFicha`, `guardarFicha`) y «Pegar lista» desde Excel (nombre, contrato, horas semanales).
 - Contratos (`CONTRATOS`): `completo`, `parcial` y `discontinuo`.
 - Jornada: cada trabajador guarda la jornada tal como se escribió (`modo`: `semana` | `pct` | `anio`, y `valor`). `pctDe`, `semanaDe` y `anualBase` convierten con `S.ajustes.hSemana` (40) y `S.ajustes.hAnio` (1.700). Un tiempo completo es siempre el 100 %. Los fijos discontinuos tienen periodos de actividad (`actividad: [{desde, hasta}]`), y su jornada anual es la base × días de actividad del año / días del año (`anualDe`, `diasActividad`).
+- Jornada concretada o reducida: `concretado` (sí/no) y `conc: {modo: 'semana' | 'pct', valor}`, donde `pct` es el porcentaje de la jornada de su contrato. `pctEf` da la jornada efectiva en % de un tiempo completo y de ella salen `semanaEf`, `anualBase` y `anualDe`; `pctDe` y `semanaDe` siguen siendo la jornada del contrato. No puede ser mayor que la del contrato. `formulaDe(e)` explica el cálculo en la ficha.
 - Cualquier cambio de formato de datos se migra en `normalizar()`.
 
 ## Convenciones

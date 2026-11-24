@@ -108,6 +108,10 @@ table.plantilla{width:100%;border-collapse:collapse;font-variant-numeric:tabular
 .chip.completo{background:#E4ECF9;color:var(--c-completo)}
 .chip.parcial{background:#EEE6F7;color:var(--c-parcial)}
 .chip.discontinuo{background:#FBEBDC;color:var(--c-disc)}
+.chip.concretada{background:var(--senal-suave);color:#7A5600}
+.jcampo.fijo{background:#F4F5F8;border-style:dashed}
+.jcampo .valor{font-family:var(--cond);font-size:30px;font-weight:700}
+.bloque .seg button{padding:9px 22px;font-size:15px}
 .aviso{display:inline-block;background:#FBE7E5;color:var(--mal);border-radius:6px;padding:2px 8px;font-size:12.5px;font-weight:700}
 .vacio{text-align:center;padding:50px 20px}
 .vacio h3{font-size:28px;margin-bottom:8px}
@@ -202,9 +206,15 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
    Control Planning 10 — rehecha desde cero
    Datos en localStorage, con una clave nueva.
    ========================================================= */
-const APP_VERSION = '10.1.0';
+const APP_VERSION = '10.2.0';
 const CLAVE = 'control-planning-v10';
 const NOVEDADES = {
+  '10.2.0': [
+    { titulo:'Jornada concretada o reducida', donde:'Personal › ficha del trabajador',
+      texto:'En cada trabajador puedes marcar si está concretado o reducido (Sí o No). Si es que sí, escribe las horas que hace a la semana o el porcentaje de su jornada, y la app calcula sola su porcentaje sobre un tiempo completo y su jornada anual.' },
+    { titulo:'Se ve en la lista', donde:'Personal',
+      texto:'Los trabajadores con jornada concretada llevan la etiqueta «Concretada», y la tabla muestra las horas que hacen de verdad junto a las de su contrato.' },
+  ],
   '10.1.0': [
     { titulo:'Control Planning, desde cero', donde:'Inicio',
       texto:'La app empieza de nuevo y crecerá por partes. Por ahora solo tiene una: Personal.' },
@@ -250,7 +260,8 @@ function normalizar(d){
   d.ajustes = Object.assign(estadoInicial().ajustes, d.ajustes || {});
   d.trabajadores = (d.trabajadores||[]).map(t=>({ id:t.id||uid(), nombre:t.nombre||'', num:t.num||'',
     contrato: CONTRATOS[t.contrato] ? t.contrato : 'completo', modo:['semana','pct','anio'].includes(t.modo)?t.modo:'semana',
-    valor: t.valor ?? null, actividad: Array.isArray(t.actividad) ? t.actividad : [] }));
+    valor: t.valor ?? null, actividad: Array.isArray(t.actividad) ? t.actividad : [],
+    concretado: !!t.concretado, conc: { modo: t.conc?.modo==='pct' ? 'pct' : 'semana', valor: t.conc?.valor ?? null } }));
   return d;
 }
 let S;
@@ -272,8 +283,17 @@ function pctDe(t){
   const A = S.ajustes;
   return t.modo==='pct' ? v : t.modo==='semana' ? v / A.hSemana * 100 : v / A.hAnio * 100;
 }
-const semanaDe = t => { const p = pctDe(t); return p==null ? null : p/100 * S.ajustes.hSemana; };
-const anualBase = t => { const p = pctDe(t); return p==null ? null : p/100 * S.ajustes.hAnio; };
+const semanaDe = t => { const p = pctDe(t); return p==null ? null : p/100 * S.ajustes.hSemana; };   // la de su contrato
+/* Jornada concretada o reducida: la que hace de verdad, en horas a la semana o en % de la jornada de su contrato.
+   pctEf es la jornada efectiva en % de un tiempo completo; todos los cálculos salen de ella. */
+function pctEf(t){
+  const pc = pctDe(t); if(!t.concretado) return pc;
+  const v = num(t.conc?.valor); if(v==null || pc==null) return null;
+  return t.conc.modo==='pct' ? pc * v / 100 : v / S.ajustes.hSemana * 100;
+}
+const semanaEf = t => { const p = pctEf(t); return p==null ? null : p/100 * S.ajustes.hSemana; };
+const pctDeSuJornada = t => { const pc = pctDe(t), pe = pctEf(t); return pc && pe!=null ? pe / pc * 100 : null; };
+const anualBase = t => { const p = pctEf(t); return p==null ? null : p/100 * S.ajustes.hAnio; };
 /* días de actividad de un fijo discontinuo dentro del año */
 function diasActividad(t, y=S.anio){
   const ini = `${y}-01-01`, fin = `${y}-12-31`; const dias = new Set();
@@ -288,7 +308,7 @@ function anualDe(t, y=S.anio){
   if(t.contrato!=='discontinuo') return base;
   return base * diasActividad(t, y) / diasAnio(y);
 }
-const faltaJornada = t => t.contrato!=='completo' && pctDe(t)==null;
+const faltaJornada = t => (t.contrato!=='completo' && pctDe(t)==null) || (t.concretado && pctEf(t)==null);
 const faltaActividad = t => t.contrato==='discontinuo' && diasActividad(t)===0;
 
 /* =========================================================
@@ -330,16 +350,16 @@ function vPersonal(){
   const filas = ts.map(t=>{ const c = CONTRATOS[t.contrato];
     return `<tr onclick="abrirFicha('${t.id}')">
       <td><div class="nombre">${esc(t.nombre)}</div>${t.num?`<div class="sub">Nº ${esc(t.num)}</div>`:''}</td>
-      <td><span class="chip ${t.contrato}">${c.nombre}</span></td>
-      <td class="num">${semanaDe(t)==null?'—':nh(semanaDe(t))+' h'}</td>
-      <td class="num">${pctDe(t)==null?'—':nh(pctDe(t))+' %'}</td>
+      <td><span class="chip ${t.contrato}">${c.nombre}</span>${t.concretado?' <span class="chip concretada">Concretada</span>':''}</td>
+      <td class="num">${semanaEf(t)==null?'—':nh(semanaEf(t))+' h'}${t.concretado&&semanaDe(t)!=null?`<div class="sub">de ${nh(semanaDe(t))} h</div>`:''}</td>
+      <td class="num">${pctEf(t)==null?'—':nh(pctEf(t))+' %'}</td>
       <td class="num">${t.contrato==='discontinuo'?`${diasActividad(t)} días`:'<span class="muted">Todo el año</span>'}</td>
       <td class="num">${avisos(t) || `<span class="anual">${nh(anualDe(t))} h</span>`}</td></tr>`; }).join('');
   const tarjetas = ts.map(t=>`<button class="tm" onclick="abrirFicha('${t.id}')"><div class="l1"><b>${esc(t.nombre)}</b><span class="chip ${t.contrato}">${CONTRATOS[t.contrato].corto}</span></div>
-      <div class="l2"><span>${semanaDe(t)==null?'—':nh(semanaDe(t))+' h/sem'} · ${pctDe(t)==null?'—':nh(pctDe(t))+' %'}</span>${avisos(t) || `<b>${nh(anualDe(t))} h</b>`}</div></button>`).join('');
+      <div class="l2"><span>${semanaEf(t)==null?'—':nh(semanaEf(t))+' h/sem'} · ${pctEf(t)==null?'—':nh(pctEf(t))+' %'}${t.concretado?' · concretada':''}</span>${avisos(t) || `<b>${nh(anualDe(t))} h</b>`}</div></button>`).join('');
   const fb = (k,t) => `<button class="${UI.filtro===k?'on':''}" onclick="UI.filtro='${k}';pintar()">${t}</button>`;
   return cab + `<div class="resumen anim" style="--i:1">
-      <div class="cifra"><b>${todos.length}</b><span>trabajadores</span></div>
+      <div class="cifra"><b>${todos.length}</b><span>trabajadores${todos.some(t=>t.concretado)?`, ${todos.filter(t=>t.concretado).length} con jornada concretada`:''}</span></div>
       <div class="cifra" style="--cc:var(--c-completo)"><b>${cuenta('completo')}</b><span>tiempo completo</span></div>
       <div class="cifra" style="--cc:var(--c-parcial)"><b>${cuenta('parcial')}</b><span>tiempo parcial</span></div>
       <div class="cifra" style="--cc:var(--c-disc)"><b>${cuenta('discontinuo')}</b><span>fijos discontinuos</span></div>
@@ -364,12 +384,12 @@ function vPersonal(){
    ========================================================= */
 function abrirFicha(id){
   const t = id ? S.trabajadores.find(x=>x.id===id) : null;
-  UI.edit = t ? JSON.parse(JSON.stringify(t)) : { id:null, nombre:'', num:'', contrato:'completo', modo:'semana', valor:null, actividad:[] };
+  UI.edit = t ? JSON.parse(JSON.stringify(t)) : { id:null, nombre:'', num:'', contrato:'completo', modo:'semana', valor:null, actividad:[], concretado:false, conc:{modo:'semana', valor:null} };
   pintarFicha(true);
 }
 function pintarFicha(primera){
   const e = UI.edit, A = S.ajustes;
-  const pct = pctDe(e), sem = semanaDe(e), anu = anualBase(e), real = anualDe(e), dAct = diasActividad(e);
+  const pct = pctDe(e), sem = semanaDe(e), real = anualDe(e);
   const campo = (modo, titulo, valor, ud) => { const activo = e.contrato!=='completo' && e.modo===modo;
     return `<div class="jcampo ${activo?'on':''}" onclick="${e.contrato==='completo'?'':`if(UI.edit.modo!=='${modo}'){cambiarModo('${modo}')}`}"><small>${titulo}</small>
       <input id="j_${modo}" inputmode="decimal" ${e.contrato==='completo'?'disabled':''} value="${valor==null?'':nh(valor).replace(/\./g,'')}" aria-label="${titulo}"
@@ -383,10 +403,17 @@ function pintarFicha(primera){
         <button type="button" class="quitar" aria-label="Quitar periodo" onclick="UI.edit.actividad.splice(${i},1);pintarFicha()">×</button></div>`).join('')}
       </div>
       <div class="fila" style="margin-top:8px"><button type="button" class="btn" onclick="UI.edit.actividad.push({desde:'',hasta:''});pintarFicha()">${ICO.mas} Añadir periodo</button></div></div>`;
-  const formula = e.contrato==='discontinuo'
-    ? (anu==null ? 'Escribe su jornada para calcularla.' : `${nh(anu)} h × ${dAct} días de actividad / ${diasAnio(S.anio)} días del año`)
-    : e.contrato==='completo' ? `Tiempo completo: ${nh(A.hSemana)} h a la semana, ${nh(A.hAnio)} h al año.`
-    : (pct==null ? 'Escribe su jornada en cualquiera de las tres casillas.' : `${nh(pct)} % de ${nh(A.hAnio)} h`);
+  const formula = formulaDe(e);
+  const cc = e.conc, cSem = semanaEf(e), cPct = pctDeSuJornada(e);
+  const ccampo = (modo, titulo, valor, ud) => `<div class="jcampo ${cc.modo===modo?'on':''}"><small>${titulo}</small>
+      <input id="c_${modo}" inputmode="decimal" value="${e.concretado && valor!=null ? nh(valor).replace(/\./g,'') : ''}" aria-label="${titulo}"
+        onfocus="if(UI.edit.conc.modo!=='${modo}'){UI.edit.conc.modo='${modo}';UI.edit.conc.valor=num(this.value);marcarConc()}" oninput="UI.edit.conc.valor=num(this.value);recalcular()"> <span class="ud">${ud}</span></div>`;
+  const concretado = `<div class="bloque"><h3>¿Está concretado o reducido?</h3>
+      <div class="seg" role="group" aria-label="¿Está concretado o reducido?"><button type="button" class="${e.concretado?'':'on'}" onclick="UI.edit.concretado=false;pintarFicha()">No</button><button type="button" class="${e.concretado?'on':''}" onclick="UI.edit.concretado=true;pintarFicha();setTimeout(()=>$('#c_'+UI.edit.conc.modo)?.focus(),20)">Sí</button></div>
+      ${e.concretado ? `<div class="jornada conc" style="margin-top:12px">${ccampo('semana','Horas a la semana que hace', cSem, 'h')}${ccampo('pct','Porcentaje de su jornada', cPct, '%')}
+          <div class="jcampo fijo"><small>Sobre un tiempo completo</small><span class="valor" id="c_tc">${pctEf(e)==null?'—':nh(pctEf(e))}</span> <span class="ud">%</span></div></div>
+        <p class="muted" style="margin:8px 0 0;font-size:13.5px">Escribe las horas que hace a la semana o el porcentaje de su jornada (por ejemplo, 80 % si tiene reducido un 20 %). Lo demás se calcula solo.</p>` : ''}
+    </div>`;
   $('#capa').innerHTML = `<div class="fondo" onclick="if(event.target===this)cerrarFicha()"><div class="dlg" role="dialog" aria-modal="true" aria-labelledby="fTit">
     <div class="dlg-cab"><h2 id="fTit">${e.id?esc(e.nombre||'Trabajador'):'Nuevo trabajador'}</h2><button class="cerrar" onclick="cerrarFicha()" aria-label="Cerrar">×</button></div>
     <div class="dlg-cuerpo">
@@ -394,8 +421,9 @@ function pintarFicha(primera){
         <label style="flex:1 1 120px">Nº de empleado<input value="${esc(e.num)}" oninput="UI.edit.num=this.value" autocomplete="off"></label></div>
       <div class="bloque"><h3>Contrato</h3><div class="contratos">${Object.keys(CONTRATOS).map(contratoBtn).join('')}</div></div>
       <div class="bloque"><h3>Jornada</h3>
-        <div class="jornada">${campo('semana','Horas a la semana', sem, 'h')}${campo('pct','Porcentaje', pct, '%')}${campo('anio','Horas al año', anu, 'h')}</div>
+        <div class="jornada">${campo('semana','Horas a la semana', sem, 'h')}${campo('pct','Porcentaje', pct, '%')}${campo('anio','Horas al año', pct==null?null:pct/100*A.hAnio, 'h')}</div>
         ${e.contrato!=='completo'?'<p class="muted" style="margin:8px 0 0;font-size:13.5px">Escribe en la casilla que tengas; las otras dos se calculan solas.</p>':''}</div>
+      ${concretado}
       ${periodos}
       <div class="calculo" id="calc"><span>Jornada anual ${S.anio}</span><b>${real==null?'—':nh(real)+' h'}</b><span class="f">${formula}</span></div>
     </div>
@@ -413,14 +441,32 @@ function cambiarModo(modo, input){
 }
 /* al escribir, se actualizan las otras casillas y el cálculo sin repintar la que tiene el foco */
 function recalcular(){
-  const e = UI.edit, pct = pctDe(e);
-  const vals = {semana: semanaDe(e), pct, anio: anualBase(e)};
-  Object.keys(vals).forEach(k=>{ if(k!==e.modo){ const i = $('#j_'+k); if(i) i.value = vals[k]==null ? '' : nh(vals[k]).replace(/\./g,''); } });
+  const e = UI.edit, pct = pctDe(e), A = S.ajustes;
+  const vals = {semana: semanaDe(e), pct, anio: pct==null ? null : pct/100*A.hAnio};
+  const pon = (id, v) => { const i = $('#'+id); if(i && document.activeElement!==i) i.value = v==null ? '' : nh(v).replace(/\./g,''); };
+  Object.keys(vals).forEach(k=>{ if(k!==e.modo) pon('j_'+k, vals[k]); });
+  if(e.concretado){
+    if(e.conc.modo!=='semana') pon('c_semana', semanaEf(e));
+    if(e.conc.modo!=='pct') pon('c_pct', pctDeSuJornada(e));
+    const tc = $('#c_tc'); if(tc) tc.textContent = pctEf(e)==null ? '—' : nh(pctEf(e));
+  }
   const real = anualDe(e), c = $('#calc');
-  if(c){ c.querySelector('b').textContent = real==null ? '—' : nh(real)+' h';
-    c.querySelector('.f').textContent = e.contrato==='discontinuo' ? (vals.anio==null?'Escribe su jornada para calcularla.':`${nh(vals.anio)} h × ${diasActividad(e)} días de actividad / ${diasAnio(S.anio)} días del año`)
-      : pct==null ? 'Escribe su jornada en cualquiera de las tres casillas.' : `${nh(pct)} % de ${nh(S.ajustes.hAnio)} h`; }
+  if(c){ c.querySelector('b').textContent = real==null ? '—' : nh(real)+' h'; c.querySelector('.f').textContent = formulaDe(e); }
 }
+/* explicación del cálculo de la jornada anual */
+function formulaDe(e){
+  const A = S.ajustes, pc = pctDe(e), pe = pctEf(e);
+  if(pc==null) return 'Escribe su jornada en cualquiera de las tres casillas.';
+  if(e.concretado && pe==null) return 'Escribe su jornada concretada.';
+  const base = pe/100*A.hAnio;
+  let f = e.concretado ? `Concretada: ${nh(semanaEf(e))} h a la semana (${nh(pctDeSuJornada(e))} % de su jornada de ${nh(semanaDe(e))} h) = ${nh(pe)} % de ${nh(A.hAnio)} h`
+        : e.contrato==='completo' ? `Tiempo completo: ${nh(A.hSemana)} h a la semana, ${nh(A.hAnio)} h al año`
+        : `${nh(pe)} % de ${nh(A.hAnio)} h`;
+  if(e.contrato==='discontinuo') f += `${e.concretado?'':''}, y ${nh(base)} h × ${diasActividad(e)} días de actividad / ${diasAnio(S.anio)} días del año`;
+  return f + '.';
+}
+/* al cambiar de casilla en la jornada concretada se repinta para marcar la activa sin perder el foco */
+function marcarConc(){ document.querySelectorAll('.jornada.conc .jcampo').forEach(x=>x.classList.toggle('on', x.querySelector('input')?.id==='c_'+UI.edit.conc.modo)); }
 function cerrarFicha(){ UI.edit = null; $('#capa').innerHTML = ''; }
 function guardarFicha(){
   const e = UI.edit;
@@ -428,9 +474,16 @@ function guardarFicha(){
   if(!e.nombre){ toast('Escribe el nombre'); $('#fNombre')?.focus(); return; }
   const p = pctDe(e);
   if(e.contrato!=='completo' && p!=null && (p<=0 || p>100)){ toast('La jornada tiene que estar entre 0 y un tiempo completo'); return; }
+  if(e.concretado){
+    const pe = pctEf(e);
+    if(pe==null){ toast('Escribe su jornada concretada, o marca «No»'); $('#c_'+e.conc.modo)?.focus(); return; }
+    if(pe<=0 || pe>p+0.001){ toast('La jornada concretada tiene que ser menor que la de su contrato'); return; }
+  }
   if(e.contrato==='discontinuo' && e.actividad.some(x=>x.desde&&x.hasta&&x.hasta<x.desde)){ toast('Hay un periodo que acaba antes de empezar'); return; }
   e.actividad = e.actividad.filter(x=>x.desde && x.hasta);
   if(e.contrato==='completo'){ e.valor = null; e.modo = 'semana'; }
+  if(!e.concretado) e.conc = {modo:'semana', valor:null};
+  else if(e.conc.modo==='pct') e.conc.valor = Math.round(pctDeSuJornada(e)*100)/100; else e.conc.valor = Math.round(semanaEf(e)*100)/100;
   if(e.id){ const i = S.trabajadores.findIndex(x=>x.id===e.id); S.trabajadores[i] = e; toast('Cambios guardados'); }
   else { e.id = uid(); S.trabajadores.push(e); toast('Trabajador añadido'); }
   guardar(); cerrarFicha(); pintar();
@@ -460,7 +513,7 @@ function importarPegado(){
   filas.forEach(([nombre, contrato='', horas=''])=>{
     const c = /^disc|^fijo/i.test(contrato) ? 'discontinuo' : /^parc/i.test(contrato) ? 'parcial' : 'completo';
     const h = num(horas);
-    S.trabajadores.push({ id:uid(), nombre:nombre.replace(/\s+/g,' '), num:'', contrato:c, modo:'semana', valor: c==='completo' ? null : h, actividad:[] });
+    S.trabajadores.push({ id:uid(), nombre:nombre.replace(/\s+/g,' '), num:'', contrato:c, modo:'semana', valor: c==='completo' ? null : h, actividad:[], concretado:false, conc:{modo:'semana', valor:null} });
     n++;
   });
   guardar(); $('#capa').innerHTML=''; pintar(); toast(`${n} trabajador${n===1?'':'es'} añadido${n===1?'':'s'}`);
