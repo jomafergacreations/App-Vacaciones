@@ -18,12 +18,11 @@ Si `version.json` lleva una versión mayor que la de `index.html`, la app entra 
 
 ## Estructura actual
 
-- Inicio: departamento (`DEPARTAMENTOS`: Pasaje, Rampa, Operaciones) → producto (`PRODUCTOS`: GroundHandling azul, RedBull naranja) → menú del producto (globos). Todo se filtra por `UI.dep` y `UI.prod` (`plantilla()`).
-- Año de cálculo `S.anio` en la cabecera.
-- Personal (vista `personal`): resumen por contrato, tabla de trabajadores (tarjetas en móvil), búsqueda, filtro por contrato, ficha en diálogo (`abrirFicha`, `pintarFicha`, `guardarFicha`) y «Pegar lista» desde Excel (nombre, contrato, horas semanales).
+- Cabecera: solo la marca (logo y «Control Planning»), que lleva al inicio.
+- Inicio (`vInicio`): una sola burbuja, Personal. No hay departamentos, productos, ajustes ni más módulos: se irán añadiendo cuando el usuario lo pida.
+- Personal (vista `personal`): resumen por contrato, barra con búsqueda, filtro por contrato y año de cálculo (`S.anio`), tabla de trabajadores (tarjetas en móvil), ficha en diálogo (`abrirFicha`, `pintarFicha`, `guardarFicha`) y «Pegar lista» desde Excel (nombre, contrato, horas semanales).
 - Contratos (`CONTRATOS`): `completo`, `parcial` y `discontinuo`.
 - Jornada: cada trabajador guarda la jornada tal como se escribió (`modo`: `semana` | `pct` | `anio`, y `valor`). `pctDe`, `semanaDe` y `anualBase` convierten con `S.ajustes.hSemana` (40) y `S.ajustes.hAnio` (1.700). Un tiempo completo es siempre el 100 %. Los fijos discontinuos tienen periodos de actividad (`actividad: [{desde, hasta}]`), y su jornada anual es la base × días de actividad del año / días del año (`anualDe`, `diasActividad`).
-- Ajustes (⚙): horas de un tiempo completo y copia de seguridad (descargar y restaurar).
 - Cualquier cambio de formato de datos se migra en `normalizar()`.
 
 ## Convenciones

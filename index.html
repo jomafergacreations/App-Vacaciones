@@ -39,17 +39,9 @@ header{position:sticky;top:0;z-index:20;background:var(--asfalto);color:#fff}
 .logo{width:34px;height:34px;border-radius:8px;background:var(--senal);display:grid;place-items:center;flex:0 0 auto}
 .logo svg{width:22px;height:22px}
 .marca h1{font-size:24px;letter-spacing:.01em;white-space:nowrap}
-.migas{display:flex;align-items:center;gap:6px;min-width:0}
-.miga{border:0;border-radius:7px;padding:5px 10px;font-family:var(--cond);font-weight:700;font-size:17px;cursor:pointer;white-space:nowrap}
-.miga.dep{background:#3A404C;color:var(--senal)}
-.miga.prod{background:var(--ctx);color:#fff}
-.migas .sep{color:#8C93A0}
-.cab .esp{flex:1}
-.anio{display:flex;align-items:center;gap:4px;color:#C9CED6;font-size:13px}
-.anio b{color:var(--senal);font-family:var(--cond);font-size:22px;min-width:48px;text-align:center}
-.anio button{border:0;background:#3A404C;color:#fff;width:28px;height:28px;border-radius:6px;cursor:pointer}
-.icono-btn{border:0;background:#3A404C;color:#fff;width:36px;height:36px;border-radius:8px;cursor:pointer;display:grid;place-items:center}
-.icono-btn svg{width:20px;height:20px}
+.anio{display:flex;align-items:center;gap:4px;background:var(--asfalto);border-radius:10px;padding:4px}
+.anio b{color:var(--senal);font-family:var(--cond);font-size:22px;min-width:52px;text-align:center}
+.anio button{border:0;background:#3A404C;color:#fff;width:30px;height:32px;border-radius:7px;cursor:pointer}
 
 main{max-width:1600px;margin:0 auto;padding:26px 22px 60px}
 
@@ -72,21 +64,10 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--asfalto)
 
 /* portadas */
 .portada{margin-bottom:22px}
-.portada .k{font-family:var(--cond);font-weight:600;font-size:18px;color:var(--gris);margin:0 0 4px}
 .portada h2{font-size:52px;letter-spacing:-.005em}
 .portada p{margin:8px 0 0;color:var(--gris);max-width:60ch}
 .volver{border:0;background:none;color:var(--pista);font-weight:600;cursor:pointer;padding:0;margin-bottom:8px;font-size:15px}
-.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
-.tile{position:relative;text-align:left;border:0;border-radius:18px;padding:22px 22px 20px;min-height:170px;background:var(--asfalto);color:#fff;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;transition:transform .18s,box-shadow .18s}
-.tile:hover{transform:translateY(-3px);box-shadow:0 16px 30px -18px rgba(34,38,46,.8)}
-.tile .letra{font-family:var(--cond);font-weight:700;font-size:20px;width:44px;height:44px;border-radius:10px;background:var(--senal);color:var(--asfalto);display:grid;place-items:center}
-.tile .nom{font-family:var(--cond);font-weight:700;font-size:36px;line-height:1}
-.tile .dato{color:#C9CED6;font-size:14px;margin-top:4px}
-.tile .fl{position:absolute;top:22px;right:22px;color:var(--senal);transition:transform .2s}
-.tile .fl svg{width:28px;height:28px}
-.tile:hover .fl{transform:translateX(4px)}
-.tile.prod{background:var(--c)} .tile.prod .letra{background:#fff;color:var(--c)} .tile.prod .dato{color:rgba(255,255,255,.85)} .tile.prod .fl{color:#fff}
-
+   
 /* globos del menú */
 .globos{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
 .globo{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:10px;text-align:left;border:1px solid var(--linea);background:var(--papel);border-radius:26px;padding:26px;min-height:250px;cursor:pointer;transition:transform .2s,box-shadow .2s,border-color .2s}
@@ -186,14 +167,11 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
 
 /* móvil */
 @media (max-width:760px){
-  .cab{padding:8px 10px;gap:6px} .marca h1{display:none} .anio span{display:none}
-  .migas{flex:1 1 auto;overflow:hidden} .migas .sep{display:none}
-  .miga{font-size:14px;padding:4px 7px;max-width:42vw;overflow:hidden;text-overflow:ellipsis}
-  .cab .esp{display:none} .anio b{font-size:18px;min-width:40px} .anio button{width:24px;height:28px} .icono-btn{width:32px;height:32px}
+  .cab{padding:8px 12px} .marca h1{font-size:21px}
   .cifra b{font-size:26px}
   .barra-herr .btn{flex:1 1 auto}
   main{padding:18px 12px 50px}
-  .portada h2{font-size:38px}
+  .portada h2{font-size:38px} .globos{grid-template-columns:1fr}
   .resumen{grid-template-columns:repeat(2,minmax(0,1fr))} .resumen .cifra:first-child{grid-column:1/-1}
   .tabla-escritorio{display:none} .tarjetas-movil{display:flex;flex-direction:column;gap:10px}
   .tm{background:var(--papel);border:1px solid var(--linea);border-radius:14px;padding:14px;text-align:left;width:100%;cursor:pointer}
@@ -214,10 +192,6 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
       <span class="logo"><svg viewBox="0 0 24 24" aria-hidden="true"><g transform="rotate(45 12 12)"><path fill="#22262E" d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></g></svg></span>
       <h1>Control Planning</h1>
     </button>
-    <nav class="migas" id="migas" aria-label="Dónde estás"></nav>
-    <span class="esp"></span>
-    <div class="anio" title="Año con el que se calcula la jornada anual"><span>Año</span><button onclick="cambiarAnio(-1)" aria-label="Año anterior">‹</button><b id="anio"></b><button onclick="cambiarAnio(1)" aria-label="Año siguiente">›</button></div>
-    <button class="icono-btn" onclick="abrirAjustes()" aria-label="Ajustes" title="Ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M5.5 18.5l1.7-1.7M16.8 7.2l1.7-1.7"/></svg></button>
   </div>
 </header>
 <main id="main"></main>
@@ -228,22 +202,16 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
    Control Planning 10 — rehecha desde cero
    Datos en localStorage, con una clave nueva.
    ========================================================= */
-const APP_VERSION = '10.0.1';
+const APP_VERSION = '10.1.0';
 const CLAVE = 'control-planning-v10';
 const NOVEDADES = {
-  '10.0.1': [
-    { titulo:'Solo Personal', donde:'Toda la app',
-      texto:'Se ha quitado todo lo de la versión anterior. Por ahora la app tiene solo Personal; las demás partes se irán añadiendo cuando esta funcione bien.' },
-  ],
-  '10.0.0': [
-    { titulo:'Control Planning, desde cero', donde:'Toda la app',
-      texto:'Empezamos una app nueva y más sencilla, por partes. La primera es Personal: los trabajadores, su contrato y su jornada anual. Los datos empiezan en blanco.' },
-    { titulo:'Personal', donde:'Departamento › Producto › Personal',
-      texto:'Añade a cada trabajador con su contrato: tiempo completo, tiempo parcial o fijo discontinuo. Verás su jornada en horas a la semana, en porcentaje y en horas al año.' },
+  '10.1.0': [
+    { titulo:'Control Planning, desde cero', donde:'Inicio',
+      texto:'La app empieza de nuevo y crecerá por partes. Por ahora solo tiene una: Personal.' },
+    { titulo:'Personal', donde:'Inicio › Personal',
+      texto:'Añade a cada trabajador con su contrato (tiempo completo, tiempo parcial o fijo discontinuo) y su jornada. Verás la jornada en horas a la semana, en porcentaje y en horas al año.' },
     { titulo:'Jornada como tú la tengas', donde:'Ficha de cada trabajador',
-      texto:'Escribe la jornada en horas semanales, en porcentaje o en horas anuales: la app calcula las otras dos. Un tiempo completo son 40 h a la semana y 1.700 h al año (se cambia en Ajustes).' },
-    { titulo:'Fijos discontinuos', donde:'Ficha de cada trabajador',
-      texto:'Apunta sus periodos de actividad y la jornada anual se calcula en proporción a los días que trabaja en el año.' },
+      texto:'Escribe la jornada en horas semanales, en porcentaje o en horas anuales: la app calcula las otras dos. Un tiempo completo son 40 h a la semana y 1.700 h al año. A los fijos discontinuos se les apuntan sus periodos de actividad.' },
   ],
 };
 
@@ -267,15 +235,11 @@ const ICO = {
 };
 
 /* ---------- catálogos fijos ---------- */
-const DEPARTAMENTOS = [ {id:'pasaje', nombre:'Pasaje'}, {id:'rampa', nombre:'Rampa'}, {id:'operaciones', nombre:'Operaciones'} ];
-const PRODUCTOS = [ {id:'gh', nombre:'GroundHandling', color:'#1F5FBF'}, {id:'rb', nombre:'RedBull', color:'#E2631B'} ];
 const CONTRATOS = {
   completo:    {nombre:'Tiempo completo', corto:'Completo', desc:'Jornada entera todo el año', color:'#1F5FBF'},
   parcial:     {nombre:'Tiempo parcial', corto:'Parcial', desc:'Menos horas que un completo', color:'#7A4FB5'},
   discontinuo: {nombre:'Fijo discontinuo', corto:'Discontinuo', desc:'Trabaja por periodos de actividad', color:'#C46A12'},
 };
-const nomDep = id => DEPARTAMENTOS.find(d=>d.id===id)?.nombre || '';
-const prodDe = id => PRODUCTOS.find(p=>p.id===id);
 
 /* ---------- estado ---------- */
 function anioInicial(){ const d = new Date(); return d.getFullYear() + (d.getMonth()>=9 ? 1 : 0); }   // de octubre en adelante, el año siguiente
@@ -284,7 +248,7 @@ function normalizar(d){
   const b = estadoInicial();
   d = Object.assign(b, d || {});
   d.ajustes = Object.assign(estadoInicial().ajustes, d.ajustes || {});
-  d.trabajadores = (d.trabajadores||[]).map(t=>({ id:t.id||uid(), nombre:t.nombre||'', num:t.num||'', dep:t.dep||'pasaje', prod:t.prod||'gh',
+  d.trabajadores = (d.trabajadores||[]).map(t=>({ id:t.id||uid(), nombre:t.nombre||'', num:t.num||'',
     contrato: CONTRATOS[t.contrato] ? t.contrato : 'completo', modo:['semana','pct','anio'].includes(t.modo)?t.modo:'semana',
     valor: t.valor ?? null, actividad: Array.isArray(t.actividad) ? t.actividad : [] }));
   return d;
@@ -292,8 +256,8 @@ function normalizar(d){
 let S;
 try { S = normalizar(JSON.parse(localStorage.getItem(CLAVE))); } catch(e){ S = estadoInicial(); }
 const guardar = () => { try { localStorage.setItem(CLAVE, JSON.stringify(S)); } catch(e){ toast('No se ha podido guardar en este navegador'); } };
-let UI = { vista:'inicio', dep:'', prod:'', buscar:'', filtro:'todos', edit:null };
-try { const u = JSON.parse(sessionStorage.getItem('cp-ui')||'{}'); if(u.dep) UI.dep=u.dep; if(u.prod) UI.prod=u.prod; if(u.vista) UI.vista=u.vista; } catch(e){}
+let UI = { vista:'inicio', buscar:'', filtro:'todos', edit:null };
+try { const u = JSON.parse(sessionStorage.getItem('cp-ui')||'{}'); if(u.vista) UI.vista=u.vista; } catch(e){}
 
 /* =========================================================
    Jornada
@@ -330,48 +294,31 @@ const faltaActividad = t => t.contrato==='discontinuo' && diasActividad(t)===0;
 /* =========================================================
    Pantallas
    ========================================================= */
-function ir(v){ UI.vista = v; if(v==='inicio'){ UI.dep=''; UI.prod=''; } if(v==='producto') UI.prod=''; pintar(true); scrollTo(0,0); }
-function elegirDep(id){ UI.dep = id; ir('producto'); }
-function elegirProd(id){ UI.prod = id; ir('menu'); }
-const plantilla = () => S.trabajadores.filter(t=>t.dep===UI.dep && t.prod===UI.prod);
+function ir(v){ UI.vista = v; pintar(true); scrollTo(0,0); }
+const plantilla = () => S.trabajadores;
 
 function pintar(cambio){
-  const p = prodDe(UI.prod);
-  document.documentElement.style.setProperty('--ctx', p ? p.color : '#1F5FBF');
-  $('#anio').textContent = S.anio;
-  $('#migas').innerHTML = (UI.dep ? `<span class="sep">›</span><button class="miga dep" onclick="ir('producto')">${esc(nomDep(UI.dep))}</button>` : '')
-    + (p ? `<span class="sep">›</span><button class="miga prod" onclick="ir('menu')">${esc(p.nombre)}</button>` : '');
-  const V = {inicio:vInicio, producto:vProducto, menu:vMenu, personal:vPersonal};
-  if(!V[UI.vista] || (UI.vista!=='inicio' && !UI.dep) || (['menu','personal'].includes(UI.vista) && !UI.prod)) UI.vista = UI.dep ? 'producto' : 'inicio';
+  const V = {inicio:vInicio, personal:vPersonal};
+  if(!V[UI.vista]) UI.vista = 'inicio';
   const m = $('#main'); m.innerHTML = V[UI.vista]();
   if(cambio){ m.classList.remove('entrando'); void m.offsetWidth; m.classList.add('entrando'); clearTimeout(pintar._t); pintar._t = setTimeout(()=>m.classList.remove('entrando'), 800); }
-  try { sessionStorage.setItem('cp-ui', JSON.stringify({dep:UI.dep, prod:UI.prod, vista:UI.vista})); } catch(e){}
+  try { sessionStorage.setItem('cp-ui', JSON.stringify({vista:UI.vista})); } catch(e){}
 }
 
+/* inicio: una sola burbuja */
 function vInicio(){
-  return `<div class="portada anim"><p class="k">Menzies AGP</p><h2>¿Con qué departamento vas a trabajar?</h2></div>
-  <div class="tiles">${DEPARTAMENTOS.map((d,i)=>{ const n = S.trabajadores.filter(t=>t.dep===d.id).length;
-    return `<button class="tile anim" style="--i:${i+1}" onclick="elegirDep('${d.id}')"><span class="letra">${d.nombre[0]}</span><span><span class="nom">${d.nombre}</span><div class="dato">${n ? `${n} trabajador${n===1?'':'es'}` : 'Sin trabajadores todavía'}</div></span><span class="fl">${ICO.flecha}</span></button>`; }).join('')}</div>`;
-}
-function vProducto(){
-  return `<div class="portada anim"><button class="volver" onclick="ir('inicio')">‹ Departamentos</button><p class="k">${esc(nomDep(UI.dep))}</p><h2>¿Qué producto?</h2></div>
-  <div class="tiles">${PRODUCTOS.map((p,i)=>{ const n = S.trabajadores.filter(t=>t.dep===UI.dep && t.prod===p.id).length;
-    return `<button class="tile prod anim" style="--c:${p.color};--i:${i+1}" onclick="elegirProd('${p.id}')"><span class="letra">${p.nombre[0]}</span><span><span class="nom">${p.nombre}</span><div class="dato">${n ? `${n} trabajador${n===1?'':'es'}` : 'Sin trabajadores todavía'}</div></span><span class="fl">${ICO.flecha}</span></button>`; }).join('')}</div>`;
-}
-function vMenu(){
-  const ts = plantilla(), total = ts.reduce((a,t)=>a+(anualDe(t)||0),0), pend = ts.filter(t=>faltaJornada(t)||faltaActividad(t)).length;
-  return `<div class="portada anim"><button class="volver" onclick="ir('producto')">‹ Productos</button><p class="k">${esc(nomDep(UI.dep))}</p><h2>${esc(prodDe(UI.prod).nombre)}</h2></div>
-  <div class="globos">
-    <button class="globo anim" style="--i:1" onclick="ir('personal')"><span class="gi">${ICO.personal}</span><span class="gt">Personal</span>
-      <span class="gp">Los trabajadores, su tipo de contrato y su jornada: a la semana, en porcentaje y al año.</span>
-      <span class="gd"><span>${ts.length} trabajador${ts.length===1?'':'es'}</span>${ts.length?`<span>${nh(total)} h en ${S.anio}</span>`:''}${pend?`<span>${pend} por completar</span>`:''}</span></button>
+  const ts = S.trabajadores, pend = ts.filter(t=>faltaJornada(t)||faltaActividad(t)).length;
+  return `<div class="globos">
+    <button class="globo anim" style="--i:0" onclick="ir('personal')"><span class="gi">${ICO.personal}</span><span class="gt">Personal</span>
+      <span class="gp">Los trabajadores, su tipo de contrato y su jornada.</span>
+      <span class="gd">${ts.length?`<span>${ts.length} trabajador${ts.length===1?'':'es'}</span>`:'<span>Sin trabajadores todavía</span>'}${pend?`<span>${pend} por completar</span>`:''}</span></button>
   </div>`;
 }
 
 function vPersonal(){
   const todos = plantilla();
-  const cab = `<div class="portada anim"><button class="volver" onclick="ir('menu')">‹ ${esc(prodDe(UI.prod).nombre)}</button><h2>Personal</h2>
-    <p>Trabajadores de ${esc(nomDep(UI.dep))}, ${esc(prodDe(UI.prod).nombre)}, con su contrato y su jornada en ${S.anio}.</p></div>`;
+  const cab = `<div class="portada anim"><button class="volver" onclick="ir('inicio')">‹ Inicio</button><h2>Personal</h2>
+    <p>Los trabajadores con su contrato y su jornada.</p></div>`;
   if(!todos.length) return cab + `<div class="tarjeta vacio anim" style="--i:1"><h3>Todavía no hay nadie</h3><p>Añade a los trabajadores uno a uno o pega la lista desde tu Excel.</p>
     <div class="fila" style="justify-content:center"><button class="btn primario" onclick="abrirFicha()">${ICO.mas} Añadir trabajador</button><button class="btn" onclick="abrirPegar()">${ICO.pegar} Pegar lista</button></div></div>`;
   const cuenta = c => todos.filter(t=>t.contrato===c).length;
@@ -402,6 +349,7 @@ function vPersonal(){
       <div class="barra-herr">
         <input class="buscar" type="search" placeholder="Buscar por nombre o número" value="${esc(UI.buscar)}" aria-label="Buscar" oninput="UI.buscar=this.value;clearTimeout(window._b);window._b=setTimeout(()=>{pintar();const i=document.querySelector('.buscar');i.focus();i.setSelectionRange(i.value.length,i.value.length)},200)">
         <div class="seg" role="group" aria-label="Filtrar por contrato">${fb('todos','Todos')}${fb('completo','Completo')}${fb('parcial','Parcial')}${fb('discontinuo','Discontinuo')}</div>
+        <div class="anio" title="Año de la jornada anual"><button onclick="cambiarAnio(-1)" aria-label="Año anterior">‹</button><b>${S.anio}</b><button onclick="cambiarAnio(1)" aria-label="Año siguiente">›</button></div>
         <span class="esp"></span>
         <button class="btn" onclick="abrirPegar()">${ICO.pegar} Pegar lista</button>
         <button class="btn primario" onclick="abrirFicha()">${ICO.mas} Añadir trabajador</button>
@@ -416,7 +364,7 @@ function vPersonal(){
    ========================================================= */
 function abrirFicha(id){
   const t = id ? S.trabajadores.find(x=>x.id===id) : null;
-  UI.edit = t ? JSON.parse(JSON.stringify(t)) : { id:null, nombre:'', num:'', dep:UI.dep, prod:UI.prod, contrato:'completo', modo:'semana', valor:null, actividad:[] };
+  UI.edit = t ? JSON.parse(JSON.stringify(t)) : { id:null, nombre:'', num:'', contrato:'completo', modo:'semana', valor:null, actividad:[] };
   pintarFicha(true);
 }
 function pintarFicha(primera){
@@ -499,7 +447,7 @@ function abrirPegar(){
     <div class="dlg-cab"><h2 id="pTit">Pegar lista</h2><button class="cerrar" onclick="$('#capa').innerHTML=''" aria-label="Cerrar">×</button></div>
     <div class="dlg-cuerpo">
       <p style="margin:0">Copia las columnas de tu Excel y pégalas aquí, una persona por fila, en este orden: <b>nombre</b>, <b>contrato</b> y <b>horas a la semana</b>. Solo el nombre es obligatorio.</p>
-      <p class="muted" style="margin:0;font-size:14px">Contrato: «completo», «parcial» o «discontinuo» (vale cualquier palabra que empiece así). Si no pones nada, se entiende tiempo completo. Se añaden a ${esc(nomDep(UI.dep))}, ${esc(prodDe(UI.prod).nombre)}.</p>
+      <p class="muted" style="margin:0;font-size:14px">Contrato: «completo», «parcial» o «discontinuo» (vale cualquier palabra que empiece así). Si no pones nada, se entiende tiempo completo.</p>
       <textarea id="pegado" placeholder="ANA GARCÍA LÓPEZ&#9;completo&#10;LUIS PÉREZ RUIZ&#9;parcial&#9;30&#10;MARTA SANZ GIL&#9;discontinuo&#9;40"></textarea>
     </div>
     <div class="dlg-pie"><button class="btn" onclick="$('#capa').innerHTML=''">Cancelar</button><button class="btn primario" onclick="importarPegado()">Añadir a la plantilla</button></div></div></div>`;
@@ -512,48 +460,14 @@ function importarPegado(){
   filas.forEach(([nombre, contrato='', horas=''])=>{
     const c = /^disc|^fijo/i.test(contrato) ? 'discontinuo' : /^parc/i.test(contrato) ? 'parcial' : 'completo';
     const h = num(horas);
-    S.trabajadores.push({ id:uid(), nombre:nombre.replace(/\s+/g,' '), num:'', dep:UI.dep, prod:UI.prod, contrato:c, modo:'semana', valor: c==='completo' ? null : h, actividad:[] });
+    S.trabajadores.push({ id:uid(), nombre:nombre.replace(/\s+/g,' '), num:'', contrato:c, modo:'semana', valor: c==='completo' ? null : h, actividad:[] });
     n++;
   });
   guardar(); $('#capa').innerHTML=''; pintar(); toast(`${n} trabajador${n===1?'':'es'} añadido${n===1?'':'s'}`);
 }
 
-/* ---------- año y ajustes ---------- */
+/* ---------- año de cálculo ---------- */
 function cambiarAnio(d){ S.anio += d; guardar(); pintar(); }
-function abrirAjustes(){
-  const A = S.ajustes;
-  $('#capa').innerHTML = `<div class="fondo" onclick="if(event.target===this)$('#capa').innerHTML=''"><div class="dlg" role="dialog" aria-modal="true" aria-labelledby="aTit">
-    <div class="dlg-cab"><h2 id="aTit">Ajustes</h2><button class="cerrar" onclick="$('#capa').innerHTML=''" aria-label="Cerrar">×</button></div>
-    <div class="dlg-cuerpo">
-      <div class="bloque"><h3>Tiempo completo</h3><p class="muted" style="margin:0 0 10px;font-size:14px">Es la base de todos los cálculos de jornada.</p>
-        <div class="fila"><label>Horas a la semana<input id="aSem" inputmode="decimal" value="${nh(A.hSemana)}"></label><label>Horas al año<input id="aAnio" inputmode="decimal" value="${String(A.hAnio)}"></label></div></div>
-      <div class="bloque"><h3>Copia de seguridad</h3><p class="muted" style="margin:0 0 10px;font-size:14px">Los datos viven solo en este navegador. Descarga una copia de vez en cuando.</p>
-        <div class="fila"><button class="btn" onclick="descargarCopia()">Descargar copia</button><label class="btn" style="flex:0 0 auto;color:inherit;font-size:inherit">Restaurar una copia<input type="file" accept=".json,application/json" style="display:none" onchange="restaurarCopia(this.files[0])"></label></div></div>
-      <p class="muted" style="margin:0;font-size:13px">Versión ${APP_VERSION}</p>
-    </div>
-    <div class="dlg-pie"><button class="btn" onclick="$('#capa').innerHTML=''">Cancelar</button><button class="btn primario" onclick="guardarAjustes()">Guardar</button></div></div></div>`;
-}
-function guardarAjustes(){
-  const s = num($('#aSem').value), a = num($('#aAnio').value);
-  if(!s || !a || s<=0 || a<=0) return toast('Escribe horas mayores que cero');
-  S.ajustes.hSemana = s; S.ajustes.hAnio = a; guardar(); $('#capa').innerHTML=''; pintar(); toast('Ajustes guardados');
-}
-function descargarCopia(){
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([JSON.stringify(S,null,1)], {type:'application/json'}));
-  a.download = `control-planning-${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(a); a.click();
-  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
-}
-function restaurarCopia(f){
-  if(!f) return;
-  const r = new FileReader();
-  r.onload = () => { try { const d = JSON.parse(r.result); if(!d || d.v!==10) throw 0;
-      if(!confirm('Se sustituirán todos los datos actuales por los de la copia. ¿Seguir?')) return;
-      S = normalizar(d); guardar(); $('#capa').innerHTML=''; pintar(true); toast('Copia restaurada');
-    } catch(e){ toast('Ese archivo no es una copia de esta versión de la app'); } };
-  r.readAsText(f);
-}
-
 /* =========================================================
    Actualizaciones: aviso que bloquea y recorrido de novedades
    ========================================================= */

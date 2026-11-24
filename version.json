@@ -1,5 +1,5 @@
 {
-  "version": "10.0.1",
+  "version": "10.1.0",
   "fecha": "2026-11-24",
-  "novedades": ["Solo queda Personal: se ha quitado todo lo de la versión anterior"]
+  "novedades": ["La app empieza de cero: solo la burbuja Personal"]
 }
