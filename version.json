@@ -1,9 +1,9 @@
 {
-  "version": "6.0.0",
+  "version": "7.0.0",
   "fecha": "2026-11-24",
   "novedades": [
-    "Menú renovado por bloques con iconos",
-    "La asignación muestra sus tres pasos y te lleva al siguiente",
-    "Transiciones y animaciones suaves"
+    "Ahora se llama PlanningApp",
+    "Nuevo apartado Jornada: horas, media diaria, hechas y pendientes",
+    "Ajustes de jornada (AJ), festivos de empresa (X) y bajas por persona"
   ]
 }

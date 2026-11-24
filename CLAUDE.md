@@ -1,6 +1,6 @@
-# Vacaciones AGP
+# PlanningApp (antes Vacaciones AGP)
 
-App personal en un único `index.html` (HTML + CSS + JS, sin dependencias) para gestionar la elección de vacaciones en Menzies AGP según el convenio (BOE-A-2023-25956, arts. 32 y 33). Se publica con GitHub Pages desde `main`. Los datos viven en el `localStorage` del navegador del usuario: nunca subir copias `.json` de datos al repositorio.
+App personal en un único `index.html` (HTML + CSS + JS, sin dependencias) para gestionar la elección de vacaciones en Menzies AGP según el convenio (BOE-A-2023-25956, arts. 32 y 33) y la jornada anual de cada persona. La clave de `localStorage` sigue siendo `vacaciones-agp-v1` para no perder datos. Se publica con GitHub Pages desde `main`. Los datos viven en el `localStorage` del navegador del usuario: nunca subir copias `.json` de datos al repositorio.
 
 ## Cómo publicar una versión
 
@@ -15,11 +15,14 @@ Si `version.json` lleva una versión mayor que la de `index.html`, la app entrar
 ## Estructura
 
 - Inicio: departamento (Pasaje, Rampa, Operaciones) → producto (GroundHandling azul, RedBull naranja) → menú del producto (`vMenu`). Todo lo de dentro se filtra por ese contexto (`S.ctx`).
-- Menú: tarjeta «Asignación de vacaciones» (único sitio con barra de pasos: Grupos de elección › Elección › Resumen y cierre, `PASOS`; en el menú muestra el estado de cada paso y lleva al siguiente) y secciones sueltas (`SECCIONES`) agrupadas en tres bloques (Personas, Turnos y contratos, Consultar), con iconos SVG de `ICONOS`/`ico()`: Plantilla (pestañas Trabajadores y Cupos de plantilla), Grupos (vista `equipos`: miembros a mano y año con la rotación del grupo), Skills, Rotaciones, Transformaciones, Desprogramaciones, Calendario y Exportar PDF.
+- Menú: tarjeta «Asignación de vacaciones» (único sitio con barra de pasos: Grupos de elección › Elección › Resumen y cierre, `PASOS`; en el menú muestra el estado de cada paso y lleva al siguiente) y secciones sueltas (`SECCIONES`) agrupadas en tres bloques (Personas; Turnos, jornada y contratos; Consultar), con iconos SVG de `ICONOS`/`ico()`: Plantilla (pestañas Trabajadores y Cupos de plantilla), Grupos (vista `equipos`: miembros a mano y año con la rotación del grupo), Skills, Rotaciones, Jornada, Transformaciones, Desprogramaciones, Calendario y Exportar PDF.
 - Categorías: una skill puede ser «de super» (`skill.super`); quien tenga alguna es super, el resto agente (`catDe`). Cada grupo tiene cupo por categoría (`cupoAg`, `cupoSup`): cuántos agentes y supers del grupo pueden estar fuera a la vez (`companerosEnFechas`).
 - Días de vacaciones: no se puede pasar de `derechoCiclo` (`excedeDias`). Los descansos y festivos de la rotación (`esDescanso`) no se pueden coger y, si un periodo los cruza, no cuentan (`statsRango(desde, hasta, w)`).
 - Grupos de elección ≠ cupos de plantilla: los grupos solo marcan quién elige con quién y en qué orden (y el 10 % de desprogramaciones); los cupos limitan cuántos pueden estar fuera a la vez.
 - Rotaciones: plantilla de 3 semanas (L-D) por departamento y producto; se asigna a grupos (`grupo.rotacionId`) o a una persona concreta (`trabajador.rotacionId`, que manda sobre la del grupo); `turnoDia(w, fecha)` da el turno de cada persona. La fase se fija por grupo o persona eligiendo en qué semana cae el 1 de enero (`rotAnio`, `rotSemana`, ver `inicioRot`); si no hay, se usa `rotacion.inicio`.
+- Jornada (vista `jornada`): jornada garantizada por persona en horas o en % de `S.ajustes.jornadaBase` (1.700 h; `jornadaModo`, `jornadaValor`; un tiempo completo sin valor usa 1.700). `jornadaInfo(w)` cuenta los días del año: R, F, X, AJ (libres), H (vacaciones y desprogramaciones), baja y D.T. Con bajas, cómputo = jornada × (x − b) / x, donde x son los días de trabajo previstos y b los de baja; media = jornada / x; hechas = días trabajados hasta hoy × media.
+- Leyenda del cuadrante: R descanso, F festivo, X festivo de empresa, AJ ajuste de jornada (para no pasar de la jornada anual), H vacaciones, PR y PNR permisos (aún sin usar), D.T. días de trabajo.
+- Marcas por persona y día (`S.marcas`: AJ, X) mandan sobre la rotación en `turnoDia` y cuentan como libres. Bajas por rangos en `S.bajas`.
 - Transformaciones: cambios de contrato con fecha (`S.transf`); `derechoCiclo(w, año)` prorratea los días de vacaciones por tramos. Solo se deshace la última de cada persona.
 - Ajustes generales (convenio, Semana Santa, puentes, ponderación, reglas de desprogramación, copias) en el botón ⚙.
 - Las vacaciones no se borran al cerrar ciclo: el histórico se consulta en el calendario anual. Los cálculos del ciclo filtran por año (`periodosDe`, `desprogDe`).

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#22262E">
-<title>Vacaciones AGP</title>
+<title>PlanningApp</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -119,6 +119,18 @@ body.ancho main{max-width:none}
 .engranaje:hover .ico{transform:rotate(60deg)}
 .tile .fl .ico{width:34px;height:34px;stroke-width:2.2;transition:transform .2s}
 .tile:hover .fl .ico{transform:translateX(4px)}
+
+/* ---- jornada ---- */
+.jo-tabla td.num,.jo-tabla th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.jo-tabla tr.gfil td{background:#F3F4F7;font-family:var(--cond);font-weight:700;font-size:15px;color:var(--gris)}
+.jo-tabla tr.clic{cursor:pointer;transition:background .12s} .jo-tabla tr.clic:hover{background:color-mix(in srgb,var(--ctx) 7%,#fff)}
+.jo-leyenda{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:16px;padding-top:14px;border-top:1px solid var(--linea);font-size:13.5px;color:var(--gris)}
+.jo-leyenda b{color:var(--asfalto);font-size:16px;margin-right:5px;font-variant-numeric:tabular-nums}
+.fd.mk{background:var(--mc);border-color:var(--mc);color:#fff;font-weight:700}
+.fd.bj{background:repeating-linear-gradient(135deg,#F3C2BD 0 3px,#FBE7E5 3px 7px);color:#8C2A20}
+.fd.sel{outline:2px solid var(--asfalto);outline-offset:1px}
+.chip.bad-soft{background:#FBE7E5;color:#8C2A20}
+.chip .x{border:0;background:none;color:inherit;font-size:16px;line-height:1;cursor:pointer;padding:0 0 0 6px}
 
 /* ---- movimiento: una entrada escalonada al cambiar de pantalla y respuestas a lo que se toca ---- */
 @keyframes subir{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
@@ -491,7 +503,7 @@ body.bloqueada{overflow:hidden}
 </head>
 <body>
 <header class="app">
-  <button class="marca" onclick="irInicio()" aria-label="Volver al inicio"><span class="logo" aria-hidden="true">✈</span><h1>Vacaciones AGP</h1></button>
+  <button class="marca" onclick="irInicio()" aria-label="Volver al inicio"><span class="logo" aria-hidden="true">✈</span><h1>PlanningApp</h1></button>
   <div class="migas" id="migas"></div>
   <span class="ciclo" id="hdrCiclo"></span>
   <button class="engranaje" id="btnAjustes" onclick="go(UI.vista==='ajustes'?UI.volverDe:'ajustes')" aria-label="Ajustes generales" title="Ajustes generales"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M5.5 18.5l1.7-1.7M16.8 7.2l1.7-1.7"/></svg></button>
@@ -503,11 +515,11 @@ body.bloqueada{overflow:hidden}
 
 <script>
 /* =========================================================
-   Vacaciones AGP — app personal de elección de vacaciones
+   PlanningApp — app personal de vacaciones y jornada
    Reglas base: Convenio Menzies (BOE-A-2023-25956), arts. 32 y 33
    Datos guardados en el navegador (localStorage). Haz copias.
    ========================================================= */
-const APP_VERSION = '6.0.0';   // súbela junto con version.json en cada publicación
+const APP_VERSION = '7.0.0';   // súbela junto con version.json en cada publicación
 const LS_KEY = 'vacaciones-agp-v1';
 const SIN = '_'; // clave interna para «sin grupo»
 
@@ -561,7 +573,7 @@ const SUGERENCIAS = { // ideas para crear skills rápido; se pueden ignorar
   Operaciones:['Agente administrativo','Auxiliar administrativo','Coordinador de operaciones','Control de carga','Jefe de turno','Supervisor'],
 };
 const TURNOS_DEF = [ {cod:'R',nombre:'Libre',color:'#23864F',libre:true}, {cod:'F',nombre:'Festivo',color:'#C23B30',libre:true}, {cod:'M',nombre:'Mañana',color:'#1F5FBF',libre:false}, {cod:'T',nombre:'Tarde',color:'#B86E00',libre:false}, {cod:'N',nombre:'Noche',color:'#5B3E99',libre:false} ];
-const AJUSTES_DEF = { computo:'naturales', bloquear:true, rondas:3, ptsSS:8, ptsPuente:2, diasDefecto:24,
+const AJUSTES_DEF = { jornadaBase:1700, computo:'naturales', bloquear:true, rondas:3, ptsSS:8, ptsPuente:2, diasDefecto:24,
   ponderar:true, baseDias:24, bloqueoGrupo:true, maxDesprog:3, preaviso:15, pctTurno:10, desprogPuntua:true };
 const depsIniciales = () => ['Pasaje','Rampa','Operaciones'].map(n=>({id:uid(), nombre:n, baseDias:''}));
 
@@ -606,13 +618,21 @@ function normalizar(d){ // también migra datos de versiones anteriores
   d.skills.forEach(k=>{ if(k.super===undefined) k.super = /jefe|supervis/i.test(k.nombre); });
   d.grupos.forEach(g=>{ if(g.cupoAg===undefined) g.cupoAg=1; if(g.cupoSup===undefined) g.cupoSup=1; });
   d.cupos.forEach(c=>{ c.skills ||= []; if(c.grupoId===undefined) c.grupoId=''; if(c.depId===undefined) c.depId=''; if(c.prodId===undefined) c.prodId = c.depId ? prod0 : ''; });
+  // 7.0: marcas por persona y día (AJ, X), bajas y jornada
+  d.marcas ||= []; d.bajas ||= [];
+  [{cod:'X',nombre:'Festivo de empresa',color:'#8E2A6B',libre:true},{cod:'AJ',nombre:'Ajuste de jornada',color:'#0E7A8A',libre:true}]
+    .forEach(t=>{ if(!d.turnosTipos.some(x=>x.cod===t.cod)) d.turnosTipos.push({...t}); });
+  d.turnosTipos.forEach(t=>{ if(t.cod==='F' && t.nombre==='Festivo') t.libre = true; });
+  d.trabajadores.forEach(t=>{ if(t.jornadaModo===undefined) t.jornadaModo='horas'; if(t.jornadaValor===undefined) t.jornadaValor=''; });
   delete d.vistaDep;
   d.version = 4;
   return d;
 }
 let S;
 try { const raw = JSON.parse(localStorage.getItem(LS_KEY)); S = raw ? normalizar(raw) : estadoInicial(); } catch(e){ S = estadoInicial(); }
-const save = () => { try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch(e){ toast('No se ha podido guardar en este navegador'); } };
+let _marcasIdx = null;
+const marcaDe = (id, s) => { if(!_marcasIdx){ _marcasIdx = new Map(); S.marcas.forEach(m=>_marcasIdx.set(m.trabajadorId+'|'+m.dia, m)); } return _marcasIdx.get(id+'|'+s); };
+const save = () => { _marcasIdx = null; try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch(e){ toast('No se ha podido guardar en este navegador'); } };
 
 let UI = { vista:'inicio', volverDe:'inicio', modo:'turnos', grupo:null, trab:null, desde:'', hasta:'', editTrab:null, editCupo:null,
   cal:{modo:'anual', anio:null, zoom: (window.innerWidth<760 ? 'semana' : 'ajustar'), grupo:'all', skill:'all', buscar:'', mes:null, dia:null},
@@ -633,6 +653,7 @@ const ICONOS = {
   ajustes:'<circle cx="12" cy="12" r="3"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M5.5 18.5l1.7-1.7M16.8 7.2l1.7-1.7"/>',
   flecha:'<path d="M5 12h14M13 6l6 6-6 6"/>',
   ok:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  jornada:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
 };
 const ico = (n, cls='') => `<svg class="ico ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONOS[n]||''}</svg>`;
 
@@ -706,6 +727,7 @@ function inicioRot(w, r){
 }
 const codEnFecha = (r, ini, s) => { const n = r.semanas.length*7, i = ((daysBetween(ini, s) % n) + n) % n; return r.semanas[Math.floor(i/7)][i%7]; };
 function turnoDia(w, s){
+  const mk = w && marcaDe(w.id, s); if(mk) return tipoTurno(mk.cod) || {cod:mk.cod, nombre:mk.cod, color:'#5F6775', libre:true};
   const r = rotDe(w); if(!r || !r.inicio) return null;
   const n = r.semanas.length*7, i = ((daysBetween(inicioRot(w,r), s) % n) + n) % n;
   const cod = r.semanas[Math.floor(i/7)][i%7]; return cod ? (tipoTurno(cod) || {cod, nombre:cod, color:'#5F6775', libre:false}) : null;
@@ -791,6 +813,40 @@ function ordenEleccion(k){
     (a.antig||'9999').localeCompare(b.antig||'9999') ||
     a.nombre.localeCompare(b.nombre,'es'));
 }
+
+/* ---------- jornada: horas del año de cada persona ----------
+   Jornada garantizada en horas o en % de un tiempo completo (S.ajustes.jornadaBase, 1.700 h).
+   x = días de trabajo previstos (sin bajas), b = días de baja que caen en días de trabajo.
+   Con bajas, el cómputo se recalcula por regla de tres: h = jornada × (x − b) / x.
+   La media diaria es jornada / x, y las horas hechas son los días trabajados hasta hoy por esa media. */
+const bajasDe = (id, y=S.ciclo) => S.bajas.filter(b=>b.trabajadorId===id && b.desde<=`${y}-12-31` && b.hasta>=`${y}-01-01`).sort((a,b)=>a.desde.localeCompare(b.desde));
+const enBaja = (w,s) => S.bajas.some(b=>b.trabajadorId===w.id && s>=b.desde && s<=b.hasta);
+function jornadaAnual(w){
+  const base = Number(S.ajustes.jornadaBase)||1700, v = w.jornadaValor;
+  if(v!=='' && v!=null && !isNaN(Number(v))) return { h: w.jornadaModo==='pct' ? base*Number(v)/100 : Number(v), defecto:false };
+  return w.modalidad==='completo' ? { h:base, defecto:true } : { h:null, defecto:false };
+}
+function jornadaInfo(w, y=S.ciclo){
+  const c = {R:0, F:0, X:0, AJ:0, otros:0, H:0, baja:0, trabajo:0, hechos:0, cese:0};
+  const vac = new Set();
+  S.periodos.forEach(p=>{ if(p.trabajadorId===w.id) for(const d of eachDay(p.desde,p.hasta)) vac.add(d); });
+  desprogDe(w.id,y).forEach(d=>vac.add(d.dia));
+  const hoyS = hoy();
+  for(const s of eachDay(`${y}-01-01`,`${y}-12-31`)){
+    const t = turnoDia(w,s);
+    if(enCese(w,s)) c.cese++;
+    else if(t && t.libre) c[['R','F','X','AJ'].includes(t.cod)?t.cod:'otros']++;
+    else if(vac.has(s)) c.H++;
+    else if(enBaja(w,s)) c.baja++;
+    else { c.trabajo++; if(s<=hoyS) c.hechos++; }
+  }
+  const x = c.trabajo + c.baja, j = jornadaAnual(w);
+  const media = j.h!=null && x>0 ? j.h/x : null;
+  const computo = j.h!=null ? (x>0 ? j.h*c.trabajo/x : j.h) : null;
+  const hechas = media!=null ? media*c.hechos : null;
+  return { ...c, x, dt:c.trabajo, jornada:j.h, defecto:j.defecto, computo, media, hechas, quedan: computo!=null ? computo-hechas : null, sinRot: !rotDe(w) };
+}
+const fh = n => n==null ? '—' : (Math.round(n*100)/100).toLocaleString('es-ES',{maximumFractionDigits:2,useGrouping:'always'});
 
 /* ---------- cupos ---------- */
 function ocupacion(excluirTrab){
@@ -889,6 +945,7 @@ const SECCIONES = [
   ['equipos','Grupos','Crea los grupos, mete a cada trabajador en el suyo y mira el año entero con la rotación de cada grupo. Son los mismos grupos con los que se eligen las vacaciones.'],
   ['skills','Skills','Las funciones que pueden tener los trabajadores de este departamento y producto.'],
   ['rotaciones','Rotaciones','El patrón de turnos de la base, en una plantilla de 3 semanas. Cada grupo lleva una rotación y todos sus miembros la siguen.'],
+  ['jornada','Jornada','Las horas del año de cada persona: su jornada garantizada, los días de trabajo, las bajas, la media diaria y cuántas horas lleva y le quedan.'],
   ['transformaciones','Transformaciones','Cambios de contrato con su fecha. Los días de vacaciones del año se prorratean por tramos.'],
   ['desprog','Desprogramaciones','Consulta a cada trabajador: sus vacaciones, sus días desprogramados y cuántos le quedan. Toca un día para registrar una desprogramación.'],
   ['calendario','Calendario',''],
@@ -935,6 +992,7 @@ function pie(){
 }
 function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'),2800); }
 function render(){
+  _marcasIdx = null;
   // ¿qué pantalla toca según el contexto?
   if(UI.vista!=='ajustes'){
     if(!S.ctx.dep || !depDeId(S.ctx.dep)){ S.ctx={dep:'',prod:''}; UI.vista='inicio'; }
@@ -954,7 +1012,7 @@ function render(){
     `<button class="step extra" onclick="go('menu')">‹ Menú</button><span class="sep"></span>` +
     PASOS.map(([k,n],i)=>`<button class="step ${UI.vista===k?'on':''} ${pasoHecho(k)?'done':''}" onclick="go('${k}')" ${UI.vista===k?'aria-current="step"':''}><span class="num">${pasoHecho(k)&&UI.vista!==k?'✓':i+1}</span>${n}</button>`).join('');
   document.body.classList.toggle('ancho', UI.vista==='calendario' && UI.cal.modo==='anual');
-  const V = {equipos:vEquipos, plantilla:vPlantilla, menu:vMenu, rotaciones:vRotaciones, transformaciones:vTransformaciones, inicio:vInicio, producto:vProducto, ajustes:vAjustes, skills:vSkills, grupos:vGrupos, trabajadores:vTrabajadores, cupos:vCupos, eleccion:vEleccion, desprog:vDesprog, resumen:vResumen, calendario:vCalendario, pdf:vPDF};
+  const V = {equipos:vEquipos, plantilla:vPlantilla, menu:vMenu, rotaciones:vRotaciones, transformaciones:vTransformaciones, jornada:vJornada, inicio:vInicio, producto:vProducto, ajustes:vAjustes, skills:vSkills, grupos:vGrupos, trabajadores:vTrabajadores, cupos:vCupos, eleccion:vEleccion, desprog:vDesprog, resumen:vResumen, calendario:vCalendario, pdf:vPDF};
   const an0 = document.getElementById('anual'); if(an0){ UI.cal.sx = an0.scrollLeft; UI.cal.sy = an0.scrollTop; }
   const main = document.getElementById('main'), cambia = UI._vistaPintada !== UI.vista;
   main.innerHTML = intro() + V[UI.vista]() + pie();
@@ -1007,6 +1065,7 @@ function vMenu(){
   const conVac = ts.filter(t=>periodosDe(t.id).length).length;
   const dpAnio = S.desprog.filter(d=>{const t=trabDe(d.trabajadorId); return t&&visible(t)&&delAnio(d.dia,S.ciclo);}).length;
   const sinG = ts.filter(t=>!t.grupoId).length, nSup = ts.filter(esSuper).length;
+  const nBaja = ts.filter(t=>bajasDe(t.id).length).length, sinJor = ts.filter(t=>jornadaAnual(t).h==null).length;
   const ncupos = S.cupos.filter(c=>cupoVisible(c)&&c.depId).length, ntf = S.transf.filter(t=>{const w=trabDe(t.trabajadorId); return w&&visible(w);}).length;
   // estado de los tres pasos de la asignación
   const p1 = pasoHecho('grupos'), p2 = pasoHecho('eleccion');
@@ -1031,11 +1090,12 @@ function vMenu(){
       tile('plantilla','Plantilla', `${ts.length} persona${ts.length===1?'':'s'}, ${ncupos} cupo${ncupos===1?'':'s'}`) +
       tile('equipos','Grupos', `${gs.length} grupo${gs.length===1?'':'s'}${sinG?`, ${sinG} sin grupo`:''}`) +
       tile('skills','Skills', `${skillsVis().length} skill${skillsVis().length===1?'':'s'}`))}
-  ${bloque('Turnos y contratos',
+  ${bloque('Turnos, jornada y contratos',
       tile('rotaciones','Rotaciones', `${rotacionesVis().length} rotación${rotacionesVis().length===1?'':'es'}, ${gs.filter(g=>g.rotacionId).length} de ${gs.length} grupos`) +
-      tile('transformaciones','Transformaciones', `${ntf} cambio${ntf===1?'':'s'} de contrato`) +
-      tile('desprog','Desprogramaciones', `${dpAnio} en ${S.ciclo}`))}
+      tile('jornada','Jornada', `${nBaja ? `${nBaja} con baja en ${S.ciclo}` : `Horas de ${S.ciclo}`}${sinJor ? `, ${sinJor} sin jornada` : ''}`) +
+      tile('transformaciones','Transformaciones', `${ntf} cambio${ntf===1?'':'s'} de contrato`))}
   ${bloque('Consultar',
+      tile('desprog','Desprogramaciones', `${dpAnio} en ${S.ciclo}`) +
       tile('calendario','Calendario', 'El año entero, a pantalla completa') +
       tile('pdf','Exportar PDF', 'Informe del producto'))}`;
 }
@@ -1752,6 +1812,120 @@ function vDesprog(){
     </section>
   </div>`;
 }
+/* =========================================================
+   Jornada
+   ========================================================= */
+function vJornada(){
+  if(!trabsVis().length) return vacio(`Todavía no hay trabajadores en ${esc(ctxTxt())}.`, `<button class="btn primary" onclick="go('trabajadores')">Ir a Trabajadores</button>`);
+  const tab = UI.joTab || 'resumen', base = Number(S.ajustes.jornadaBase)||1700;
+  const seg = `<div class="seg" style="margin-bottom:16px"><button class="${tab==='resumen'?'on':''}" onclick="UI.joTab='resumen';render()">Resumen</button><button class="${tab==='persona'?'on':''}" onclick="UI.joTab='persona';render()">Por persona</button></div>`;
+  if(tab==='resumen'){
+    const filas = gruposActivos().map(k=>{
+      const ts = trabsVis().filter(t=>gk(t)===k).sort((a,b)=>a.nombre.localeCompare(b.nombre,'es')); if(!ts.length) return '';
+      return `<tr class="gfil"><td colspan="9">${esc(nombreGrupo(k))}</td></tr>` + ts.map(t=>{ const j=jornadaInfo(t);
+        return `<tr class="clic" onclick="UI.joTrab='${t.id}';UI.joTab='persona';UI.joDia='';render()">
+          <td><b>${esc(t.nombre)}</b><div class="muted" style="font-size:12.5px">${nombreModalidad(t.modalidad)}</div></td>
+          <td class="num">${j.jornada==null?'<span class="chip warn">Sin jornada</span>':`${fh(j.jornada)}${j.defecto?' <span class="muted">(por defecto)</span>':''}`}</td>
+          <td class="num">${j.dt}</td><td class="num">${j.baja||''}</td><td class="num">${fh(j.computo)}</td><td class="num">${fh(j.media)}</td>
+          <td class="num">${fh(j.hechas)}</td><td class="num"><b>${fh(j.quedan)}</b></td>
+          <td>${j.sinRot?'<span class="chip warn">Sin rotación</span>':''}</td></tr>`; }).join('');
+    }).join('');
+    return seg + `<div class="card">
+      <div class="row" style="justify-content:space-between;align-items:flex-end;margin-bottom:12px">
+        <p class="muted" style="margin:0;max-width:60ch">Toca una persona para ver su año, poner su jornada, marcar ajustes de jornada (AJ) y festivos de empresa (X) o apuntar bajas.</p>
+        <label style="flex:0 1 230px">Jornada de un tiempo completo (h/año)<input type="number" min="0" value="${base}" onchange="S.ajustes.jornadaBase=Number(this.value)||1700;save();render()"></label></div>
+      <div class="scroll"><table class="tabla jo-tabla"><thead><tr><th>Persona</th><th class="num">Jornada (h)</th><th class="num" title="Días de trabajo">D.T.</th><th class="num">Baja (días)</th><th class="num">Cómputo (h)</th><th class="num">Media h/día</th><th class="num">Hechas</th><th class="num">Quedan</th><th></th></tr></thead><tbody>${filas}</tbody></table></div></div>`;
+  }
+  if(!UI.joTrab || !trabDe(UI.joTrab) || !visible(trabDe(UI.joTrab))) UI.joTrab = [...trabsVis()].sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'))[0].id;
+  const w = trabDe(UI.joTrab), j = jornadaInfo(w), bs = bajasDe(w.id);
+  let panel = '';
+  if(UI.joDia){
+    const s = UI.joDia, mk = marcaDe(w.id,s), bj = S.bajas.find(b=>b.trabajadorId===w.id && s>=b.desde && s<=b.hasta);
+    const vacDia = S.periodos.some(p=>p.trabajadorId===w.id && s>=p.desde && s<=p.hasta);
+    const t = turnoDia(w,s);
+    let acc;
+    if(mk) acc = `<button class="btn danger" onclick="quitarMarca('${mk.id}')">Quitar ${esc(tipoTurno(mk.cod)?.nombre||mk.cod)}</button>`;
+    else if(vacDia) acc = `<span class="muted">Es un día de vacaciones. Para cambiarlo, ve a la elección o al calendario.</span>`;
+    else if(t && t.libre) acc = `<span class="muted">Es ${esc(t.nombre.toLowerCase())} según su rotación.</span>`;
+    else acc = `<button class="btn primary" onclick="marcarDia('AJ')">Marcar ajuste de jornada (AJ)</button><button class="btn" onclick="marcarDia('X')">Marcar festivo de empresa (X)</button>`;
+    panel = `<div class="preview"><b>${fmtL(s)}</b>${bj?`<p>De baja del ${fmt(bj.desde)} al ${fmt(bj.hasta)}.</p>`:''}<div class="row" style="margin-top:8px">${acc}<button class="btn" onclick="UI.joDia='';render()">Cerrar</button></div></div>`;
+  }
+  const lista = gruposActivos().map(k=>{ const ts=trabsVis().filter(t=>gk(t)===k).sort((a,b)=>a.nombre.localeCompare(b.nombre,'es')); if(!ts.length) return '';
+    return `<div class="dpl-g">${esc(nombreGrupo(k))}</div>` + ts.map(t=>`<button class="dpl-i ${t.id===w.id?'on':''}" onclick="UI.joTrab='${t.id}';UI.joDia='';render()"><span>${esc(t.nombre)}</span>${jornadaAnual(t).h==null?'<span class="chip warn">!</span>':''}</button>`).join(''); }).join('');
+  const opts = [...trabsVis()].sort((a,b)=>a.nombre.localeCompare(b.nombre,'es')).map(t=>`<option value="${t.id}" ${t.id===w.id?'selected':''}>${esc(t.nombre)}</option>`).join('');
+  return seg + `<div class="dp-layout">
+    <aside class="dp-lista card"><label class="solo-movil">Trabajador<select onchange="UI.joTrab=this.value;UI.joDia='';render()">${opts}</select></label><div class="solo-ancho">${lista}</div></aside>
+    <section>
+      <div class="card ficha">
+        <h2 style="font-size:30px;margin:0">${esc(w.nombre)}</h2>
+        <div class="chips" style="margin-top:6px">${grupoChip(gk(w))} <span class="chip grey">${nombreModalidad(w.modalidad)}</span>${rotDe(w)?`<span class="chip grey">Rotación: ${esc(rotDe(w).nombre)}</span>`:'<span class="chip warn">Sin rotación: todos los días cuentan como trabajo</span>'}</div>
+        <div class="row" style="margin-top:16px;align-items:flex-end">
+          <label style="flex:0 1 220px">Jornada garantizada<select onchange="fijarJornada('${w.id}',this.value,null)"><option value="horas" ${w.jornadaModo!=='pct'?'selected':''}>En horas al año</option><option value="pct" ${w.jornadaModo==='pct'?'selected':''}>En % de un tiempo completo</option></select></label>
+          <label style="flex:0 1 170px">${w.jornadaModo==='pct'?`Porcentaje (de ${fh(base)} h)`:'Horas al año'}<input type="number" min="0" step="0.01" value="${esc(w.jornadaValor)}" placeholder="${w.modalidad==='completo'?(w.jornadaModo==='pct'?'100':fh(base)):''}" onchange="fijarJornada('${w.id}',null,this.value)"></label>
+          <span class="muted" style="padding-bottom:10px">${j.jornada==null?'Escribe su jornada para calcular sus horas.':`= ${fh(j.jornada)} h al año${j.defecto?' (tiempo completo por defecto)':''}`}</span>
+        </div>
+        <div class="stats" style="margin-top:18px">
+          <div><b>${fh(j.computo)}</b>horas de cómputo${j.baja?' (recalculado por bajas)':''}</div>
+          <div><b>${fh(j.media)}</b>horas de media al día</div>
+          <div><b class="c-ok">${fh(j.hechas)}</b>hechas a hoy</div>
+          <div><b>${fh(j.quedan)}</b>le quedan</div>
+        </div>
+        ${j.baja && j.jornada!=null?`<p class="muted" style="margin:10px 0 0">Con ${j.baja} día${j.baja===1?'':'s'} de baja: ${fh(j.jornada)} h × (${j.x} − ${j.baja}) / ${j.x} días = ${fh(j.computo)} h.</p>`:''}
+        <div class="jo-leyenda">
+          <span><b>${j.dt}</b>D.T. días de trabajo</span><span><b>${j.R}</b>R descanso</span><span><b>${j.F}</b>F festivo</span><span><b>${j.X}</b>X festivo de empresa</span>
+          <span><b>${j.AJ}</b>AJ ajuste de jornada</span><span><b>${j.H}</b>H vacaciones</span><span><b>${j.baja}</b>Baja</span>${j.cese?`<span><b>${j.cese}</b>Cese</span>`:''}
+        </div>
+      </div>
+      <div class="card">
+        <h2 style="margin:0 0 10px">Bajas</h2>
+        ${bs.length?`<div class="chips" style="margin-bottom:12px">${bs.map(b=>`<span class="chip bad-soft">${fmt(b.desde)} – ${fmt(b.hasta)} (${[...eachDay(b.desde,b.hasta)].length} días naturales) <button class="x" aria-label="Quitar baja" onclick="quitarBaja('${b.id}')">×</button></span>`).join('')}</div>`:'<p class="muted" style="margin:0 0 12px">Sin bajas en '+S.ciclo+'.</p>'}
+        <div class="row" style="align-items:flex-end"><label style="flex:0 1 180px">Desde<input type="date" id="bjD"></label><label style="flex:0 1 180px">Hasta<input type="date" id="bjH"></label><button class="btn primary" onclick="añadirBaja('${w.id}')">Apuntar baja</button></div>
+      </div>
+      <div class="card">
+        <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:10px"><h2 style="margin:0">${S.ciclo}</h2><span class="muted">Toca un día de trabajo para marcar AJ o X, o una marca para quitarla.</span></div>
+        ${panel}
+        ${calendarioJornada(w, S.ciclo)}
+      </div>
+    </section></div>`;
+}
+function calendarioJornada(w, y){
+  const vac = new Set(); S.periodos.filter(p=>p.trabajadorId===w.id).forEach(p=>{ for(const d of eachDay(p.desde,p.hasta)) vac.add(d); });
+  let html = `<div class="fcal">`;
+  for(let m=0;m<12;m++){
+    const mm=String(m+1).padStart(2,'0'), first=`${y}-${mm}-01`, dim=new Date(Date.UTC(y,m+1,0)).getUTCDate(), off=(pd(first).getUTCDay()+6)%7;
+    html += `<div class="smes"><div class="smes-t">${MESES[m][0].toUpperCase()+MESES[m].slice(1)}</div><div class="sgrid">${DOW.map(d=>`<span class="sdow">${d}</span>`).join('')}${'<span></span>'.repeat(off)}`;
+    for(let d=1; d<=dim; d++){
+      const s=`${y}-${mm}-${String(d).padStart(2,'0')}`, tt=turnoDia(w,s), mk=marcaDe(w.id,s), lib=tt&&tt.libre, v=!lib&&vac.has(s), bj=!lib&&!v&&enBaja(w,s);
+      const cls = ['fd', mk?'mk':v?'vac':bj?'bj':lib?'lib':'', UI.joDia===s?'sel':''].filter(Boolean).join(' ');
+      const tit = `${fmt(s)}${mk?': '+(tipoTurno(mk.cod)?.nombre||mk.cod):v?': vacaciones':bj?': baja':tt?'. '+tt.nombre:''}`;
+      html += `<span class="${cls}" ${mk?`style="--mc:${tipoTurno(mk.cod)?.color||'#5F6775'}"`:''} title="${esc(tit)}" onclick="UI.joDia='${s}';render()" role="button" tabindex="0">${d}${tt?`<i class="tc" style="color:${(mk||v)?'#fff':tt.color}">${esc(tt.cod)}</i>`:''}</span>`;
+    }
+    html += '</div></div>';
+  }
+  return html + `</div><div class="legend"><span style="--c:var(--ok)">Vacaciones</span><span style="--c:#0E7A8A">AJ</span><span style="--c:#8E2A6B">X</span><span style="--c:repeating-linear-gradient(135deg,#F3C2BD 0 3px,#FBE7E5 3px 7px)">Baja</span><span style="--c:#EBEFF6">Descanso o festivo</span></div>`;
+}
+function fijarJornada(id, modo, valor){
+  const w = trabDe(id); if(!w) return;
+  if(modo!=null){ if(modo!==w.jornadaModo){ const h = jornadaAnual(w).h, base = Number(S.ajustes.jornadaBase)||1700;
+      if(w.jornadaValor!=='' && h!=null) w.jornadaValor = modo==='pct' ? Math.round(h/base*10000)/100 : Math.round(h*100)/100; w.jornadaModo = modo; } }
+  if(valor!=null) w.jornadaValor = valor==='' ? '' : Number(String(valor).replace(',','.'));
+  save(); render();
+}
+function marcarDia(cod){
+  const w = trabDe(UI.joTrab), s = UI.joDia; if(!w||!s) return;
+  if(S.periodos.some(p=>p.trabajadorId===w.id && s>=p.desde && s<=p.hasta)) return toast('Ese día ya es de vacaciones');
+  S.marcas.push({id:uid(), trabajadorId:w.id, dia:s, cod}); UI.joDia=''; save(); render(); toast(cod==='AJ'?'Ajuste de jornada marcado':'Festivo de empresa marcado');
+}
+function quitarMarca(id){ S.marcas = S.marcas.filter(m=>m.id!==id); UI.joDia=''; save(); render(); }
+function añadirBaja(id){
+  const d = document.getElementById('bjD').value, h = document.getElementById('bjH').value || d;
+  if(!d) return toast('Pon al menos la fecha de inicio');
+  if(h<d) return toast('La fecha final va antes que la de inicio');
+  if(S.bajas.some(b=>b.trabajadorId===id && d<=b.hasta && h>=b.desde)) return toast('Se solapa con otra baja de esta persona');
+  S.bajas.push({id:uid(), trabajadorId:id, desde:d, hasta:h}); save(); render(); toast('Baja apuntada');
+}
+function quitarBaja(id){ if(!confirm('¿Quitar esta baja?')) return; S.bajas = S.bajas.filter(b=>b.id!==id); save(); render(); }
+
 /* calendario de 12 meses de una persona: vacaciones en verde, desprogramaciones en rojo */
 function calendarioFicha(w, y, interactivo){
   const vac = new Set(), dps = new Set(desprogDe(w.id,y).map(d=>d.dia));
@@ -1819,7 +1993,7 @@ function exportarCSV(){
   }));
   descargar(`vacaciones-${S.ciclo}-${nombreDep(S.ctx.dep)}-${nombreProd(S.ctx.prod)}.csv`, '﻿'+rows.map(r=>r.map(q).join(';')).join('\r\n'), 'text/csv;charset=utf-8');
 }
-function copiaJSON(){ descargar('vacaciones-agp-'+S.ciclo+'-'+hoy()+'.json', JSON.stringify(S,null,1), 'application/json'); }
+function copiaJSON(){ descargar('planningapp-'+S.ciclo+'-'+hoy()+'.json', JSON.stringify(S,null,1), 'application/json'); }
 function cerrarCiclo(){
   if(!confirm(`Se cerrará el ciclo ${S.ciclo} para todos los departamentos y productos. Antes se descargará una copia. ¿Seguir?`)) return;
   copiaJSON();
@@ -2322,6 +2496,16 @@ render();
    Para publicar: subir APP_VERSION, añadir sus pasos a NOVEDADES y poner la misma versión en version.json.
    ========================================================= */
 const NOVEDADES = {
+  '7.0.0': [
+    { titulo:'Ahora se llama PlanningApp', donde:'Toda la app',
+      texto:'Además de las vacaciones, ahora lleva la jornada de cada persona. Tus datos siguen igual.' },
+    { titulo:'Nuevo apartado: Jornada', donde:'Menú, bloque «Turnos, jornada y contratos»',
+      texto:'En Resumen ves de un vistazo la jornada, los días de trabajo (D.T.), las bajas, el cómputo, la media de horas al día y cuántas horas lleva y le quedan a cada persona.' },
+    { titulo:'Jornada garantizada', donde:'Jornada › Por persona',
+      texto:'Escríbela en horas al año o en porcentaje de un tiempo completo (1.700 h, editable). A los tiempos completos sin jornada escrita se les aplican las 1.700 h.' },
+    { titulo:'AJ, X y bajas', donde:'Jornada › Por persona',
+      texto:'Toca un día de trabajo para marcar un ajuste de jornada (AJ) o un festivo de empresa (X). Esos días no se pueden coger de vacaciones. Las bajas recalculan el cómputo por regla de tres.' },
+  ],
   '6.0.0': [
     { titulo:'Menú renovado', donde:'Menú de cada producto',
       texto:'Las secciones están ordenadas en tres bloques: Personas, Turnos y contratos, y Consultar. Cada una tiene su icono y un dato rápido para saber cómo va sin entrar.' },
