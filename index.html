@@ -4,7 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#22262E">
-<title>PlanningApp</title>
+<title>Control Planning</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Control Planning">
+<meta name="application-name" content="Control Planning">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -549,7 +554,7 @@ body.bloqueada{overflow:hidden}
 </head>
 <body>
 <header class="app">
-  <button class="marca" onclick="irInicio()" aria-label="Volver al inicio"><span class="logo" aria-hidden="true">✈</span><h1>PlanningApp</h1></button>
+  <button class="marca" onclick="irInicio()" aria-label="Volver al inicio"><span class="logo" aria-hidden="true">✈</span><h1>Control Planning</h1></button>
   <div class="migas" id="migas"></div>
   <span class="ciclo" id="hdrCiclo"></span>
   <button class="engranaje" id="btnAjustes" onclick="go(UI.vista==='ajustes'?UI.volverDe:'ajustes')" aria-label="Ajustes generales" title="Ajustes generales"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M5.5 18.5l1.7-1.7M16.8 7.2l1.7-1.7"/></svg></button>
@@ -561,11 +566,11 @@ body.bloqueada{overflow:hidden}
 
 <script>
 /* =========================================================
-   PlanningApp — app personal de vacaciones y jornada
+   Control Planning — app personal de vacaciones y jornada
    Reglas base: Convenio Menzies (BOE-A-2023-25956), arts. 32 y 33
    Datos guardados en el navegador (localStorage). Haz copias.
    ========================================================= */
-const APP_VERSION = '8.0.0';   // súbela junto con version.json en cada publicación
+const APP_VERSION = '8.1.0';   // súbela junto con version.json en cada publicación
 const LS_KEY = 'vacaciones-agp-v1';
 const SIN = '_'; // clave interna para «sin grupo»
 
@@ -1469,7 +1474,7 @@ function pdfPersona(w, y=S.ciclo){
   // leyenda y pie
   const ley = [[C.ok,'Vacaciones'],[C.bad,'Desprogramado'],['#0E7A8A','AJ ajuste de jornada'],['#8E2A6B','X festivo de empresa'],[C.baja,'Baja'],[C.lib,'R descanso, F festivo'],[C.ss,'Semana Santa']];
   let lx = M; ley.forEach(([c,t])=>{ pdf.rect(lx, 26, 9, 9, c); pdf.texto(lx+13, 28, t, 7.5, {color:C.gris}); lx += 22 + pdfAncho(t,7.5); });
-  pdf.texto(W-M, 28, `PlanningApp, ${fmt(hoy())} ${hoy().slice(0,4)}`, 7, {color:C.gris, align:'right'});
+  pdf.texto(W-M, 28, `Control Planning, ${fmt(hoy())} ${hoy().slice(0,4)}`, 7, {color:C.gris, align:'right'});
   return pdf.bytes(W, H);
 }
 const nombreArchivo = t => t.replace(/[\\/:*?"<>|]+/g,' ').replace(/\s+/g,' ').trim();
@@ -2275,7 +2280,7 @@ function exportarCSV(){
   }));
   descargar(`vacaciones-${S.ciclo}-${nombreDep(S.ctx.dep)}-${nombreProd(S.ctx.prod)}.csv`, '﻿'+rows.map(r=>r.map(q).join(';')).join('\r\n'), 'text/csv;charset=utf-8');
 }
-function copiaJSON(){ descargar('planningapp-'+S.ciclo+'-'+hoy()+'.json', JSON.stringify(S,null,1), 'application/json'); }
+function copiaJSON(){ descargar('control-planning-'+S.ciclo+'-'+hoy()+'.json', JSON.stringify(S,null,1), 'application/json'); }
 function cerrarCiclo(){
   if(!confirm(`Se cerrará el ciclo ${S.ciclo} para todos los departamentos y productos. Antes se descargará una copia. ¿Seguir?`)) return;
   copiaJSON();
@@ -2738,6 +2743,9 @@ function restaurar(f){
   r.readAsText(f);
 }
 
+/* instalable como app: service worker mínimo, sin caché */
+if('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(()=>{});
+
 UI.vista = enCtx() ? 'menu' : (S.ctx.dep ? 'producto' : 'inicio');
 render();
 
@@ -2749,6 +2757,12 @@ render();
    Para publicar: subir APP_VERSION, añadir sus pasos a NOVEDADES y poner la misma versión en version.json.
    ========================================================= */
 const NOVEDADES = {
+  '8.1.0': [
+    { titulo:'Ahora se llama Control Planning', donde:'Toda la app',
+      texto:'Cambia el nombre, pero tus datos y tu forma de trabajar siguen igual.' },
+    { titulo:'Instálala en el escritorio', donde:'Barra de direcciones del navegador',
+      texto:'En Chrome o Edge, pulsa el botón «Instalar» de la barra de direcciones. La app se abre en su propia ventana, con el icono del avión. Si ya tenías un acceso directo, bórralo e instálala de nuevo para que salga el icono nuevo.' },
+  ],
   '8.0.0': [
     { titulo:'Tres globos', donde:'Pantalla de cada producto',
       texto:'Al entrar en un producto verás tres globos: Personal, Grupos y Vacaciones. Todo lo que había antes está dentro de ellos.' },

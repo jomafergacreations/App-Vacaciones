@@ -1,6 +1,6 @@
-# PlanningApp (antes Vacaciones AGP)
+# Control Planning (antes PlanningApp y Vacaciones AGP)
 
-App personal en un único `index.html` (HTML + CSS + JS, sin dependencias) para gestionar la elección de vacaciones en Menzies AGP según el convenio (BOE-A-2023-25956, arts. 32 y 33) y la jornada anual de cada persona. La clave de `localStorage` sigue siendo `vacaciones-agp-v1` para no perder datos. Se publica con GitHub Pages desde `main`. Los datos viven en el `localStorage` del navegador del usuario: nunca subir copias `.json` de datos al repositorio.
+App personal en un único `index.html` (HTML + CSS + JS, sin dependencias) para gestionar la elección de vacaciones en Menzies AGP según el convenio (BOE-A-2023-25956, arts. 32 y 33) y la jornada anual de cada persona. La clave de `localStorage` sigue siendo `vacaciones-agp-v1` para no perder datos. Se publica con GitHub Pages desde `main`. Es instalable como app de escritorio: `manifest.webmanifest`, iconos del avión (`icono-192.png`, `icono-512.png`, `icono-maskable-512.png`, `apple-touch-icon.png`, `favicon-32.png`) y un `sw.js` mínimo sin caché, para no romper el aviso de actualización. Los datos viven en el `localStorage` del navegador del usuario: nunca subir copias `.json` de datos al repositorio.
 
 ## Cómo publicar una versión
 

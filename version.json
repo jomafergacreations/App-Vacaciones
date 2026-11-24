@@ -1,10 +1,8 @@
 {
-  "version": "8.0.0",
+  "version": "8.1.0",
   "fecha": "2026-11-24",
   "novedades": [
-    "Pantalla del producto con tres globos: Personal, Grupos y Vacaciones",
-    "Ficha de cada persona con pestañas",
-    "Calendario de dos meses con nombres fijos",
-    "PDF por persona y ZIP con todas las fichas"
+    "Ahora se llama Control Planning",
+    "Se puede instalar en el escritorio con el icono del avión"
   ]
 }
