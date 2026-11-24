@@ -15,7 +15,7 @@ Si `version.json` lleva una versión mayor que la de `index.html`, la app entrar
 ## Estructura
 
 - Inicio: departamento (Pasaje, Rampa, Operaciones) → producto (GroundHandling azul, RedBull naranja) → menú del producto (`vMenu`). Todo lo de dentro se filtra por ese contexto (`S.ctx`).
-- Menú: tarjeta «Asignación de vacaciones» (único sitio con barra de pasos: Grupos de elección › Elección › Resumen y cierre, `PASOS`) y secciones sueltas (`SECCIONES`): Plantilla (pestañas Trabajadores y Cupos de plantilla), Grupos (vista `equipos`: miembros a mano y año con la rotación del grupo), Skills, Rotaciones, Transformaciones, Desprogramaciones, Calendario y Exportar PDF.
+- Menú: tarjeta «Asignación de vacaciones» (único sitio con barra de pasos: Grupos de elección › Elección › Resumen y cierre, `PASOS`; en el menú muestra el estado de cada paso y lleva al siguiente) y secciones sueltas (`SECCIONES`) agrupadas en tres bloques (Personas, Turnos y contratos, Consultar), con iconos SVG de `ICONOS`/`ico()`: Plantilla (pestañas Trabajadores y Cupos de plantilla), Grupos (vista `equipos`: miembros a mano y año con la rotación del grupo), Skills, Rotaciones, Transformaciones, Desprogramaciones, Calendario y Exportar PDF.
 - Categorías: una skill puede ser «de super» (`skill.super`); quien tenga alguna es super, el resto agente (`catDe`). Cada grupo tiene cupo por categoría (`cupoAg`, `cupoSup`): cuántos agentes y supers del grupo pueden estar fuera a la vez (`companerosEnFechas`).
 - Días de vacaciones: no se puede pasar de `derechoCiclo` (`excedeDias`). Los descansos y festivos de la rotación (`esDescanso`) no se pueden coger y, si un periodo los cruza, no cuentan (`statsRango(desde, hasta, w)`).
 - Grupos de elección ≠ cupos de plantilla: los grupos solo marcan quién elige con quién y en qué orden (y el 10 % de desprogramaciones); los cupos limitan cuántos pueden estar fuera a la vez.
@@ -29,4 +29,5 @@ Si `version.json` lleva una versión mayor que la de `index.html`, la app entrar
 
 - Todo el texto de la interfaz en español, en tono claro y directo.
 - Identidad visual: señalética de aeropuerto (asfalto `#22262E`, hormigón `#ECEEF1`, amarillo señal `#F6C300`, azul pista `#1F5FBF`; Barlow y Barlow Condensed).
+- Animación: solo una entrada escalonada al cambiar de pantalla (`main.entrando` + `.anim` con `--i`) y respuestas a lo que se toca; respetar `prefers-reduced-motion`.
 - Probar en móvil (390 px) y escritorio antes de publicar.

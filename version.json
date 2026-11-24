@@ -1,9 +1,9 @@
 {
-  "version": "5.6.0",
+  "version": "6.0.0",
   "fecha": "2026-11-24",
   "novedades": [
-    "Agentes y supers con cupo propio dentro de cada grupo",
-    "No se pueden añadir más vacaciones que los días que tiene cada persona",
-    "Los descansos y festivos de la rotación no se pueden coger y no gastan días"
+    "Menú renovado por bloques con iconos",
+    "La asignación muestra sus tres pasos y te lleva al siguiente",
+    "Transiciones y animaciones suaves"
   ]
 }

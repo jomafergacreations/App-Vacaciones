@@ -68,31 +68,75 @@ body.ancho main{max-width:none}
 .portada h2{font-family:var(--cond);font-size:46px;line-height:1.02;font-weight:700;margin:0;max-width:16ch}
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-bottom:22px}
 .tile{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;text-align:left;border:0;border-radius:14px;padding:22px;cursor:pointer;font:inherit;background:var(--asfalto);color:#fff;min-height:132px;transition:transform .12s}
-.tile:hover{transform:translateY(-2px)}
+.tile:hover{transform:translateY(-3px);box-shadow:0 14px 30px -18px rgba(34,38,46,.7)}
+.tile{transition:transform .2s ease,box-shadow .2s ease}
 .tile .ini{width:58px;height:58px;border-radius:9px;background:var(--senal);color:var(--asfalto);display:grid;place-items:center;font-family:var(--cond);font-weight:700;font-size:34px}
 .tile .nom{font-family:var(--cond);font-weight:700;font-size:40px;line-height:1;display:block;color:var(--senal)}
 .tile .dato{display:block;color:#B8BEC9;font-size:14px;margin-top:6px}
-.tile .fl{font-family:var(--cond);font-size:44px;color:var(--senal);line-height:1}
+.tile .fl{color:var(--senal);line-height:1}
 .tile.prod{background:var(--c);min-height:170px}
 .tile.prod .nom{color:#fff;font-size:46px}
 .tile.prod .dato{color:rgba(255,255,255,.85)}
 .tile.prod .fl{color:#fff}
 .tile.prod .ini{background:rgba(255,255,255,.18);color:#fff}
-.asig{display:flex;align-items:stretch;width:100%;border:0;padding:0;background:var(--senal);color:var(--asfalto);border-radius:14px;overflow:hidden;cursor:pointer;font:inherit;text-align:left;margin-bottom:16px;transition:transform .12s}
-.asig:hover{transform:translateY(-2px)}
-.asig .flecha{background:var(--asfalto);color:var(--senal);display:grid;place-items:center;font-family:var(--cond);font-size:48px;font-weight:700;padding:0 22px}
-.asig .cuerpo{flex:1;padding:18px 20px;display:flex;flex-direction:column;gap:2px}
-.asig .t{font-family:var(--cond);font-weight:700;font-size:32px;line-height:1.05}
-.asig .d{font-weight:600;font-size:14px}
-.asig .e{font-size:14px;opacity:.85}
-.asig .ir{font-family:var(--cond);font-size:46px;display:grid;place-items:center;padding:0 20px}
-.mtiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-bottom:24px}
-.mtile{display:flex;gap:14px;align-items:center;text-align:left;border:1px solid var(--linea);background:var(--papel);border-radius:12px;padding:16px;cursor:pointer;font:inherit;color:var(--asfalto);border-left:5px solid var(--ctx)}
-.mtile:hover{border-color:var(--asfalto);border-left-color:var(--ctx)}
-.mtile .mini{width:42px;height:42px;border-radius:8px;background:var(--hormigon);display:grid;place-items:center;font-size:20px;flex:0 0 auto}
-.mtile .mt{display:block;font-family:var(--cond);font-weight:700;font-size:21px;line-height:1.1;overflow-wrap:anywhere}
-.mtile>span:last-child{min-width:0}
-.mtile .md{display:block;color:var(--gris);font-size:13px;margin-top:2px}
+/* ---- menú del producto ---- */
+.resumen-p{margin:8px 0 0;color:var(--gris);font-size:15px}
+.asig{background:var(--senal);color:var(--asfalto);border-radius:16px;padding:18px 20px 16px;margin-bottom:28px;box-shadow:0 1px 0 rgba(0,0,0,.04)}
+.asig-cab{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.asig-ic{width:52px;height:52px;border-radius:12px;background:var(--asfalto);color:var(--senal);display:grid;place-items:center;flex:0 0 auto}
+.asig-ic .ico{width:30px;height:30px;stroke-width:2.4}
+.asig-cab>div{flex:1 1 220px}
+.asig-t{font-family:var(--cond);font-weight:700;font-size:30px;line-height:1.05}
+.asig-s{font-size:14px;font-weight:600;opacity:.8;margin-top:2px}
+.asig-go .ico{width:18px;height:18px;transition:transform .2s}
+.asig-go:hover .ico{transform:translateX(3px)}
+.asig-pasos{list-style:none;margin:16px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.asig-pasos button{width:100%;display:flex;gap:10px;align-items:center;text-align:left;border:0;border-radius:10px;padding:10px 12px;background:rgba(255,255,255,.55);font:inherit;color:var(--asfalto);cursor:pointer;transition:background .15s,transform .15s}
+.asig-pasos button:hover{background:#fff;transform:translateY(-1px)}
+.asig-pasos button.sig{background:#fff;box-shadow:inset 0 0 0 2px var(--asfalto)}
+.asig-pasos b{display:block;font-size:14px}
+.asig-pasos small{display:block;font-size:12.5px;color:#4B5160}
+.ap-n{width:28px;height:28px;border-radius:7px;background:var(--asfalto);color:var(--senal);display:grid;place-items:center;font-family:var(--cond);font-weight:700;font-size:16px;flex:0 0 auto}
+.ap-n .ico{width:16px;height:16px;stroke-width:2.6}
+.asig-pasos .ok .ap-n{background:var(--ok);color:#fff}
+.mbloque{margin-bottom:22px}
+.mbt{font-family:var(--cond);font-weight:700;font-size:15px;letter-spacing:.02em;color:var(--gris);margin:0 0 10px 2px}
+.mtiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:1100px){.mtiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.mtile{position:relative;display:flex;gap:14px;align-items:center;text-align:left;border:1px solid var(--linea);background:var(--papel);border-radius:14px;padding:16px 18px;cursor:pointer;font:inherit;color:var(--asfalto);transition:transform .18s ease,box-shadow .18s ease,border-color .18s}
+.mtile:hover{transform:translateY(-3px);box-shadow:0 10px 24px -14px rgba(34,38,46,.45);border-color:color-mix(in srgb,var(--ctx) 45%,var(--linea))}
+.mtile .mi{width:46px;height:46px;border-radius:12px;background:color-mix(in srgb,var(--ctx) 11%,#fff);color:var(--ctx);display:grid;place-items:center;flex:0 0 auto;transition:background .18s,color .18s}
+.mtile:hover .mi{background:var(--ctx);color:#fff}
+.mtile .mi .ico{width:25px;height:25px}
+.mtile .mtx{flex:1;min-width:0}
+.mtile .mt{display:block;font-family:var(--cond);font-weight:700;font-size:22px;line-height:1.1;overflow-wrap:break-word}
+.mtile .md{display:block;color:var(--gris);font-size:13.5px;margin-top:2px}
+.mtile .mfl{color:var(--gris);opacity:0;transform:translateX(-6px);transition:opacity .18s,transform .18s}
+.mtile:hover .mfl{opacity:1;transform:none;color:var(--ctx)}
+.mtile .mfl .ico{width:20px;height:20px}
+.ico{width:20px;height:20px;display:block}
+.engranaje .ico{width:20px;height:20px;margin:auto;transition:transform .5s ease}
+.engranaje:hover .ico{transform:rotate(60deg)}
+.tile .fl .ico{width:34px;height:34px;stroke-width:2.2;transition:transform .2s}
+.tile:hover .fl .ico{transform:translateX(4px)}
+
+/* ---- movimiento: una entrada escalonada al cambiar de pantalla y respuestas a lo que se toca ---- */
+@keyframes subir{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes aparecer{from{opacity:0}to{opacity:1}}
+main.entrando .anim{animation:subir .42s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i,0) * 45ms)}
+main.entrando>.intro,main.entrando>.card,main.entrando>.grid2,main.entrando>.dp-layout,main.entrando>.seg{animation:subir .32s cubic-bezier(.2,.7,.2,1) both}
+main.entrando>.card:nth-of-type(2),main.entrando>.grid2{animation-delay:50ms}
+main.entrando>.card:nth-of-type(3){animation-delay:90ms}
+.btn{transition:background .15s,border-color .15s,box-shadow .15s,transform .08s}
+.btn:active:not(:disabled){transform:scale(.97)}
+.pill,.seg button,.step{transition:background .15s,color .15s,border-color .15s}
+.dlg-fondo{animation:aparecer .15s ease-out}
+.dlg{animation:subir .22s cubic-bezier(.2,.7,.2,1)}
+.ed,.fd{transition:background .12s,border-color .12s,transform .1s}
+.ed.libre:active{transform:scale(.92)}
+.preview{animation:aparecer .2s ease-out}
+.logo{transition:transform .3s}
+.marca:hover .logo{transform:rotate(-12deg)}
 .volver{background:none;border:0;font:inherit;font-weight:600;color:var(--pista);cursor:pointer;padding:0;margin-bottom:6px}
 
 .card{background:var(--papel);border:1px solid var(--linea);border-radius:14px;padding:18px;margin-bottom:16px}
@@ -247,12 +291,6 @@ body.cal-full .anual{flex:1;max-height:none}
 .dlg-op.on{background:var(--senal-soft);border-color:var(--asfalto)}
 .dlg-op b{font-family:var(--cond);font-size:26px;width:40px;text-align:center;color:var(--tc,var(--gris))}
 .dlg-op small{color:var(--gris)}
-.rot{display:grid;grid-template-columns:auto repeat(7,1fr);gap:4px;max-width:640px}
-.rot-h{text-align:center;font-size:12px;font-weight:700;color:var(--gris)}
-.rot-s{font-family:var(--cond);font-weight:600;font-size:15px;align-self:center;padding-right:8px;white-space:nowrap}
-.rot-c{height:46px;border:1px solid var(--linea);border-radius:7px;background:#fff;font:inherit;font-family:var(--cond);font-weight:700;font-size:20px;color:var(--tc,#B9C0CA);cursor:pointer;box-shadow:inset 0 -4px 0 var(--tc,transparent)}
-.rot-c:hover{border-color:var(--asfalto)}
-.rot-c.lib{background:#EBEFF6}
 .xchip{border:0;background:none;color:inherit;font:inherit;cursor:pointer;padding:0 0 0 4px}
 .ene{border-collapse:separate;border-spacing:2px;font-size:13px}
 .ene th,.ene td{border:0;padding:0;text-align:center}
@@ -413,8 +451,8 @@ body.bloqueada{overflow:hidden}
   .stats b{font-size:36px} .preview .stats b{font-size:28px}
   .step{font-size:15px} .miga{font-size:20px} .marca h1{font-size:26px}
   .tile{min-height:150px} .tile .nom{font-size:46px} .tile.prod .nom{font-size:54px}
-  .mtiles{grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px} .mtile{padding:20px} .mtile .mt{font-size:24px} .mtile .md{font-size:14px} .mtile .mini{width:50px;height:50px;font-size:24px}
-  .asig .t{font-size:40px} .asig .flecha{font-size:58px;padding:0 28px}
+  .mtiles{gap:16px} .mtile{padding:20px 22px} .mtile .mt{font-size:25px} .mtile .md{font-size:14.5px} .mtile .mi{width:54px;height:54px} .mtile .mi .ico{width:28px;height:28px}
+  .asig{padding:22px 24px 20px} .asig-t{font-size:38px} .asig-ic{width:60px;height:60px} .asig-pasos b{font-size:15.5px} .asig-pasos small{font-size:13.5px} .mbt{font-size:17px}
   .selcal{grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:18px 24px} .ed{font-size:14.5px;border-radius:6px} .smes-t{font-size:20px} .sdow{font-size:12px}
   .fcal{grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px 24px} .fd{font-size:14px} .tc{font-size:10px}
   .dp-layout{grid-template-columns:320px 1fr;gap:20px} .dpl-i{font-size:15px;padding:10px}
@@ -434,7 +472,7 @@ body.bloqueada{overflow:hidden}
   main{padding:16px 10px 6px} .intro h2{font-size:30px}
   .cartel .flecha{font-size:34px;padding:0 12px} .cartel .who{font-size:30px}
   header.app{padding:0 10px;gap:8px} .marca h1{display:none} .ciclo{display:none} .miga{font-size:16px;padding:3px 8px}
-  .portada h2{font-size:36px} .asig .t{font-size:24px} .asig .flecha{font-size:34px;padding:0 14px} .asig .ir{display:none} .tile .nom{font-size:34px} .tile.prod .nom{font-size:38px} .tile{min-height:110px;padding:18px}
+  .portada h2{font-size:36px} .asig{padding:14px} .asig-t{font-size:24px} .asig-ic{width:42px;height:42px} .asig-pasos{grid-template-columns:1fr} .asig-go{width:100%;justify-content:center} .mtiles{grid-template-columns:1fr} .tile .nom{font-size:34px} .tile.prod .nom{font-size:38px} .tile{min-height:110px;padding:18px}
   .anual{--nw:112px;max-height:65vh}
   .selcal{grid-template-columns:repeat(2,1fr);gap:12px} .ed{font-size:11px}
   .tipo-fila{flex-wrap:wrap!important;gap:8px} .tipo-fila>input:nth-of-type(3){flex:1 1 140px!important}
@@ -456,7 +494,7 @@ body.bloqueada{overflow:hidden}
   <button class="marca" onclick="irInicio()" aria-label="Volver al inicio"><span class="logo" aria-hidden="true">✈</span><h1>Vacaciones AGP</h1></button>
   <div class="migas" id="migas"></div>
   <span class="ciclo" id="hdrCiclo"></span>
-  <button class="engranaje" id="btnAjustes" onclick="go(UI.vista==='ajustes'?UI.volverDe:'ajustes')" aria-label="Ajustes generales" title="Ajustes generales">⚙</button>
+  <button class="engranaje" id="btnAjustes" onclick="go(UI.vista==='ajustes'?UI.volverDe:'ajustes')" aria-label="Ajustes generales" title="Ajustes generales"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M5.5 18.5l1.7-1.7M16.8 7.2l1.7-1.7"/></svg></button>
 </header>
 <nav class="pasos" id="pasos" aria-label="Secciones"></nav>
 <main id="main"></main>
@@ -469,7 +507,7 @@ body.bloqueada{overflow:hidden}
    Reglas base: Convenio Menzies (BOE-A-2023-25956), arts. 32 y 33
    Datos guardados en el navegador (localStorage). Haz copias.
    ========================================================= */
-const APP_VERSION = '5.6.0';   // súbela junto con version.json en cada publicación
+const APP_VERSION = '6.0.0';   // súbela junto con version.json en cada publicación
 const LS_KEY = 'vacaciones-agp-v1';
 const SIN = '_'; // clave interna para «sin grupo»
 
@@ -530,7 +568,7 @@ const depsIniciales = () => ['Pasaje','Rampa','Operaciones'].map(n=>({id:uid(), 
 function estadoInicial(){
   const ciclo = new Date().getFullYear() + (new Date().getMonth() >= 6 ? 1 : 0);
   return normalizar({ version:4, ciclo, departamentos:depsIniciales(), productos:PRODUCTOS_DEF.map(p=>({...p})), skills:[], grupos:[], trabajadores:[],
-    tramos:TRAMOS_CONVENIO.map(t=>({...t})), semanaSanta:semanaSantaDefault(ciclo), puentes:[], cupos:[], periodos:[], desprog:[], turnos:{}, pasosOk:{}, ctx:{dep:'',prod:''} });
+    tramos:TRAMOS_CONVENIO.map(t=>({...t})), semanaSanta:semanaSantaDefault(ciclo), puentes:[], cupos:[], periodos:[], desprog:[], turnos:{}, ctx:{dep:'',prod:''} });
 }
 function normalizar(d){ // también migra datos de versiones anteriores
   d.ajustes = {...AJUSTES_DEF, ...(d.ajustes||{})};
@@ -539,7 +577,7 @@ function normalizar(d){ // también migra datos de versiones anteriores
   d.grupos ||= []; d.desprog ||= []; d.puentes ||= []; d.cupos ||= []; d.periodos ||= []; d.trabajadores ||= [];
   d.turnos ||= {}; if('hechos' in d.turnos) d.turnos = {};
   if(!d.ctx) d.ctx = {dep:'', prod:''};
-  if(!d.pasosOk || Array.isArray(d.pasosOk)) d.pasosOk = {};
+  delete d.pasosOk;
   const prod0 = d.productos[0].id;
   d.grupos.forEach(g=>{ if(g.depId===undefined) g.depId=''; if(!g.prodId) g.prodId=prod0; });
   const gDep = w => (w.grupoId && d.grupos.find(g=>g.id===w.grupoId)?.depId) || w.depId || '';
@@ -581,6 +619,22 @@ let UI = { vista:'inicio', volverDe:'inicio', modo:'turnos', grupo:null, trab:nu
   dpTrab:'', dpDia:'', dpSol:hoy(),
   m:{trab:'', desde:'', hasta:'', forzar:false, nota:'', edit:null, filtro:'all'},
   pdf:{grupo:'all', cuadrante:true, tabla:true, puntos:true, desprog:true, firma:false, orient:'landscape'} };
+
+/* ---------- iconos de línea (24×24, trazo) ---------- */
+const ICONOS = {
+  plantilla:'<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="17" cy="9" r="2.4"/><path d="M16 14.2c2.3.2 3.9 1.8 4.5 4.8"/>',
+  equipos:'<rect x="3.5" y="4" width="7" height="7" rx="1.6"/><rect x="13.5" y="4" width="7" height="7" rx="1.6"/><rect x="3.5" y="14" width="7" height="7" rx="1.6"/><rect x="13.5" y="14" width="7" height="7" rx="1.6"/>',
+  skills:'<path d="M12 3.8l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 16.2l-4.8 2.5.9-5.4-3.9-3.8 5.4-.8z"/>',
+  rotaciones:'<path d="M19.5 12a7.5 7.5 0 0 1-13.2 4.9"/><path d="M4.5 12a7.5 7.5 0 0 1 13.2-4.9"/><path d="M18 3.8v3.6h-3.6"/><path d="M6 20.2v-3.6h3.6"/>',
+  transformaciones:'<path d="M4 8h13"/><path d="M14 4.5L17.5 8 14 11.5"/><path d="M20 16H7"/><path d="M10 12.5L6.5 16l3.5 3.5"/>',
+  desprog:'<rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/><path d="M9.5 13l5 5M14.5 13l-5 5"/>',
+  calendario:'<rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/><path d="M7.5 13.5h3M13.5 13.5h3M7.5 17h3"/>',
+  pdf:'<path d="M7 9V3.5h10V9"/><rect x="3.5" y="9" width="17" height="7.5" rx="1.6"/><path d="M7 14h10v6.5H7z"/>',
+  ajustes:'<circle cx="12" cy="12" r="3"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M5.5 18.5l1.7-1.7M16.8 7.2l1.7-1.7"/>',
+  flecha:'<path d="M5 12h14M13 6l6 6-6 6"/>',
+  ok:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+};
+const ico = (n, cls='') => `<svg class="ico ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONOS[n]||''}</svg>`;
 
 /* ---------- consultas ---------- */
 const skillDe = id => S.skills.find(t=>t.id===id);
@@ -656,7 +710,6 @@ function turnoDia(w, s){
   const n = r.semanas.length*7, i = ((daysBetween(inicioRot(w,r), s) % n) + n) % n;
   const cod = r.semanas[Math.floor(i/7)][i%7]; return cod ? (tipoTurno(cod) || {cod, nombre:cod, color:'#5F6775', libre:false}) : null;
 }
-const marcaTurno = (w,s) => { const t = turnoDia(w,s); return t ? `<i class="tc" style="color:${t.color}">${esc(t.cod)}</i>` : ''; };
 
 /* ---------- transformaciones de contrato: los días de vacaciones se prorratean por tramos ---------- */
 const transfDe = id => S.transf.filter(t=>t.trabajadorId===id).sort((a,b)=>a.fecha.localeCompare(b.fecha) || a.creado-b.creado);
@@ -903,7 +956,9 @@ function render(){
   document.body.classList.toggle('ancho', UI.vista==='calendario' && UI.cal.modo==='anual');
   const V = {equipos:vEquipos, plantilla:vPlantilla, menu:vMenu, rotaciones:vRotaciones, transformaciones:vTransformaciones, inicio:vInicio, producto:vProducto, ajustes:vAjustes, skills:vSkills, grupos:vGrupos, trabajadores:vTrabajadores, cupos:vCupos, eleccion:vEleccion, desprog:vDesprog, resumen:vResumen, calendario:vCalendario, pdf:vPDF};
   const an0 = document.getElementById('anual'); if(an0){ UI.cal.sx = an0.scrollLeft; UI.cal.sy = an0.scrollTop; }
-  document.getElementById('main').innerHTML = intro() + V[UI.vista]() + pie();
+  const main = document.getElementById('main'), cambia = UI._vistaPintada !== UI.vista;
+  main.innerHTML = intro() + V[UI.vista]() + pie();
+  if(cambia){ UI._vistaPintada = UI.vista; main.classList.remove('entrando'); void main.offsetWidth; main.classList.add('entrando'); clearTimeout(render._t); render._t = setTimeout(()=>main.classList.remove('entrando'), 900); }
   const on = document.querySelector('.step.on'); if(on) on.scrollIntoView({block:'nearest',inline:'center'});
   if(UI.vista==='pdf') ajustarHoja();
   if(UI.vista==='rotaciones' && UI.rotEdit) document.querySelector('.dlg-op.on, .dlg-op')?.focus();
@@ -928,9 +983,9 @@ const vacio = (txt, boton) => `<div class="card"><p class="help">${txt}</p>${bot
    ========================================================= */
 function vInicio(){
   const sinDep = S.trabajadores.filter(t=>!depDeId(depDe(t))).length;
-  return `<div class="portada"><p class="k">Ciclo ${S.ciclo}</p><h2>¿Con qué departamento vas a trabajar?</h2></div>
-  <div class="tiles">${S.departamentos.map(d=>{const n=S.trabajadores.filter(t=>depDe(t)===d.id).length;
-    return `<button class="tile" onclick="elegirDep('${d.id}')"><span class="ini" aria-hidden="true">${esc(d.nombre[0])}</span><span><span class="nom">${esc(d.nombre)}</span><span class="dato">${n?`${n} persona${n===1?'':'s'}`:'Sin trabajadores todavía'}</span></span><span class="fl" aria-hidden="true">›</span></button>`}).join('')}</div>
+  return `<div class="portada anim" style="--i:0"><p class="k">Ciclo ${S.ciclo}</p><h2>¿Con qué departamento vas a trabajar?</h2></div>
+  <div class="tiles">${S.departamentos.map((d,i)=>{const n=S.trabajadores.filter(t=>depDe(t)===d.id).length;
+    return `<button class="tile anim" style="--i:${i+1}" onclick="elegirDep('${d.id}')"><span class="ini" aria-hidden="true">${esc(d.nombre[0])}</span><span><span class="nom">${esc(d.nombre)}</span><span class="dato">${n?`${n} persona${n===1?'':'s'}`:'Sin trabajadores todavía'}</span></span><span class="fl" aria-hidden="true">${ico('flecha')}</span></button>`}).join('')}</div>
   ${sinDep?`<div class="card"><h2>${sinDep} trabajador(es) sin departamento</h2><p class="help">Vienen de una versión anterior. Elige a qué departamento y producto pasan.</p>
     <div class="row"><label>Departamento<select id="mDep">${opts(S.departamentos,'')}</select></label><label>Producto<select id="mProd">${opts(S.productos,'')}</select></label><button class="btn primary" onclick="asignarSinDep()">Asignar</button></div></div>`:''}`;
 }
@@ -941,34 +996,48 @@ function asignarSinDep(){
 }
 function vProducto(){
   const d = depDeId(S.ctx.dep);
-  return `<div class="portada"><button class="volver" onclick="irInicio()">‹ Departamentos</button><p class="k">${esc(d.nombre)}</p><h2>¿Con qué producto?</h2></div>
-  <div class="tiles">${S.productos.map(p=>{const n=S.trabajadores.filter(t=>depDe(t)===d.id && prodDe(t)===p.id).length;
-    return `<button class="tile prod" style="--c:${p.color}" onclick="elegirProd('${p.id}')"><span class="ini" aria-hidden="true">${esc(p.nombre[0])}</span><span><span class="nom">${esc(p.nombre)}</span><span class="dato">${n?`${n} persona${n===1?'':'s'} en ${esc(d.nombre)}`:'Sin trabajadores todavía'}</span></span><span class="fl" aria-hidden="true">›</span></button>`}).join('')}</div>`;
+  return `<div class="portada anim" style="--i:0"><button class="volver" onclick="irInicio()">‹ Departamentos</button><p class="k">${esc(d.nombre)}</p><h2>¿Con qué producto?</h2></div>
+  <div class="tiles">${S.productos.map((p,i)=>{const n=S.trabajadores.filter(t=>depDe(t)===d.id && prodDe(t)===p.id).length;
+    return `<button class="tile prod anim" style="--c:${p.color};--i:${i+1}" onclick="elegirProd('${p.id}')"><span class="ini" aria-hidden="true">${esc(p.nombre[0])}</span><span><span class="nom">${esc(p.nombre)}</span><span class="dato">${n?`${n} persona${n===1?'':'s'} en ${esc(d.nombre)}`:'Sin trabajadores todavía'}</span></span><span class="fl" aria-hidden="true">${ico('flecha')}</span></button>`}).join('')}</div>`;
 }
 
 function vMenu(){
-  const ts = trabsVis(), ks = gruposActivos();
-  const hechos = ks.reduce((a,k)=>a+Object.values(tState(k).hechos).flat().filter((v,i,arr)=>arr.indexOf(v)===i).length,0);
+  const ts = trabsVis(), ks = gruposActivos(), gs = gruposVis();
   const terminado = ts.length && ks.every(grupoTerminado);
   const conVac = ts.filter(t=>periodosDe(t.id).length).length;
   const dpAnio = S.desprog.filter(d=>{const t=trabDe(d.trabajadorId); return t&&visible(t)&&delAnio(d.dia,S.ciclo);}).length;
-  const tile = (v, titulo, dato, ini) => `<button class="mtile" onclick="go('${v}')"><span class="mini">${ini}</span><span><span class="mt">${titulo}</span><span class="md">${dato}</span></span></button>`;
-  return `<div class="portada"><p class="k">${esc(nombreDep(S.ctx.dep))}</p><h2 style="max-width:none">${esc(nombreProd(S.ctx.prod))}</h2></div>
-  <button class="asig" onclick="go('grupos')"><span class="flecha" aria-hidden="true">➜</span>
-    <span class="cuerpo"><span class="t">Asignación de vacaciones ${S.ciclo}</span>
-      <span class="d">Grupos de elección › Elección › Resumen y cierre</span>
-      <span class="e">${!ts.length?'Primero añade trabajadores':terminado?'Todas las rondas terminadas':`${conVac} de ${ts.length} personas con vacaciones`}</span></span>
-    <span class="ir" aria-hidden="true">›</span></button>
-  <div class="mtiles">
-    ${tile('plantilla','Plantilla', `${ts.length} persona${ts.length===1?'':'s'}, ${S.cupos.filter(c=>cupoVisible(c)&&c.depId).length} cupos de plantilla`, '👤')}
-    ${tile('equipos','Grupos', `${gruposVis().length} grupo${gruposVis().length===1?'':'s'}${trabsVis().filter(t=>!t.grupoId).length?`, ${trabsVis().filter(t=>!t.grupoId).length} sin grupo`:''}`, '◫')}
-    ${tile('skills','Skills', `${skillsVis().length} skill${skillsVis().length===1?'':'s'}`, '★')}
-    ${tile('rotaciones','Rotaciones', `${rotacionesVis().length} rotación(es), ${gruposVis().filter(g=>g.rotacionId).length} de ${gruposVis().length} grupos con rotación`, '↻')}
-    ${tile('transformaciones','Transformaciones', `${S.transf.filter(t=>{const w=trabDe(t.trabajadorId); return w&&visible(w);}).length} cambios de contrato`, '⇄')}
-    ${tile('desprog','Desprogramaciones', `${dpAnio} en ${S.ciclo}`, '✕')}
-    ${tile('calendario','Calendario', 'Todo el año, a pantalla completa', '▦')}
-    ${tile('pdf','Exportar PDF', 'Informe del producto', '⎙')}
-  </div>`;
+  const sinG = ts.filter(t=>!t.grupoId).length, nSup = ts.filter(esSuper).length;
+  const ncupos = S.cupos.filter(c=>cupoVisible(c)&&c.depId).length, ntf = S.transf.filter(t=>{const w=trabDe(t.trabajadorId); return w&&visible(w);}).length;
+  // estado de los tres pasos de la asignación
+  const p1 = pasoHecho('grupos'), p2 = pasoHecho('eleccion');
+  const pasos = [
+    {v:'grupos', n:'Grupos de elección', d: gs.length ? `${gs.length} grupo${gs.length===1?'':'s'}${sinG?`, ${sinG} sin grupo`:''}` : 'Sin grupos', ok:p1},
+    {v:'eleccion', n:'Elección', d: ts.length ? `${conVac} de ${ts.length} con vacaciones` : 'Sin trabajadores', ok:p2},
+    {v:'resumen', n:'Resumen y cierre', d: terminado ? 'Listo para revisar' : 'Al terminar', ok:false},
+  ];
+  const sig = pasos.find(x=>!x.ok) || pasos[2];
+  let k = 0;
+  const tile = (v, titulo, dato) => `<button class="mtile anim" style="--i:${k++}" onclick="go('${v}')"><span class="mi">${ico(v)}</span><span class="mtx"><span class="mt">${titulo}</span><span class="md">${dato}</span></span><span class="mfl">${ico('flecha')}</span></button>`;
+  const bloque = (titulo, tiles) => `<section class="mbloque"><h3 class="mbt anim" style="--i:${k++}">${titulo}</h3><div class="mtiles">${tiles}</div></section>`;
+  return `<div class="portada anim" style="--i:0"><p class="k">${esc(nombreDep(S.ctx.dep))}, ciclo ${S.ciclo}</p><h2 style="max-width:none">${esc(nombreProd(S.ctx.prod))}</h2>
+    <p class="resumen-p">${ts.length} persona${ts.length===1?'':'s'}: ${ts.length-nSup} agente${ts.length-nSup===1?'':'s'} y ${nSup} super${nSup===1?'':'s'}, en ${gs.length} grupo${gs.length===1?'':'s'}.</p></div>
+  <div class="asig anim" style="--i:1">
+    <div class="asig-cab"><span class="asig-ic">${ico('flecha')}</span><div><div class="asig-t">Asignación de vacaciones ${S.ciclo}</div><div class="asig-s">${terminado?'Todas las rondas terminadas':`Siguiente: ${sig.n.toLowerCase()}`}</div></div>
+      <button class="btn ink asig-go" onclick="go('${sig.v}')">${conVac||p1?'Continuar':'Empezar'} ${ico('flecha')}</button></div>
+    <ol class="asig-pasos">${pasos.map((x,n)=>`<li><button class="${x.ok?'ok':''} ${x===sig?'sig':''}" onclick="go('${x.v}')"><span class="ap-n">${x.ok?ico('ok'):n+1}</span><span><b>${x.n}</b><small>${x.d}</small></span></button></li>`).join('')}</ol>
+  </div>
+  ${(k=2, '')}
+  ${bloque('Personas',
+      tile('plantilla','Plantilla', `${ts.length} persona${ts.length===1?'':'s'}, ${ncupos} cupo${ncupos===1?'':'s'}`) +
+      tile('equipos','Grupos', `${gs.length} grupo${gs.length===1?'':'s'}${sinG?`, ${sinG} sin grupo`:''}`) +
+      tile('skills','Skills', `${skillsVis().length} skill${skillsVis().length===1?'':'s'}`))}
+  ${bloque('Turnos y contratos',
+      tile('rotaciones','Rotaciones', `${rotacionesVis().length} rotación${rotacionesVis().length===1?'':'es'}, ${gs.filter(g=>g.rotacionId).length} de ${gs.length} grupos`) +
+      tile('transformaciones','Transformaciones', `${ntf} cambio${ntf===1?'':'s'} de contrato`) +
+      tile('desprog','Desprogramaciones', `${dpAnio} en ${S.ciclo}`))}
+  ${bloque('Consultar',
+      tile('calendario','Calendario', 'El año entero, a pantalla completa') +
+      tile('pdf','Exportar PDF', 'Informe del producto'))}`;
 }
 
 /* =========================================================
@@ -1757,7 +1826,7 @@ function cerrarCiclo(){
   S.trabajadores.forEach(t=>{ const st=statsTrab(t); t.ptsAnt2=t.ptsAnt||0; t.ptsAnt=st.pts; });
   const mas1 = s => { const d=pd(s), y=d.getUTCFullYear()+1, m=d.getUTCMonth(); const ult=new Date(Date.UTC(y,m+1,0)).getUTCDate(); return iso(new Date(Date.UTC(y,m,Math.min(d.getUTCDate(),ult)))); };
   S.cupos.forEach(c=>{ c.desde=mas1(c.desde); c.hasta=mas1(c.hasta); });
-  S.ciclo++; S.puentes=[]; S.semanaSanta=semanaSantaDefault(S.ciclo); S.turnos={}; S.pasosOk={};
+  S.ciclo++; S.puentes=[]; S.semanaSanta=semanaSantaDefault(S.ciclo); S.turnos={};
   UI.cal.anio=null; save(); render(); toast(`Ciclo ${S.ciclo} abierto. Añade los puentes del nuevo año en Ajustes.`);
 }
 
@@ -2037,14 +2106,6 @@ function crearRotacion(silencio){
   if(silencio) gruposVis().forEach(g=>{ if(!g.rotacionId) g.rotacionId=r.id; });   // la primera rotación se asigna a los grupos
   save(); if(!silencio){ render(); toast('Rotación creada: pulsa los días para configurarla'); }
 }
-function pintarRot(id, wi, di){
-  const r = rotDeId(id); if(!r) return;
-  if(UI.rotPincel===null || UI.rotPincel===undefined){
-    const cods = ['', ...S.turnosTipos.map(t=>t.cod)], i = cods.indexOf(r.semanas[wi][di]);
-    r.semanas[wi][di] = cods[(i+1) % cods.length];
-  } else r.semanas[wi][di] = UI.rotPincel;
-  save(); render();
-}
 function borrarRotacion(id){
   const r = rotDeId(id), ng = S.grupos.filter(g=>g.rotacionId===id).length, np = S.trabajadores.filter(t=>t.rotacionId===id).length;
   if(!confirm(`¿Eliminar «${r?.nombre||'la rotación'}»?${ng||np?` ${ng} grupo(s) y ${np} persona(s) que la usan se quedarán sin rotación.`:''}`)) return; UI.rotSel=null; S.rotIniciada ||= {}; S.rotIniciada[ctxKey()] = true;
@@ -2261,6 +2322,14 @@ render();
    Para publicar: subir APP_VERSION, añadir sus pasos a NOVEDADES y poner la misma versión en version.json.
    ========================================================= */
 const NOVEDADES = {
+  '6.0.0': [
+    { titulo:'Menú renovado', donde:'Menú de cada producto',
+      texto:'Las secciones están ordenadas en tres bloques: Personas, Turnos y contratos, y Consultar. Cada una tiene su icono y un dato rápido para saber cómo va sin entrar.' },
+    { titulo:'La asignación, paso a paso', donde:'Tarjeta amarilla del menú',
+      texto:'La tarjeta de Asignación de vacaciones muestra los tres pasos con su estado y te lleva directo al siguiente con «Continuar».' },
+    { titulo:'Más fluida', donde:'Toda la app',
+      texto:'Las pantallas entran con una transición suave y los botones, tarjetas y días responden al tocarlos. Si tu equipo tiene activado «reducir movimiento», las animaciones se desactivan solas.' },
+  ],
   '5.6.0': [
     { titulo:'Agentes y supers', donde:'Skills',
       texto:'Marca «Es de super» en las skills de jefe de servicio, jefe de turno y supervisor. Quien tenga alguna es super; el resto, agente. Lo verás con una etiqueta en Plantilla, Grupos y Elección.' },
