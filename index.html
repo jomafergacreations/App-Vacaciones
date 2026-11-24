@@ -206,7 +206,7 @@ table.cg{border-collapse:separate;border-spacing:0;width:max-content;font-size:1
 .cg thead .cg-nom{z-index:4;font-family:var(--cond);font-size:14px;color:var(--gris);padding-left:10px!important;vertical-align:bottom;padding-bottom:6px!important}
 .cg-nom button{all:unset;display:block;box-sizing:border-box;width:100%;padding:0 10px;height:30px;line-height:30px;font-weight:600;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
 .cg-nom button:hover{color:var(--ctx);text-decoration:underline}
-.cg tbody td{height:30px;text-align:center;font-weight:700;font-size:11px}
+.cg tbody td{cursor:pointer;height:30px;text-align:center;font-weight:700;font-size:11px}
 .cg-grp th,.cg-grp td{background:var(--hormigon)!important;height:26px}
 .cg-grp th{font-family:var(--cond);font-size:14px;padding-left:10px!important;color:var(--gris)}
 .ed-cab{display:flex;flex-wrap:wrap;gap:14px 24px;align-items:flex-end}
@@ -231,6 +231,8 @@ table.eg{border-collapse:separate;border-spacing:2px;width:100%;min-width:900px;
 .acc-dia .btn{flex:0 1 auto}
 
 /* ---- celdas de días (Consultar y Editar) ---- */
+.cg tbody tr[data-w] td:hover{outline:2px solid var(--asfalto);outline-offset:-2px}
+.vboton.principal{background:var(--senal);border-color:var(--senal)} .vboton.principal .gi{background:var(--asfalto);color:var(--senal)} .vboton.principal:hover .gi{background:var(--asfalto);color:var(--senal)} .vboton.principal .vb-d{color:#3B3F48} .vboton.principal .gfl,.vboton.principal:hover .gfl{color:var(--asfalto)}
 .cg td.pinta,.eg td.pinta{background:var(--cc);color:var(--ct);border-color:var(--cc)}
 .cg td.c-bj,.eg td.c-bj{background:repeating-linear-gradient(135deg,#F3C2BD 0 3px,#FBE7E5 3px 7px);color:#8C2A20}
 .eg td.pinta small{color:var(--ct);opacity:.85}
@@ -599,7 +601,7 @@ body.bloqueada{overflow:hidden}
    Reglas base: Convenio Menzies (BOE-A-2023-25956), arts. 32 y 33
    Datos guardados en el navegador (localStorage). Haz copias.
    ========================================================= */
-const APP_VERSION = '8.3.0';   // súbela junto con version.json en cada publicación
+const APP_VERSION = '8.4.0';   // súbela junto con version.json en cada publicación
 const LS_KEY = 'vacaciones-agp-v1';
 const SIN = '_'; // clave interna para «sin grupo»
 
@@ -1026,7 +1028,7 @@ const PASOS = [
 const SECCIONES = [
   ['personal','Personal','Toda la plantilla con su ficha: datos, jornada, vacaciones y contrato. Lo que cambies aquí se aplica en el resto de la app.'],
   ['gestion','Grupos','Los grupos, las skills, las rotaciones y los cupos de plantilla.'],
-  ['vacaciones','Vacaciones','La asignación del año, el calendario de todos y el de cada persona, con su PDF.'],
+  ['vacaciones','Vacaciones','Consulta y edita el calendario, o empieza la asignación del año que viene.'],
   ['pdf','Informe del producto',''],
 ];
 const VISTAS_CTX = ['menu', ...PASOS.map(p=>p[0]), ...SECCIONES.map(e=>e[0])];
@@ -1165,8 +1167,8 @@ function vMenu(){
       [cuenta(ts.length,'persona','personas'), ts.length?`${ts.length-nSup} agente${ts.length-nSup===1?'':'s'} y ${cuenta(nSup,'super','supers')}`:'', sinJor?`${sinJor} sin jornada`:'', nBaja?`${nBaja} con baja`:''],1)}
     ${globo('gestion','equipos','Grupos','Los grupos y quién está en cada uno, las skills, las rotaciones y los cupos de plantilla.',
       [cuenta(gs.length,'grupo','grupos'), cuenta(skillsVis().length,'skill','skills'), cuenta(rotacionesVis().length,'rotación','rotaciones')],2)}
-    ${globo('vacaciones','vacaciones','Vacaciones','La asignación del año, el calendario de todos y el de cada persona, con su PDF.',
-      [`Asignación ${S.ciclo}: ${sig ? sig.n.toLowerCase() : 'terminada'}`, ts.length?`${conVac} de ${ts.length} con vacaciones`:''],3,'principal')}
+    ${globo('vacaciones','vacaciones','Vacaciones','El calendario de todos, con sus vacaciones editables día a día, y la asignación del año que viene.',
+      [`Asignación ${anioAsignacion()}: ${S.ciclo!==anioAsignacion() ? 'sin empezar' : sig ? sig.n.toLowerCase() : 'terminada'}`, ts.length?`${conVac} de ${ts.length} con vacaciones`:''],3,'principal')}
   </div>`;
 }
 function siguientePaso(){
@@ -1333,19 +1335,28 @@ function vVacaciones(){
   if(!trabsVis().length) return vacio(`Todavía no hay nadie en ${esc(ctxTxt())}.`, `<button class="btn primary" onclick="go('personal')">Ir a Personal</button>`);
   if(modo==='consultar') return barraVac('consultar') + vConsultar();
   if(modo==='editar') return barraVac('editar') + vEditar();
-  // entrada: solo los dos botones y la asignación en una línea
-  const sig = siguientePaso();
-  const boton = (m, ic, t, d, i) => `<button class="vboton anim" style="--i:${i}" onclick="UI.vacModo='${m}';render()"><span class="gi">${ico(ic)}</span><span class="vb-t">${t}</span><span class="vb-d">${d}</span><span class="gfl">${ico('flecha')}</span></button>`;
+  // entrada: consultar el calendario o empezar la asignación del año que viene
+  const Y = anioAsignacion(), sig = siguientePaso();
+  const estado = S.ciclo===Y ? (sig ? `En marcha. Siguiente paso: ${sig.n.toLowerCase()}.` : 'Todas las rondas terminadas.') : `Empieza la elección de las vacaciones de ${Y}.`;
+  const boton = (accion, ic, t, d, i, extra='') => `<button class="vboton anim ${extra}" style="--i:${i}" onclick="${accion}"><span class="gi">${ico(ic)}</span><span class="vb-t">${t}</span><span class="vb-d">${d}</span><span class="gfl">${ico('flecha')}</span></button>`;
   return `<div class="vbotones">
-      ${boton('consultar','calendario','Consultar calendario','Todos los días del año, en celdas, para toda la plantilla.',1)}
-      ${boton('editar','editar','Editar','La hoja anual de cada trabajador. Toca un día para asignar vacaciones, ajustes, festivos, bajas o desprogramaciones.',2)}
-    </div>
-    <div class="asig-linea anim" style="--i:3"><span><b>Asignación de vacaciones ${S.ciclo}.</b> ${sig?`Siguiente paso: ${sig.n.toLowerCase()}.`:'Todas las rondas terminadas.'}</span>
-      <button class="btn small ink" onclick="go('${sig?sig.v:'resumen'}')">${sig?'Continuar':'Ver resumen'}</button></div>`;
+      ${boton("UI.vacModo='consultar';render()",'calendario','Consultar calendario',`Todos los días de ${S.ciclo} en celdas. Toca un día o un nombre para editar sus vacaciones, ajustes, festivos o bajas.`,1)}
+      ${boton('empezarAsignacion()','flecha',`Asignación de vacaciones ${Y}`,estado,2,'principal')}
+    </div>`;
+}
+/* la asignación siempre es para el año siguiente al actual */
+const anioAsignacion = () => new Date().getFullYear() + 1;
+function empezarAsignacion(){
+  const Y = anioAsignacion();
+  if(S.ciclo===Y){ const sig = siguientePaso(); return go(sig ? sig.v : 'resumen'); }
+  if(S.ciclo===Y-1){ cerrarCiclo(); if(S.ciclo===Y) go('grupos'); return; }   // cierra el año actual (con copia) y abre el siguiente
+  if(!confirm(`El ciclo activo es ${S.ciclo}. ¿Pasar a ${Y} para empezar su asignación? Las vacaciones de otros años se conservan.`)) return;
+  S.ciclo=Y; S.semanaSanta=semanaSantaDefault(Y); S.turnos={}; save(); go('grupos');
 }
 function barraVac(modo){
-  return `<div class="vac-modos"><div><button class="volver" onclick="UI.vacModo='';UI.ed=null;render()">‹ Vacaciones</button><h2 class="vm-t">${modo==='consultar'?'Calendario':'Editar'} ${S.ciclo}</h2></div>
-    <div class="seg"><button class="${modo==='consultar'?'on':''}" onclick="UI.vacModo='consultar';UI.ed=null;render()">Consultar calendario</button><button class="${modo==='editar'?'on':''}" onclick="UI.vacModo='editar';render()">Editar</button></div></div>`;
+  return modo==='consultar'
+    ? `<div class="vac-modos"><div><button class="volver" onclick="UI.vacModo='';UI.ed=null;render()">‹ Vacaciones</button><h2 class="vm-t">Calendario ${S.ciclo}</h2></div></div>`
+    : `<div class="vac-modos"><div><button class="volver" onclick="UI.vacModo='consultar';UI.ed=null;render()">‹ Calendario</button><h2 class="vm-t">Editar ${S.ciclo}</h2></div></div>`;
 }
 /* código y estilo de un día para una persona (consultar, editar y PDF usan lo mismo) */
 const COD_DIA = e => e.k==='vac' ? 'H' : e.k==='dp' ? 'D' : e.k==='mk' ? e.cod : e.k==='lib' ? e.t.cod : e.k==='bj' ? 'B' : e.k==='ces' ? 'C' : '';
@@ -1371,7 +1382,7 @@ function vConsultar(){
     const ts = trabsVis().filter(t=>gk(t)===k && (!C.buscar || t.nombre.toLowerCase().includes(C.buscar.toLowerCase()))).sort((a,b)=>a.nombre.localeCompare(b.nombre,'es')); if(!ts.length) return '';
     return `<tr class="cg-grp"><th class="cg-nom">${esc(nombreGrupo(k))}</th><td colspan="${dias.length}"></td></tr>` + ts.map(w=>{
       const {vac, dps} = diasDe(w, y);
-      return `<tr><th class="cg-nom" title="${esc(w.nombre)}"><button onclick="UI.vacModo='editar';UI.edTrab='${w.id}';UI.ed=null;render()">${esc(w.nombre)}</button></th>${dias.map(s=>{ const e = estadoDia(w,s,vac,dps), c = COD_DIA(e), col = COLOR_DIA(e);
+      return `<tr data-w="${w.id}"><th class="cg-nom" title="${esc(w.nombre)}"><button onclick="UI.vacModo='editar';UI.edTrab='${w.id}';UI.ed=null;render()">${esc(w.nombre)}</button></th>${dias.map(s=>{ const e = estadoDia(w,s,vac,dps), c = COD_DIA(e), col = COLOR_DIA(e);
         return `<td class="${claseDia(e,s)} ${s.endsWith('-01')?'ini':''}"${col?` style="${col}"`:''}>${c}</td>`; }).join('')}</tr>`; }).join('');
   }).join('');
   return `<div class="card cons-barra">
@@ -1382,8 +1393,13 @@ function vConsultar(){
       <button class="btn" onclick="descargarZIP()">${ico('descarga')} Todas las fichas (ZIP)</button>
       <button class="btn" onclick="go('pdf')">Informe del producto</button>
     </div>
-    <div class="card cg-card"><div class="cg-scroll" id="cgScroll"><table class="cg"><thead><tr>${cabM}</tr><tr>${cabD}</tr></thead><tbody>${filas || `<tr><td class="muted" style="padding:14px">Nadie con ese nombre.</td></tr>`}</tbody></table></div>
-      <p class="muted" style="margin:10px 0 0">Desliza en horizontal para avanzar por el año. Toca un nombre para editar su hoja.</p>${leyendaDias()}</div>`;
+    <div class="card cg-card"><div class="cg-scroll" id="cgScroll"><table class="cg" onclick="clicCons(event)"><thead><tr>${cabM}</tr><tr>${cabD}</tr></thead><tbody>${filas || `<tr><td class="muted" style="padding:14px">Nadie con ese nombre.</td></tr>`}</tbody></table></div>
+      <p class="muted" style="margin:10px 0 0">Desliza en horizontal para avanzar por el año. Toca un día para editarlo, o un nombre para ver su hoja entera.</p>${leyendaDias()}</div>`;
+}
+function clicCons(ev){
+  const td = ev.target.closest('td'), tr = td && td.parentElement; if(!td || !tr.dataset.w) return;
+  const s = addDays(`${S.ciclo}-01-01`, td.cellIndex - 1);
+  UI.vacModo='editar'; UI.edTrab=tr.dataset.w; UI.ed={dia:s, accion:''}; render();
 }
 function irMesCons(m){ const c = document.getElementById('cgScroll'), th = document.getElementById('cgm'+m), nom = c?.querySelector('.cg-esq'); if(c && th) c.scrollTo({left: th.offsetLeft - (nom?nom.offsetWidth:0), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'}); }
 function colocarConsultar(){
@@ -2724,6 +2740,14 @@ render();
    Para publicar: subir APP_VERSION, añadir sus pasos a NOVEDADES y poner la misma versión en version.json.
    ========================================================= */
 const NOVEDADES = {
+  '8.4.0': [
+    { titulo:'Dos botones en Vacaciones', donde:'Globo Vacaciones',
+      texto:'Ahora son «Consultar calendario» y «Asignación de vacaciones» del año que viene. El botón Editar desaparece porque se edita desde el propio calendario.' },
+    { titulo:'Editar desde el calendario', donde:'Vacaciones › Consultar calendario',
+      texto:'Toca el día de cualquier persona y se abre su hoja del año con ese día elegido, para asignar vacaciones, desprogramar, marcar AJ o X o apuntar una baja. Si tocas el nombre, ves su hoja entera.' },
+    { titulo:'Asignación del año siguiente', donde:'Vacaciones › Asignación de vacaciones',
+      texto:'Empieza la elección de las vacaciones del año que viene, por grupos y en el orden de puntos. Si el ciclo activo es el del año actual, primero se cierra (con su copia) y se abre el nuevo.' },
+  ],
   '8.3.0': [
     { titulo:'Rotación, fines de semana y Semana Santa más claros', donde:'Vacaciones › Editar y Consultar calendario',
       texto:'Cada letra tiene ahora su color fijo y bien visible: R descanso en gris azulado, F festivo en naranja, X en morado, AJ en verde azulado y H vacaciones en verde. Los fines de semana llevan una barra oscura arriba y fondo gris. La Semana Santa va enmarcada en amarillo.' },

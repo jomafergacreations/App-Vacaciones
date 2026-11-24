@@ -1,7 +1,8 @@
 {
-  "version": "8.3.0",
+  "version": "8.4.0",
   "fecha": "2026-11-24",
   "novedades": [
-    "Rotación, fines de semana y Semana Santa bien marcados en Editar, Consultar y PDF"
+    "Vacaciones: Consultar calendario y Asignación de vacaciones del año siguiente",
+    "Toca un día del calendario para editarlo"
   ]
 }
