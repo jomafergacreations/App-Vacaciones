@@ -1,8 +1,8 @@
 {
-  "version": "8.6.0",
+  "version": "9.0.0",
   "fecha": "2026-11-24",
   "novedades": [
-    "Pincha y arrastra para elegir varios días en la hoja del año",
-    "El menú de cada día sale junto al día tocado"
+    "La asignación de vacaciones es siempre la del año siguiente al ciclo de trabajo",
+    "Dentro de la asignación, todo se muestra y se apunta en ese año"
   ]
 }

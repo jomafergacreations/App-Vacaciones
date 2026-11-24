@@ -608,7 +608,7 @@ body.bloqueada{overflow:hidden}
    Reglas base: Convenio Menzies (BOE-A-2023-25956), arts. 32 y 33
    Datos guardados en el navegador (localStorage). Haz copias.
    ========================================================= */
-const APP_VERSION = '8.6.0';   // súbela junto con version.json en cada publicación
+const APP_VERSION = '9.0.0';   // súbela junto con version.json en cada publicación
 const LS_KEY = 'vacaciones-agp-v1';
 const SIN = '_'; // clave interna para «sin grupo»
 
@@ -713,6 +713,7 @@ function normalizar(d){ // también migra datos de versiones anteriores
     .forEach(t=>{ if(!d.turnosTipos.some(x=>x.cod===t.cod)) d.turnosTipos.push({...t}); });
   d.turnosTipos.forEach(t=>{ if(t.cod==='F' && t.nombre==='Festivo') t.libre = true; });
   d.trabajadores.forEach(t=>{ if(t.jornadaModo===undefined) t.jornadaModo='horas'; if(t.jornadaValor===undefined) t.jornadaValor=''; });
+  if(d.asigAnio !== d.ciclo+1){ d.turnos = {}; d.asigAnio = d.ciclo+1; }   // 9.0: la asignación es del año siguiente al ciclo
   delete d.vistaDep;
   d.version = 4;
   return d;
@@ -772,13 +773,13 @@ const esDisc = w => w && w.modalidad==='discontinuo';
 const ceseDe = w => esDisc(w) && Array.isArray(w.cese) ? w.cese.filter(c=>c.desde && c.hasta && c.hasta>=c.desde) : [];
 const enCese = (w,s) => ceseDe(w).some(c=>s>=c.desde && s<=c.hasta);
 const solapaCese = (w,desde,hasta) => ceseDe(w).some(c=>!(hasta<c.desde || desde>c.hasta));
-function diasCese(w, y=S.ciclo){
+function diasCese(w, y=CIC()){
   const a=`${y}-01-01`, b=`${y}-12-31`; let n=0;
   ceseDe(w).forEach(c=>{ const d=c.desde<a?a:c.desde, h=c.hasta>b?b:c.hasta; if(h>=d) n+=daysBetween(d,h)+1; });
   return n;
 }
 /* días trabajados al año: los que se hayan escrito o, si no, los del año menos los de cese */
-function diasContratadosEf(w, y=S.ciclo){
+function diasContratadosEf(w, y=CIC()){
   if(Number(w.diasContratados)>0) return {n:Number(w.diasContratados), origen:'ficha'};
   const c = diasCese(w,y); if(c>0) return {n:daysBetween(`${y}-01-01`,`${y+1}-01-01`)-c, origen:'cese'};
   return {n:0, origen:''};
@@ -826,7 +827,7 @@ function turnoDia(w, s){
 /* ---------- transformaciones de contrato: los días de vacaciones se prorratean por tramos ---------- */
 const transfDe = id => S.transf.filter(t=>t.trabajadorId===id).sort((a,b)=>a.fecha.localeCompare(b.fecha) || a.creado-b.creado);
 const estadoActual = w => ({modalidad:w.modalidad, diasDerecho:Number(w.diasDerecho)||0, diasContratados:w.diasContratados||''});
-function tramosContrato(w, y=S.ciclo){
+function tramosContrato(w, y=CIC()){
   const ini=`${y}-01-01`, fin=`${y}-12-31`, ts = transfDe(w.id);
   const prox = ts.find(t=>t.fecha>ini);
   let estado = prox ? prox.antes : estadoActual(w), d = ini; const tramos = [];
@@ -834,7 +835,7 @@ function tramosContrato(w, y=S.ciclo){
   tramos.push({desde:d, hasta:fin, estado});
   return tramos;
 }
-function derechoCiclo(w, y=S.ciclo){
+function derechoCiclo(w, y=CIC()){
   const tr = tramosContrato(w,y);
   if(tr.length===1) return {n:Number(tr[0].estado.diasDerecho)||0, tramos:tr, prorrateo:false};
   const len = daysBetween(`${y}-01-01`,`${y+1}-01-01`);
@@ -852,7 +853,8 @@ function cuentaDia(s){
   return true;
 }
 const enRango = (s,r) => r && r.desde && r.hasta && s>=r.desde && s<=r.hasta;
-const esSS = s => enRango(s, S.semanaSanta);
+const ssDe = y => (S.semanaSanta && String(S.semanaSanta.desde||'').startsWith(String(y))) ? S.semanaSanta : semanaSantaDefault(y);
+const esSS = s => enRango(s, ssDe(Number(s.slice(0,4))));
 const esPuente = s => S.puentes.some(p=>enRango(s,p));
 function ptsBase(s){ const md = s.slice(5); const t = S.tramos.find(t=>md>=t.desde && md<=t.hasta); return t ? Number(t.pts)||0 : 0; }
 function ptsDia(s){ return ptsBase(s) + (esSS(s)?Number(S.ajustes.ptsSS):0) + (esPuente(s)?Number(S.ajustes.ptsPuente):0); }
@@ -879,8 +881,8 @@ function factorInfo(w){
 }
 const factor = w => factorInfo(w).f;
 /* El histórico se conserva: el ciclo activo solo mira sus propias fechas. */
-const periodosDe = (id, y=S.ciclo) => S.periodos.filter(p=>p.trabajadorId===id && delAnio(p.desde,y)).sort((a,b)=>a.desde.localeCompare(b.desde));
-const desprogDe = (id, y=S.ciclo) => S.desprog.filter(d=>d.trabajadorId===id && delAnio(d.dia,y)).sort((a,b)=>a.solicitud.localeCompare(b.solicitud) || a.creado-b.creado);
+const periodosDe = (id, y=CIC()) => S.periodos.filter(p=>p.trabajadorId===id && delAnio(p.desde,y)).sort((a,b)=>a.desde.localeCompare(b.desde));
+const desprogDe = (id, y=CIC()) => S.desprog.filter(d=>d.trabajadorId===id && delAnio(d.dia,y)).sort((a,b)=>a.solicitud.localeCompare(b.solicitud) || a.creado-b.creado);
 function statsTrab(w){
   const ps = periodosDe(w.id), dps = desprogDe(w.id);
   let diasPer=0, bruto=0, largo=false;
@@ -909,14 +911,14 @@ function ordenEleccion(k){
    x = días de trabajo previstos (sin bajas), b = días de baja que caen en días de trabajo.
    Con bajas, el cómputo se recalcula por regla de tres: h = jornada × (x − b) / x.
    La media diaria es jornada / x, y las horas hechas son los días trabajados hasta hoy por esa media. */
-const bajasDe = (id, y=S.ciclo) => S.bajas.filter(b=>b.trabajadorId===id && b.desde<=`${y}-12-31` && b.hasta>=`${y}-01-01`).sort((a,b)=>a.desde.localeCompare(b.desde));
+const bajasDe = (id, y=CIC()) => S.bajas.filter(b=>b.trabajadorId===id && b.desde<=`${y}-12-31` && b.hasta>=`${y}-01-01`).sort((a,b)=>a.desde.localeCompare(b.desde));
 const enBaja = (w,s) => S.bajas.some(b=>b.trabajadorId===w.id && s>=b.desde && s<=b.hasta);
 function jornadaAnual(w){
   const base = Number(S.ajustes.jornadaBase)||1700, v = w.jornadaValor;
   if(v!=='' && v!=null && !isNaN(Number(v))) return { h: w.jornadaModo==='pct' ? base*Number(v)/100 : Number(v), defecto:false };
   return w.modalidad==='completo' ? { h:base, defecto:true } : { h:null, defecto:false };
 }
-function jornadaInfo(w, y=S.ciclo){
+function jornadaInfo(w, y=CIC()){
   const c = {R:0, F:0, X:0, AJ:0, otros:0, H:0, baja:0, trabajo:0, hechos:0, cese:0};
   const vac = new Set();
   S.periodos.forEach(p=>{ if(p.trabajadorId===w.id) for(const d of eachDay(p.desde,p.hasta)) vac.add(d); });
@@ -978,7 +980,7 @@ function companerosEnFechas(w, desde, hasta, excepto){
   for(const s of eachDay(desde,hasta)){ if(esDescanso(w,s)) continue; const c = companerosDia(w,s,excepto); if(c.length+1 > max) c.forEach(t=>out.add(t.nombre)); }
   return [...out];
 }
-function quedanDias(w, excepto){ const st=statsTrab(w); let q=st.pendientes; if(excepto){ const p=S.periodos.find(x=>x.id===excepto); if(p && delAnio(p.desde,S.ciclo)) q += statsRango(p.desde,p.hasta,w).computables; } return q; }
+function quedanDias(w, excepto){ const st=statsTrab(w); let q=st.pendientes; if(excepto){ const p=S.periodos.find(x=>x.id===excepto); if(p && delAnio(p.desde,CIC())) q += statsRango(p.desde,p.hasta,w).computables; } return q; }
 const excedeDias = (w,desde,hasta,excepto) => statsRango(desde,hasta,w).computables > quedanDias(w,excepto);
 const solapePropio = (w,desde,hasta,excepto) => S.periodos.some(p=>p.id!==excepto && p.trabajadorId===w.id && !(hasta<p.desde || desde>p.hasta));
 const ambitoCupo = c => [!c.depId ? 'Todos los departamentos' : '', c.grupoId ? 'Solo '+esc(nombreGrupo(c.grupoId)) : 'Toda la plantilla', c.skills.length ? c.skills.map(t=>esc(skillDe(t)?.nombre)).filter(Boolean).join(', ') : 'todas las skills'].filter(Boolean).join(', ');
@@ -1001,7 +1003,7 @@ function problemasDesprog(d){
   if(propias.some(x=>x.id!==d.id && x.dia===d.dia)) out.push({nivel:'warn', txt:'Día repetido'});
   if(enCese(w,d.dia)) out.push({nivel:'bad', txt:'Cae en su periodo de cese'});
   if(esDescanso(w,d.dia)) out.push({nivel:'bad', txt:`Es ${turnoDia(w,d.dia).nombre.toLowerCase()} según su rotación`});
-  if(!delAnio(d.dia,S.ciclo)) out.push({nivel:'warn', txt:`Fuera del ciclo ${S.ciclo}`});
+  if(!delAnio(d.dia,CIC())) out.push({nivel:'warn', txt:`Fuera del ciclo ${CIC()}`});
   return out;
 }
 
@@ -1051,6 +1053,10 @@ const ALIAS = {
   calendario:()=>{ UI.vacModo='consultar'; return 'vacaciones'; },
 };
 const enProceso = () => PASOS.some(p=>p[0]===UI.vista);
+/* Año con el que se trabaja: el ciclo de la barra superior, salvo dentro de la asignación,
+   que siempre es para el año siguiente (las del ciclo actual se meten a mano). */
+const CIC = () => S.ciclo + ((UI._asig || enProceso()) ? 1 : 0);
+const conAsig = f => { const a = UI._asig; UI._asig = true; try { return f(); } finally { UI._asig = a; } };
 function pasoHecho(k){
   switch(k){
     case 'grupos': return gruposVis().length>0 && trabsVis().length>0 && trabsVis().every(t=>t.grupoId);
@@ -1077,7 +1083,7 @@ function siguiente(){
 const volverMenu = () => `<button class="volver" onclick="go('menu')">‹ Menú de ${esc(ctxTxt())}</button>`;
 function intro(){
   const i = PASOS.findIndex(p=>p[0]===UI.vista);
-  if(i>=0) return `<div class="intro"><div class="k">Asignación de vacaciones ${S.ciclo}, paso ${i+1} de ${PASOS.length}</div><h2>${PASOS[i][1]}</h2><p>${PASOS[i][2]}</p></div>`;
+  if(i>=0) return `<div class="intro"><div class="k">Asignación de vacaciones ${CIC()}, paso ${i+1} de ${PASOS.length}</div><h2>${PASOS[i][1]}</h2><p>${PASOS[i][2]}</p></div>`;
   if(UI.vista==='vacaciones' && UI.vacModo) return '';   // Consultar y Editar llevan su propia barra
   const sec = SECCIONES.find(x=>x[0]===UI.vista);
   if(sec && sec[2]) return `<div class="intro">${volverMenu()}<h2>${sec[1]}</h2><p>${sec[2]}</p></div>`;
@@ -1100,7 +1106,7 @@ function render(){
   }
   const p = prodDeId(S.ctx.prod);
   document.documentElement.style.setProperty('--ctx', p?.color || '#1F5FBF');
-  document.getElementById('hdrCiclo').innerHTML = `Ciclo <b>${S.ciclo}</b>`;
+  document.getElementById('hdrCiclo').innerHTML = enProceso() ? `Asignación <b>${CIC()}</b>` : `Ciclo <b>${S.ciclo}</b>`;
   document.getElementById('btnAjustes').classList.toggle('on', UI.vista==='ajustes');
   document.getElementById('migas').innerHTML = !S.ctx.dep ? '' :
     `<button class="miga" onclick="irInicio()" title="Cambiar de departamento">${esc(nombreDep(S.ctx.dep))}</button>`
@@ -1136,7 +1142,7 @@ const vacio = (txt, boton) => `<div class="card"><p class="help">${txt}</p>${bot
    ========================================================= */
 function vInicio(){
   const sinDep = S.trabajadores.filter(t=>!depDeId(depDe(t))).length;
-  return `<div class="portada anim" style="--i:0"><p class="k">Ciclo ${S.ciclo}</p><h2>¿Con qué departamento vas a trabajar?</h2></div>
+  return `<div class="portada anim" style="--i:0"><p class="k">Ciclo ${CIC()}</p><h2>¿Con qué departamento vas a trabajar?</h2></div>
   <div class="tiles">${S.departamentos.map((d,i)=>{const n=S.trabajadores.filter(t=>depDe(t)===d.id).length;
     return `<button class="tile anim" style="--i:${i+1}" onclick="elegirDep('${d.id}')"><span class="ini" aria-hidden="true">${esc(d.nombre[0])}</span><span><span class="nom">${esc(d.nombre)}</span><span class="dato">${n?`${n} persona${n===1?'':'s'}`:'Sin trabajadores todavía'}</span></span><span class="fl" aria-hidden="true">${ico('flecha')}</span></button>`}).join('')}</div>
   ${sinDep?`<div class="card"><h2>${sinDep} trabajador(es) sin departamento</h2><p class="help">Vienen de una versión anterior. Elige a qué departamento y producto pasan.</p>
@@ -1159,21 +1165,21 @@ function vMenu(){
   const nSup = ts.filter(esSuper).length, sinJor = ts.filter(t=>jornadaAnual(t).h==null).length, nBaja = ts.filter(t=>bajasDe(t.id).length).length;
   const cuenta = (n, uno, varios) => `${n} ${n===1?uno:varios}`;
   const conVac = ts.filter(t=>periodosDe(t.id).length).length;
-  const sig = siguientePaso();
+  const sigA = conAsig(siguientePaso);
   const globo = (v, ic, titulo, desc, datos, i, extra='') => `<button class="globo anim ${extra}" style="--i:${i}" onclick="go('${v}')">
       <span class="gi">${ico(ic)}</span>
       <span class="gt">${titulo}</span>
       <span class="gp">${desc}</span>
       <span class="gd">${datos.filter(Boolean).map(d=>`<span>${d}</span>`).join('')}</span>
       <span class="gfl">${ico('flecha')}</span></button>`;
-  return `<div class="portada anim" style="--i:0"><p class="k">${esc(nombreDep(S.ctx.dep))}, ciclo ${S.ciclo}</p><h2 style="max-width:none">${esc(nombreProd(S.ctx.prod))}</h2></div>
+  return `<div class="portada anim" style="--i:0"><p class="k">${esc(nombreDep(S.ctx.dep))}, ciclo ${CIC()}</p><h2 style="max-width:none">${esc(nombreProd(S.ctx.prod))}</h2></div>
   <div class="globos">
     ${globo('personal','plantilla','Personal','La ficha de cada persona: sus datos, su jornada, su cómputo anual, sus vacaciones y su contrato.',
       [cuenta(ts.length,'persona','personas'), ts.length?`${ts.length-nSup} agente${ts.length-nSup===1?'':'s'} y ${cuenta(nSup,'super','supers')}`:'', sinJor?`${sinJor} sin jornada`:'', nBaja?`${nBaja} con baja`:''],1)}
     ${globo('gestion','equipos','Grupos','Los grupos y quién está en cada uno, las skills, las rotaciones y los cupos de plantilla.',
       [cuenta(gs.length,'grupo','grupos'), cuenta(skillsVis().length,'skill','skills'), cuenta(rotacionesVis().length,'rotación','rotaciones')],2)}
     ${globo('vacaciones','vacaciones','Vacaciones','El calendario de todos, con sus vacaciones editables día a día, y la asignación del año que viene.',
-      [`Asignación ${anioAsignacion()}: ${S.ciclo!==anioAsignacion() ? 'sin empezar' : sig ? sig.n.toLowerCase() : 'terminada'}`, ts.length?`${conVac} de ${ts.length} con vacaciones`:''],3,'principal')}
+      [`Asignación ${anioAsignacion()}: ${sigA ? sigA.n.toLowerCase() : 'terminada'}`, ts.length?`${conVac} de ${ts.length} con vacaciones`:''],3,'principal')}
   </div>`;
 }
 function siguientePaso(){
@@ -1282,13 +1288,13 @@ function fichaJornada(w){
     </div>
     <div class="card">
       <h2 style="margin:0 0 10px">Bajas</h2>
-      ${bs.length?`<div class="chips" style="margin-bottom:12px">${bs.map(b=>`<span class="chip bad-soft">${fmt(b.desde)} – ${fmt(b.hasta)} (${[...eachDay(b.desde,b.hasta)].length} días naturales) <button class="x" aria-label="Quitar baja" onclick="quitarBaja('${b.id}')">×</button></span>`).join('')}</div>`:'<p class="muted" style="margin:0 0 12px">Sin bajas en '+S.ciclo+'.</p>'}
+      ${bs.length?`<div class="chips" style="margin-bottom:12px">${bs.map(b=>`<span class="chip bad-soft">${fmt(b.desde)} – ${fmt(b.hasta)} (${[...eachDay(b.desde,b.hasta)].length} días naturales) <button class="x" aria-label="Quitar baja" onclick="quitarBaja('${b.id}')">×</button></span>`).join('')}</div>`:'<p class="muted" style="margin:0 0 12px">Sin bajas en '+CIC()+'.</p>'}
       <div class="row" style="align-items:flex-end"><label style="flex:0 1 180px">Desde<input type="date" id="bjD"></label><label style="flex:0 1 180px">Hasta<input type="date" id="bjH"></label><button class="btn primary" onclick="añadirBaja('${w.id}')">Apuntar baja</button></div>
     </div>
     <div class="card">
-      <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:10px"><h2 style="margin:0">${S.ciclo}</h2><span class="muted">Toca un día de trabajo para marcar AJ o X, o una marca para quitarla.</span></div>
+      <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:10px"><h2 style="margin:0">${CIC()}</h2><span class="muted">Toca un día de trabajo para marcar AJ o X, o una marca para quitarla.</span></div>
       ${panel}
-      ${calendarioJornada(w, S.ciclo)}
+      ${calendarioJornada(w, CIC())}
     </div>`;
 }
 function fichaVacaciones(w){
@@ -1302,20 +1308,20 @@ function fichaVacaciones(w){
         <div><b class="c-ok">${st.diasPer}</b>días de vacaciones</div>
         <div><b>${st.dias} / ${st.derecho}</b>días usados</div>
         <div><b>${st.pendientes}</b>pendientes</div>
-        <div><b>${nf(st.pts)}</b>puntos ${S.ciclo}</div>
+        <div><b>${nf(st.pts)}</b>puntos ${CIC()}</div>
         <div><b class="c-bad">${quedan}</b>desprogramaciones le quedan</div>
       </div>
       ${st.avisos.length?`<div class="chips" style="margin-top:12px">${st.avisos.map(a=>`<span class="chip warn">${a}</span>`).join('')}</div>`:''}
       <p class="muted" style="margin:12px 0 0">Días de vacaciones al año y puntos de años anteriores: pestaña Datos.</p>
     </div>
     <div class="card">
-      <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:10px"><h2 style="margin:0">Periodos de ${S.ciclo}</h2><button class="btn primary" onclick="añadirVacDesdeFicha('${w.id}')">+ Añadir vacaciones</button></div>
-      ${filas?`<div class="scroll"><table><thead><tr><th>Fechas</th><th class="num">Días</th><th class="num">Naturales</th><th class="num">Puntos</th><th>Nota</th><th></th></tr></thead><tbody>${filas}</tbody></table></div>`:'<p class="muted" style="margin:0">Todavía no tiene vacaciones en '+S.ciclo+'.</p>'}
+      <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:10px"><h2 style="margin:0">Periodos de ${CIC()}</h2><button class="btn primary" onclick="añadirVacDesdeFicha('${w.id}')">+ Añadir vacaciones</button></div>
+      ${filas?`<div class="scroll"><table><thead><tr><th>Fechas</th><th class="num">Días</th><th class="num">Naturales</th><th class="num">Puntos</th><th>Nota</th><th></th></tr></thead><tbody>${filas}</tbody></table></div>`:'<p class="muted" style="margin:0">Todavía no tiene vacaciones en '+CIC()+'.</p>'}
     </div>
     <div class="card">
       <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:10px"><h2 style="margin:0">Desprogramaciones</h2><span class="muted">Toca un día de trabajo para desprogramarlo o para quitar una desprogramación.</span></div>
       ${panelDesprog(w, st)}
-      ${calendarioFicha(w, S.ciclo, true)}
+      ${calendarioFicha(w, CIC(), true)}
     </div>`;
 }
 function añadirVacDesdeFicha(id){ UI.edTrab = id; UI.ed = null; UI.vacModo='editar'; go('vacaciones'); }
@@ -1341,27 +1347,23 @@ function vVacaciones(){
   if(modo==='consultar') return barraVac('consultar') + vConsultar();
   if(modo==='editar') return barraVac('editar') + vEditar();
   // entrada: consultar el calendario o empezar la asignación del año que viene
-  const Y = anioAsignacion(), sig = siguientePaso();
-  const estado = S.ciclo===Y ? (sig ? `En marcha. Siguiente paso: ${sig.n.toLowerCase()}.` : 'Todas las rondas terminadas.') : `Empieza la elección de las vacaciones de ${Y}.`;
+  const Y = anioAsignacion(), sig = conAsig(siguientePaso), hay = conAsig(()=>trabsVis().some(t=>periodosDe(t.id).length));
+  const estado = !sig ? 'Todas las rondas terminadas.' : hay ? `En marcha. Siguiente paso: ${sig.n.toLowerCase()}.` : `Empieza la elección de las vacaciones de ${Y}.`;
   const boton = (accion, ic, t, d, i, extra='') => `<button class="vboton anim ${extra}" style="--i:${i}" onclick="${accion}"><span class="gi">${ico(ic)}</span><span class="vb-t">${t}</span><span class="vb-d">${d}</span><span class="gfl">${ico('flecha')}</span></button>`;
   return `<div class="vbotones">
-      ${boton("UI.vacModo='consultar';render()",'calendario','Consultar calendario',`Todos los días de ${S.ciclo} en celdas. Toca un día o un nombre para editar sus vacaciones, ajustes, festivos o bajas.`,1)}
+      ${boton("UI.vacModo='consultar';render()",'calendario','Consultar calendario',`Todos los días de ${CIC()} en celdas. Toca un día o un nombre para editar sus vacaciones, ajustes, festivos o bajas.`,1)}
       ${boton('empezarAsignacion()','flecha',`Asignación de vacaciones ${Y}`,estado,2,'principal')}
     </div>`;
 }
 /* la asignación siempre es para el año siguiente al actual */
-const anioAsignacion = () => new Date().getFullYear() + 1;
+const anioAsignacion = () => S.ciclo + 1;
 function empezarAsignacion(){
-  const Y = anioAsignacion();
-  if(S.ciclo===Y){ const sig = siguientePaso(); return go(sig ? sig.v : 'resumen'); }
-  if(S.ciclo===Y-1){ cerrarCiclo(); if(S.ciclo===Y) go('grupos'); return; }   // cierra el año actual (con copia) y abre el siguiente
-  if(!confirm(`El ciclo activo es ${S.ciclo}. ¿Pasar a ${Y} para empezar su asignación? Las vacaciones de otros años se conservan.`)) return;
-  S.ciclo=Y; S.semanaSanta=semanaSantaDefault(Y); S.turnos={}; save(); go('grupos');
+  const sig = conAsig(siguientePaso); go(sig ? sig.v : 'resumen');
 }
 function barraVac(modo){
   return modo==='consultar'
-    ? `<div class="vac-modos"><div><button class="volver" onclick="UI.vacModo='';UI.ed=null;render()">‹ Vacaciones</button><h2 class="vm-t">Calendario ${S.ciclo}</h2></div></div>`
-    : `<div class="vac-modos"><div><button class="volver" onclick="UI.vacModo='consultar';UI.ed=null;render()">‹ Calendario</button><h2 class="vm-t">Editar ${S.ciclo}</h2></div></div>`;
+    ? `<div class="vac-modos"><div><button class="volver" onclick="UI.vacModo='';UI.ed=null;render()">‹ Vacaciones</button><h2 class="vm-t">Calendario ${CIC()}</h2></div></div>`
+    : `<div class="vac-modos"><div><button class="volver" onclick="UI.vacModo='consultar';UI.ed=null;render()">‹ Calendario</button><h2 class="vm-t">Editar ${CIC()}</h2></div></div>`;
 }
 /* código y estilo de un día para una persona (consultar, editar y PDF usan lo mismo) */
 const COD_DIA = e => e.k==='vac' ? 'H' : e.k==='dp' ? 'D' : e.k==='mk' ? e.cod : e.k==='lib' ? e.t.cod : e.k==='bj' ? 'B' : e.k==='ces' ? 'C' : '';
@@ -1377,7 +1379,7 @@ function leyendaDias(){
 
 /* ---------- Consultar: todo el año en celdas, nombres fijos ---------- */
 function vConsultar(){
-  const y = S.ciclo, C = UI.cons ||= {grupo:'all', buscar:''};
+  const y = CIC(), C = UI.cons ||= {grupo:'all', buscar:''};
   if(C.grupo!=='all' && !gruposVis().some(g=>g.id===C.grupo)) C.grupo='all';
   const dias = [...eachDay(`${y}-01-01`,`${y}-12-31`)], hoyS = hoy();
   let cabM = '<th class="cg-nom cg-esq" rowspan="2">Persona</th>', cabD = '';
@@ -1403,20 +1405,20 @@ function vConsultar(){
 }
 function clicCons(ev){
   const td = ev.target.closest('td'), tr = td && td.parentElement; if(!td || !tr.dataset.w) return;
-  const s = addDays(`${S.ciclo}-01-01`, td.cellIndex - 1);
+  const s = addDays(`${CIC()}-01-01`, td.cellIndex - 1);
   UI.vacModo='editar'; UI.edTrab=tr.dataset.w; UI.ed={dia:s, accion:''}; render();
 }
 function irMesCons(m){ const c = document.getElementById('cgScroll'), th = document.getElementById('cgm'+m), nom = c?.querySelector('.cg-esq'); if(c && th) c.scrollTo({left: th.offsetLeft - (nom?nom.offsetWidth:0), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'}); }
 function colocarConsultar(){
   const c = document.getElementById('cgScroll'); if(!c) return;
   if(UI.cons._x != null && UI.cons._pintado){ c.scrollLeft = UI.cons._x; }
-  else { const h = hoy(); const m = delAnio(h,S.ciclo) ? Number(h.slice(5,7))-1 : 0; const th = document.getElementById('cgm'+m), nom = c.querySelector('.cg-esq'); if(th) c.scrollLeft = th.offsetLeft - (nom?nom.offsetWidth:0); UI.cons._pintado = true; }
+  else { const h = hoy(); const m = delAnio(h,CIC()) ? Number(h.slice(5,7))-1 : 0; const th = document.getElementById('cgm'+m), nom = c.querySelector('.cg-esq'); if(th) c.scrollLeft = th.offsetLeft - (nom?nom.offsetWidth:0); UI.cons._pintado = true; }
   c.onscroll = () => { UI.cons._x = c.scrollLeft; };
 }
 
 /* ---------- Editar: la hoja anual de un trabajador, como en el Excel ---------- */
 function vEditar(){
-  const ts = trabsVis(), y = S.ciclo;
+  const ts = trabsVis(), y = CIC();
   if(!UI.edTrab || !trabDe(UI.edTrab) || !visible(trabDe(UI.edTrab))) UI.edTrab = [...ts].sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'))[0].id;
   const w = trabDe(UI.edTrab), st = statsTrab(w), j = jornadaInfo(w), {vac, dps} = diasDe(w, y), E = UI.ed;
   const sel = `<select onchange="UI.edTrab=this.value;UI.ed=null;render()" aria-label="Trabajador">${gruposActivos().map(k=>{ const xs=ts.filter(t=>gk(t)===k).sort((a,b)=>a.nombre.localeCompare(b.nombre,'es')); return xs.length?`<optgroup label="${esc(nombreGrupo(k))}">${xs.map(t=>`<option value="${t.id}" ${t.id===w.id?'selected':''}>${esc(t.nombre)}</option>`).join('')}</optgroup>`:''; }).join('')}</select>`;
@@ -1491,7 +1493,7 @@ function colocarHoja(){
 window.addEventListener('resize', colocarHoja);
 document.addEventListener('keydown', e=>{ if(e.key==='Escape' && UI.ed && !document.getElementById('bloqueo')){ UI.ed=null; render(); } });
 function hojaAcciones(w, E){
-  const s = E.dia, {vac, dps} = diasDe(w, S.ciclo), e = estadoDia(w, s, vac, dps);
+  const s = E.dia, {vac, dps} = diasDe(w, CIC()), e = estadoDia(w, s, vac, dps);
   const cerrar = `<button class="btn" onclick="UI.ed=null;render()">Cerrar</button>`;
   let cuerpo = '';
   if(E.accion==='rango'){
@@ -1510,8 +1512,8 @@ function hojaAcciones(w, E){
     if(cc.length){ const dias = [...new Set(cc.map(x=>x.dia))]; prob.push(['warn', `Sin cupo de plantilla ${dias.length===1?'el '+fmt(dias[0]):`en ${dias.length} días (del ${fmt(dias[0])} al ${fmt(dias[dias.length-1])})`}: «${esc(cc[0].cupo.nombre||'cupo')}».`]); }
     const bloqueo = prob.some(p=>p[0]==='bad') || (conf.length && !E.forzar);
     cuerpo = `<h3>${E.edit?'Cambiar vacaciones':'Asignar vacaciones'}</h3>
-      <div class="row"><label>Desde<input type="date" value="${d}" min="${S.ciclo}-01-01" max="${S.ciclo}-12-31" onchange="UI.ed.desde=this.value;if(UI.ed.hasta&&UI.ed.hasta<this.value)UI.ed.hasta=this.value;render()"></label>
-        <label>Hasta<input type="date" value="${h}" min="${d}" max="${S.ciclo}-12-31" onchange="UI.ed.hasta=this.value;render()"></label>
+      <div class="row"><label>Desde<input type="date" value="${d}" min="${CIC()}-01-01" max="${CIC()}-12-31" onchange="UI.ed.desde=this.value;if(UI.ed.hasta&&UI.ed.hasta<this.value)UI.ed.hasta=this.value;render()"></label>
+        <label>Hasta<input type="date" value="${h}" min="${d}" max="${CIC()}-12-31" onchange="UI.ed.hasta=this.value;render()"></label>
         <button class="btn" style="align-self:flex-end" onclick="UI.ed.paso='fin';render()">Elegir el final en la hoja</button></div>
       <p style="margin:10px 0 0"><b>${st.computables}</b> día${st.computables===1?'':'s'} de vacaciones${st.descansos?`, sin contar ${st.descansos} de descanso o festivo`:''}. <b>${nf(st.pts*factor(w))}</b> puntos.</p>
       ${prob.map(p=>`<p class="aviso ${p[0]}">${p[1]}</p>`).join('')}
@@ -1636,7 +1638,7 @@ function nuevoPDF(){
   };
   return api;
 }
-function pdfPersona(w, y=S.ciclo){
+function pdfPersona(w, y=CIC()){
   const W = 842, H = 595, M = 30, pdf = nuevoPDF(); pdf.pagina();
   const st = statsTrab(w), j = jornadaInfo(w), {vac, dps} = diasDe(w, y), g = w.grupoId ? grupoDe(w.grupoId) : null;
   const C = {asf:'#22262E', gris:'#5F6775', linea:'#D9DDE3', ok:'#23864F', bad:'#C23B30', lib:'#E6EAF1', ss:'#FFF1C2', baja:'#F6D3CF', ces:'#E2E4E8', senal:'#F6C300'};
@@ -1694,7 +1696,7 @@ function descargarBlob(u8, nombre, tipo){
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([u8], {type:tipo})); a.download = nombre;
   document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1500);
 }
-function descargarPDFPersona(id){ const w = trabDe(id); if(!w) return; descargarBlob(pdfPersona(w), nombreArchivo(`${w.nombre} - ${S.ciclo}`)+'.pdf', 'application/pdf'); toast('PDF descargado'); }
+function descargarPDFPersona(id){ const w = trabDe(id); if(!w) return; descargarBlob(pdfPersona(w), nombreArchivo(`${w.nombre} - ${CIC()}`)+'.pdf', 'application/pdf'); toast('PDF descargado'); }
 const CRC_T = (()=>{ const t = new Uint32Array(256); for(let n=0;n<256;n++){ let c=n; for(let k=0;k<8;k++) c = c&1 ? 0xEDB88320^(c>>>1) : c>>>1; t[n]=c>>>0; } return t; })();
 const crc32 = u8 => { let c = 0xFFFFFFFF; for(let i=0;i<u8.length;i++) c = CRC_T[(c^u8[i])&255]^(c>>>8); return (c^0xFFFFFFFF)>>>0; };
 function hacerZIP(archivos){ // sin compresión (store): los PDF ya ocupan poco
@@ -1718,8 +1720,8 @@ function hacerZIP(archivos){ // sin compresión (store): los PDF ya ocupan poco
 function descargarZIP(){
   const ts = [...trabsVis()].sort((a,b)=>a.nombre.localeCompare(b.nombre,'es')); if(!ts.length) return;
   const usados = new Set();
-  const archivos = ts.map(w=>{ let n = nombreArchivo(`${w.nombre} - ${S.ciclo}`); while(usados.has(n)) n += ' (2)'; usados.add(n); return {nombre:n+'.pdf', datos:pdfPersona(w)}; });
-  descargarBlob(hacerZIP(archivos), nombreArchivo(`Fichas ${nombreDep(S.ctx.dep)} ${nombreProd(S.ctx.prod)} ${S.ciclo}`)+'.zip', 'application/zip');
+  const archivos = ts.map(w=>{ let n = nombreArchivo(`${w.nombre} - ${CIC()}`); while(usados.has(n)) n += ' (2)'; usados.add(n); return {nombre:n+'.pdf', datos:pdfPersona(w)}; });
+  descargarBlob(hacerZIP(archivos), nombreArchivo(`Fichas ${nombreDep(S.ctx.dep)} ${nombreProd(S.ctx.prod)} ${CIC()}`)+'.zip', 'application/zip');
   toast(`${archivos.length} fichas descargadas en un ZIP`);
 }
 
@@ -1731,7 +1733,7 @@ function vAjustes(){
   return `<div class="intro"><button class="volver" onclick="go(UI.volverDe||'inicio')">‹ Volver</button><h2>Ajustes generales</h2><p>Reglas del convenio que valen para todos los departamentos y productos.</p></div>
   <div class="card"><h2>Ciclo y elección</h2>
     <div class="row">
-      <label>Año del ciclo<input type="number" value="${S.ciclo}" onchange="cambiarCiclo(this.value)"></label>
+      <label>Año del ciclo<input type="number" value="${CIC()}" onchange="cambiarCiclo(this.value)"></label>
       <label>Rondas de elección<input type="number" min="1" max="10" value="${A.rondas}" onchange="S.ajustes.rondas=Math.max(1,Number(this.value)||1);save();render()"></label>
       <label>Días de vacaciones por defecto<input type="number" min="0" value="${A.diasDefecto}" onchange="S.ajustes.diasDefecto=Number(this.value)||0;save()"></label>
     </div>
@@ -1768,21 +1770,21 @@ function vAjustes(){
       <button class="btn" onclick="if(confirm('¿Volver a los puntos del convenio?')){S.tramos=TRAMOS_CONVENIO.map(t=>({...t}));S.ajustes.ptsSS=8;S.ajustes.ptsPuente=2;save();render()}">Restaurar convenio</button>
     </div>
   </div>
-  <div class="card"><h2>Semana Santa ${S.ciclo}</h2>
+  <div class="card"><h2>Semana Santa ${CIC()}</h2>
     <p class="help">Calculada de Domingo de Ramos a Domingo de Resurrección. Ajústala si en tu centro se cuenta distinto.</p>
     <div class="row">
       <label>Desde<input type="date" value="${S.semanaSanta.desde}" onchange="S.semanaSanta.desde=this.value;save()"></label>
       <label>Hasta<input type="date" value="${S.semanaSanta.hasta}" onchange="S.semanaSanta.hasta=this.value;save()"></label>
-      <button class="btn" onclick="S.semanaSanta=semanaSantaDefault(S.ciclo);save();render()">Recalcular</button>
+      <button class="btn" onclick="S.semanaSanta=semanaSantaDefault(CIC());save();render()">Recalcular</button>
     </div>
   </div>
-  <div class="card"><h2>Puentes ${S.ciclo}</h2>
+  <div class="card"><h2>Puentes ${CIC()}</h2>
     <p class="help">Cada día marcado como puente suma ${A.ptsPuente} puntos extra.</p>
     ${S.puentes.length?`<table>${[...S.puentes].sort((a,b)=>a.desde.localeCompare(b.desde)).map(p=>`<tr><td>${esc(p.nombre||'Puente')}</td><td>${fmt(p.desde)}${p.hasta!==p.desde?' – '+fmt(p.hasta):''}</td><td class="num"><button class="btn small danger" onclick="S.puentes=S.puentes.filter(x=>x.id!=='${p.id}');save();render()" aria-label="Quitar">✕</button></td></tr>`).join('')}</table>`:'<p class="muted">Todavía no hay puentes. Añade los del calendario laboral de Málaga.</p>'}
     <div class="row" style="margin-top:12px">
       <label style="flex-basis:200px">Nombre<input id="pNom" placeholder="Puente de la Constitución"></label>
-      <label>Desde<input id="pDes" type="date" min="${S.ciclo}-01-01" max="${S.ciclo}-12-31"></label>
-      <label>Hasta (opcional)<input id="pHas" type="date" min="${S.ciclo}-01-01" max="${S.ciclo}-12-31"></label>
+      <label>Desde<input id="pDes" type="date" min="${CIC()}-01-01" max="${CIC()}-12-31"></label>
+      <label>Hasta (opcional)<input id="pHas" type="date" min="${CIC()}-01-01" max="${CIC()}-12-31"></label>
       <button class="btn primary" onclick="añadirPuente()">Añadir puente</button>
     </div>
   </div>
@@ -1807,8 +1809,8 @@ function vAjustes(){
 }
 function cambiarCiclo(v){
   const y = Number(v); if(!(y>2000&&y<2100)) return;
-  if(!confirm(`¿Cambiar el ciclo activo a ${y}? Las vacaciones de otros años se conservan. Para pasar de año al terminar, usa «Cerrar ciclo» en Resumen.`)) return render();
-  S.ciclo=y; S.semanaSanta=semanaSantaDefault(y); S.turnos={}; save(); render();
+  if(!confirm(`¿Cambiar el ciclo activo a ${y}? Las vacaciones de otros años se conservan. La asignación de vacaciones será la de ${y+1}.`)) return render();
+  S.ciclo=y; S.semanaSanta=semanaSantaDefault(y); S.turnos={}; S.asigAnio=y+1; save(); render();
 }
 function añadirPuente(){
   const nom=document.getElementById('pNom').value.trim(), d=document.getElementById('pDes').value, h=document.getElementById('pHas').value||d;
@@ -1868,7 +1870,7 @@ function vGrupos(){
 function vEquipos(){
   const gs = gruposVis(), sinG = trabsVis().filter(t=>!t.grupoId);
   if(!UI.gSel || !gs.some(g=>g.id===UI.gSel)) UI.gSel = gs[0]?.id || '';
-  const g = grupoDe(UI.gSel), y = UI.gAnio ||= S.ciclo;
+  const g = grupoDe(UI.gSel), y = UI.gAnio ||= CIC();
   const cab = `<div class="card">
     <div class="chips" style="margin-bottom:${gs.length?'14px':'0'}">${gs.map(x=>`<button class="pill ${x.id===UI.gSel?'on':''}" onclick="UI.gSel='${x.id}';render()"><span class="dot" style="background:${x.color}"></span>${esc(x.nombre)} (${miembros(x.id).length})</button>`).join('')}</div>
     <div class="row"><label style="flex:1 1 220px">Nuevo grupo<input id="nGrupo2" placeholder="Turno A" onkeydown="if(event.key==='Enter')crearGrupoSec()"></label><button class="btn primary" onclick="crearGrupoSec()">+ Crear grupo</button></div>
@@ -1882,7 +1884,7 @@ function vEquipos(){
     <div class="card"><div class="row" style="align-items:flex-end;margin-bottom:14px">
         <label style="flex:1 1 180px">Nombre del grupo<input value="${esc(g.nombre)}" onchange="grupoDe('${g.id}').nombre=this.value.trim()||grupoDe('${g.id}').nombre;save();render()"></label>
         <label style="flex:1 1 160px">Rotación<select onchange="grupoDe('${g.id}').rotacionId=this.value;save();render()">${opts(rotacionesVis(), g.rotacionId, ['','Sin rotación'])}</select></label>
-        ${r?`<label style="flex:1 1 160px">El 1 de enero de ${S.ciclo} va en<select onchange="fijarSemanaEnero('g','${g.id}',this.value)">${r.semanas.map((_,k)=>`<option value="${k}" ${(()=>{const n=r.semanas.length*7,i=((daysBetween(inicioRot({grupoId:g.id},r),`${S.ciclo}-01-01`)%n)+n)%n;return Math.floor(i/7)===k})()?'selected':''}>Semana ${k+1}</option>`).join('')}</select></label>`:''}
+        ${r?`<label style="flex:1 1 160px">El 1 de enero de ${CIC()} va en<select onchange="fijarSemanaEnero('g','${g.id}',this.value)">${r.semanas.map((_,k)=>`<option value="${k}" ${(()=>{const n=r.semanas.length*7,i=((daysBetween(inicioRot({grupoId:g.id},r),`${CIC()}-01-01`)%n)+n)%n;return Math.floor(i/7)===k})()?'selected':''}>Semana ${k+1}</option>`).join('')}</select></label>`:''}
         <button class="btn danger" onclick="borrarGrupo('${g.id}')">Eliminar grupo</button></div>
       <div class="cupo-cat">
         <div class="cc-t">De vacaciones a la vez</div>
@@ -2065,8 +2067,8 @@ function vCupos(){
       <label>Solo un grupo de elección <span style="font-weight:400">(opcional)</span><select id="cGrupo">${opts(gruposVis(), v.grupoId, ['','Toda la plantilla'])}</select></label>
     </div>
     <div class="row" style="margin-top:12px">
-      <label>Desde<input id="cDes" type="date" value="${v.desde}" min="${S.ciclo}-01-01" max="${S.ciclo}-12-31"></label>
-      <label>Hasta<input id="cHas" type="date" value="${v.hasta}" min="${S.ciclo}-01-01" max="${S.ciclo}-12-31"></label>
+      <label>Desde<input id="cDes" type="date" value="${v.desde}" min="${CIC()}-01-01" max="${CIC()}-12-31"></label>
+      <label>Hasta<input id="cHas" type="date" value="${v.hasta}" min="${CIC()}-01-01" max="${CIC()}-12-31"></label>
       <label style="flex:0 1 130px">Máx. personas<input id="cMax" type="number" min="0" value="${v.max}"></label>
     </div>
     <div style="margin-top:14px"><label>Skills <span style="font-weight:400">(si no marcas ninguna, cuenta a todos)</span></label>
@@ -2082,7 +2084,7 @@ function vCupos(){
       <button class="btn primary" onclick="generarMensuales()">Crear 12 cupos</button>
     </div>
   </div>
-  <div class="card"><h2>Cupos de plantilla del ciclo ${S.ciclo} (${lista.length})</h2>
+  <div class="card"><h2>Cupos de plantilla del ciclo ${CIC()} (${lista.length})</h2>
     ${lista.length?`<div class="scroll"><table><tr><th>Cupo</th><th>Fechas</th><th class="num">Máx.</th><th></th></tr>
       ${lista.map(c=>`<tr><td><b>${esc(c.nombre||'Cupo')}</b><div class="muted">${ambitoCupo(c)}</div></td><td style="white-space:nowrap">${fmt(c.desde)} – ${fmt(c.hasta)}</td><td class="num">${c.max}</td>
       <td class="num" style="white-space:nowrap"><button class="btn small" onclick="UI.editCupo='${c.id}';render();scrollTo(0,0)">Editar</button> <button class="btn small danger" onclick="borrarCupo('${c.id}')" aria-label="Borrar">✕</button></td></tr>`).join('')}</table></div>
@@ -2103,7 +2105,7 @@ function generarMensuales(){
   if(!(max>=0)) return toast('El máximo tiene que ser 0 o más');
   const pref = [grupoId?nombreGrupo(grupoId):'', sk!=='all'?skillDe(sk).nombre:''].filter(Boolean).join(', ') || 'Todos';
   for(let m=0;m<12;m++){
-    const d=`${S.ciclo}-${String(m+1).padStart(2,'0')}-01`, h=iso(new Date(Date.UTC(S.ciclo,m+1,0)));
+    const d=`${CIC()}-${String(m+1).padStart(2,'0')}-01`, h=iso(new Date(Date.UTC(CIC(),m+1,0)));
     S.cupos.push({id:uid(), nombre:`${pref}, ${MESES[m]}`, depId:S.ctx.dep, prodId:S.ctx.prod, grupoId, desde:d, hasta:h, max, skills: sk==='all'?[]:[sk]});
   }
   save(); render(); toast('12 cupos creados');
@@ -2125,7 +2127,7 @@ function previewHTML(w, desde, hasta, excepto, bloquea){
   if(hasta < desde) return `<div class="preview bad">La fecha de fin es anterior a la de inicio.</div>`;
   const st = statsTrab(w), r = statsRango(desde,hasta,w), conf = conflictosCupo(w,desde,hasta), sol = solapePropio(w,desde,hasta,excepto), ces = solapaCese(w,desde,hasta), comp = companerosEnFechas(w,desde,hasta,excepto);
   let quedan = st.pendientes - r.computables;
-  if(excepto){ const p=S.periodos.find(x=>x.id===excepto); if(p && delAnio(p.desde,S.ciclo)) quedan += statsRango(p.desde,p.hasta,w).computables; }
+  if(excepto){ const p=S.periodos.find(x=>x.id===excepto); if(p && delAnio(p.desde,CIC())) quedan += statsRango(p.desde,p.hasta,w).computables; }
   const diasConf = [...new Set(conf.map(c=>c.dia))];
   const cls = (sol || ces || quedan<0 || !r.computables || ((conf.length||comp.length) && bloquea)) ? 'bad' : (conf.length || comp.length) ? 'warn' : 'ok';
   return `<div class="preview ${cls}">
@@ -2136,7 +2138,7 @@ function previewHTML(w, desde, hasta, excepto, bloquea){
     ${!r.computables?'<p><b>Todos esos días son descanso o festivo según su rotación.</b></p>':''}
     ${conf.length?`<p><b>${bloquea?'No hay cupo':'Supera el cupo'} ${diasConf.length} día(s):</b> ${resumenConflictos(conf)}</p>`:'<p>Hay cupo todos los días.</p>'}
     ${quedan<0?`<p><b>No le quedan días: se pasaría ${-quedan} día(s) de los ${st.derecho} que tiene.</b></p>`:''}
-    ${!delAnio(desde,S.ciclo)?`<p><b>Ojo:</b> estas fechas no son del ciclo ${S.ciclo}; no cuentan para sus puntos de este ciclo.</p>`:''}
+    ${!delAnio(desde,CIC())?`<p><b>Ojo:</b> estas fechas no son del ciclo ${CIC()}; no cuentan para sus puntos de este ciclo.</p>`:''}
   </div>`;
 }
 function vTurnos(ks){
@@ -2184,7 +2186,7 @@ function vTurnos(ks){
 /* ----- calendario de elección: pinchar o arrastrar días ----- */
 let selLibres = new Set(), selPaso = new Set(), selCuenta = new Set(), selQuedan = 0, selArrastre = null, selTipo = 'mouse';
 function selectorAnual(w){
-  const y = S.ciclo, occ = ocupacion(w.id), k = gk(w), hoyS = hoy(), cat = catDe(w), maxG = cupoGrupo(w);
+  const y = CIC(), occ = ocupacion(w.id), k = gk(w), hoyS = hoy(), cat = catDe(w), maxG = cupoGrupo(w);
   selPaso = new Set(); selCuenta = new Set(); selQuedan = statsTrab(w).pendientes;
   const propios = new Set(); S.periodos.filter(p=>p.trabajadorId===w.id).forEach(p=>{ for(const d of eachDay(p.desde,p.hasta)) if(!esDescanso(w,d)) propios.add(d); });
   selLibres = new Set();
@@ -2265,8 +2267,8 @@ function fichaTrab(w, st){
       ${st.periodos.map(p=>{const r=statsRango(p.desde,p.hasta,w);return `<tr><td>${fmt(p.desde)} – ${fmt(p.hasta)} <span class="muted">(${r.naturales} nat.${r.descansos?`, ${r.descansos} desc.`:''})</span> ${p.manual?'<span class="chip mano">A mano</span>':''} ${p.forzado?'<span class="chip bad">Sin cupo</span>':''}</td><td class="num">${r.computables}</td><td class="num">${nf(r.pts*st.f)}</td>
         <td class="num" style="white-space:nowrap"><button class="btn small" onclick="editarPeriodo('${p.id}')">Editar</button> <button class="btn small danger" onclick="borrarPeriodo('${p.id}')" aria-label="Borrar">✕</button></td></tr>`}).join('')}
       ${st.desprog.length?`<tr><td>Desprogramaciones <span class="muted">(${st.desprog.map(d=>fmt(d.dia)).join(', ')})</span></td><td class="num">${st.desprog.length}</td><td class="num">${S.ajustes.desprogPuntua?nf(st.desprog.reduce((a,d)=>a+(diaVac(w,d.dia)?ptsDia(d.dia):0),0)*st.f):'—'}</td><td></td></tr>`:''}
-      <tr><th>Total ${S.ciclo}</th><th class="num">${st.dias} / ${st.derecho}</th><th class="num">${nf(st.pts)}</th><th></th></tr></table></div>`
-      : `<p class="muted">Todavía no tiene vacaciones en ${S.ciclo}.</p>`}
+      <tr><th>Total ${CIC()}</th><th class="num">${st.dias} / ${st.derecho}</th><th class="num">${nf(st.pts)}</th><th></th></tr></table></div>`
+      : `<p class="muted">Todavía no tiene vacaciones en ${CIC()}.</p>`}
     ${st.pendientes>0 && st.pendientes<=st.reservaPosible ? `<div class="chip" style="margin:6px 6px 0 0">Le quedan ${st.pendientes}: puede dejarlos para desprogramar</div>`:''}
     ${st.avisos.map(a=>`<div class="chip warn" style="margin:6px 6px 0 0">${a}</div>`).join('')}`;
 }
@@ -2405,9 +2407,9 @@ function vResumen(){
   const todos = trabsVis().map(t=>({t,st:statsTrab(t)}));
   const ids = new Set(todos.map(f=>f.t.id));
   const sin = todos.filter(f=>!f.st.periodos.length).length, avisos = todos.filter(f=>f.st.avisos.length).length;
-  const dpMal = S.desprog.filter(d=>ids.has(d.trabajadorId) && delAnio(d.dia,S.ciclo) && problemasDesprog(d).some(p=>p.nivel==='bad')).length;
-  const forz = S.periodos.filter(p=>p.forzado && ids.has(p.trabajadorId) && delAnio(p.desde,S.ciclo)).length;
-  return `<div class="card"><h2>${esc(ctxTxt())}, ciclo ${S.ciclo}</h2>
+  const dpMal = S.desprog.filter(d=>ids.has(d.trabajadorId) && delAnio(d.dia,CIC()) && problemasDesprog(d).some(p=>p.nivel==='bad')).length;
+  const forz = S.periodos.filter(p=>p.forzado && ids.has(p.trabajadorId) && delAnio(p.desde,CIC())).length;
+  return `<div class="card"><h2>${esc(ctxTxt())}, ciclo ${CIC()}</h2>
     <div class="stats"><div><b>${todos.length}</b>personas</div><div><b>${todos.reduce((a,f)=>a+f.st.periodos.length,0)}</b>periodos</div><div><b>${sin}</b>sin vacaciones</div><div><b>${avisos}</b>con avisos</div><div><b>${cuposExcedidos()}</b>días sobre cupo</div><div><b>${forz}</b>guardadas sin cupo</div><div><b>${dpMal}</b>desprog. con problemas</div></div>
   </div>
   <div class="card"><div class="scroll"><table><tr><th>Nombre</th><th class="hide-m">Periodos</th><th class="num">Días</th><th class="num hide-m">Brutos</th><th class="num hide-m">Factor</th><th class="num">Puntos</th><th class="num">Desp.</th><th>Estado</th></tr>
@@ -2421,9 +2423,9 @@ function vResumen(){
         st.periodos.length?`<span class="chip grey">Le quedan ${st.pendientes}</span>`:'<span class="chip grey">Sin vacaciones</span>'}</td></tr>`}).join('')).join('')}
   </table></div>
   <div class="row" style="margin-top:14px"><button class="btn primary" onclick="go('pdf')">Exportar PDF</button><button class="btn" onclick="exportarCSV()">Descargar Excel (CSV)</button></div></div>
-  <div class="card"><h2>Cerrar ciclo</h2>
-    <p class="help">Cuando el ciclo ${S.ciclo} esté terminado en todos los departamentos y productos: los puntos finales de este año pasan a «puntos año anterior» (y los de antes a «hace 2 años»), se reinician los turnos, los cupos se trasladan al ${S.ciclo+1} y se recalcula la Semana Santa. Las vacaciones de ${S.ciclo} se quedan guardadas y se pueden consultar en el calendario. Antes se descarga una copia automáticamente.</p>
-    <button class="btn danger" onclick="cerrarCiclo()">Cerrar ${S.ciclo} y abrir ${S.ciclo+1}</button>
+  <div class="card"><h2>Terminar la asignación de ${CIC()}</h2>
+    <p class="help">Cuando la elección de ${CIC()} esté terminada en todos los departamentos y productos: el ciclo de trabajo pasa a ${CIC()}, los puntos de ${CIC()} de cada persona pasan a «puntos año anterior» (y los de antes a «hace 2 años»), se reinician los turnos y los cupos de plantilla se trasladan un año. La próxima asignación será la de ${CIC()+1}. No se borra ninguna vacación. Antes se descarga una copia de seguridad.</p>
+    <button class="btn danger" onclick="cerrarCiclo()">Terminar y pasar al ciclo ${CIC()}</button>
   </div>`;
 }
 function exportarCSV(){
@@ -2435,17 +2437,18 @@ function exportarCSV(){
     if(!st.periodos.length) rows.push([...base,'','','','','','','','','',...fin]);
     st.periodos.forEach((p,j)=>{ const r=statsRango(p.desde,p.hasta,t); rows.push([...base,j+1,p.desde,p.hasta,r.naturales,r.computables,dec(r.pts*st.f),p.manual?'sí':'',p.forzado?'sí':'',p.nota||'',...fin]); });
   }));
-  descargar(`vacaciones-${S.ciclo}-${nombreDep(S.ctx.dep)}-${nombreProd(S.ctx.prod)}.csv`, '﻿'+rows.map(r=>r.map(q).join(';')).join('\r\n'), 'text/csv;charset=utf-8');
+  descargar(`vacaciones-${CIC()}-${nombreDep(S.ctx.dep)}-${nombreProd(S.ctx.prod)}.csv`, '﻿'+rows.map(r=>r.map(q).join(';')).join('\r\n'), 'text/csv;charset=utf-8');
 }
-function copiaJSON(){ descargar('control-planning-'+S.ciclo+'-'+hoy()+'.json', JSON.stringify(S,null,1), 'application/json'); }
+function copiaJSON(){ descargar('control-planning-'+CIC()+'-'+hoy()+'.json', JSON.stringify(S,null,1), 'application/json'); }
 function cerrarCiclo(){
-  if(!confirm(`Se cerrará el ciclo ${S.ciclo} para todos los departamentos y productos. Antes se descargará una copia. ¿Seguir?`)) return;
+  const Y = S.ciclo + 1;   // el año que se acaba de asignar
+  if(!confirm(`Se terminará la asignación de ${Y} para todos los departamentos y productos y pasarás a trabajar en el ciclo ${Y}. Antes se descargará una copia. ¿Seguir?`)) return;
   copiaJSON();
-  S.trabajadores.forEach(t=>{ const st=statsTrab(t); t.ptsAnt2=t.ptsAnt||0; t.ptsAnt=st.pts; });
+  conAsig(()=>S.trabajadores.forEach(t=>{ const st=statsTrab(t); t.ptsAnt2=t.ptsAnt||0; t.ptsAnt=st.pts; }));
   const mas1 = s => { const d=pd(s), y=d.getUTCFullYear()+1, m=d.getUTCMonth(); const ult=new Date(Date.UTC(y,m+1,0)).getUTCDate(); return iso(new Date(Date.UTC(y,m,Math.min(d.getUTCDate(),ult)))); };
   S.cupos.forEach(c=>{ c.desde=mas1(c.desde); c.hasta=mas1(c.hasta); });
-  S.ciclo++; S.puentes=[]; S.semanaSanta=semanaSantaDefault(S.ciclo); S.turnos={};
-  save(); render(); toast(`Ciclo ${S.ciclo} abierto. Añade los puentes del nuevo año en Ajustes.`);
+  S.ciclo = Y; S.semanaSanta = semanaSantaDefault(Y); S.turnos = {}; S.asigAnio = Y+1;
+  save(); go('vacaciones'); toast(`Ahora trabajas en el ciclo ${Y}. La próxima asignación es la de ${Y+1}.`);
 }
 
 /* =========================================================
@@ -2511,7 +2514,7 @@ function vRotaciones(){
   </div>${dlg}`;
 }
 function tarjetaEnero(){
-  const y = S.ciclo, dias = Array.from({length:31}, (_,i)=>`${y}-01-${String(i+1).padStart(2,'0')}`);
+  const y = CIC(), dias = Array.from({length:31}, (_,i)=>`${y}-01-${String(i+1).padStart(2,'0')}`);
   const dowL = s => DOW[(pd(s).getUTCDay()+6)%7];
   const d1 = DIAS_LARGOS[(pd(`${y}-01-01`).getUTCDay()+6)%7].toLowerCase();
   const filas = [];
@@ -2530,7 +2533,7 @@ function tarjetaEnero(){
 }
 function fijarSemanaEnero(tipo, id, k){
   const o = tipo==='g' ? grupoDe(id) : trabDe(id); if(!o) return;
-  o.rotAnio = S.ciclo; o.rotSemana = Number(k); save(); render(); toast('Semana de enero guardada');
+  o.rotAnio = CIC(); o.rotSemana = Number(k); save(); render(); toast('Semana de enero guardada');
 }
 function tarjetaRotPropia(){
   const rs = rotacionesVis(), con = trabsVis().filter(t=>t.rotacionId && rotDeId(t.rotacionId)).sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
@@ -2547,7 +2550,7 @@ function tarjetaRotPropia(){
 }
 function ponerDiaRot(id, wi, di, cod){ const r=rotDeId(id); if(!r) return; r.semanas[wi][di]=cod; UI.rotEdit=null; save(); render(); }
 function crearRotacion(silencio){
-  const r = {id:uid(), nombre:`Rotación ${rotacionesVis().length+1}`, depId:S.ctx.dep, prodId:S.ctx.prod, inicio:lunesDe(`${S.ciclo}-01-01`), semanas:[0,1,2].map(()=>Array(7).fill(''))};
+  const r = {id:uid(), nombre:`Rotación ${rotacionesVis().length+1}`, depId:S.ctx.dep, prodId:S.ctx.prod, inicio:lunesDe(`${CIC()}-01-01`), semanas:[0,1,2].map(()=>Array(7).fill(''))};
   S.rotaciones.push(r); UI.rotSel = r.id;
   if(!silencio && rotacionesVis().length===1) gruposVis().forEach(g=>{ if(!g.rotacionId) g.rotacionId=r.id; });
   if(silencio) gruposVis().forEach(g=>{ if(!g.rotacionId) g.rotacionId=r.id; });   // la primera rotación se asigna a los grupos
@@ -2617,7 +2620,7 @@ function vTransformaciones(soloId){
     <p class="help" style="margin:12px 0 0">Al registrarla, la ficha del trabajador pasa a tener el contrato nuevo. Los días de vacaciones del año del cambio se prorratean: los días de cada contrato por la parte del año que dura.</p>
   </div>
   <div class="card"><h2>Historial (${lista.length})</h2>
-    ${lista.length?`<div class="scroll"><table><tr><th>Fecha</th><th>Trabajador</th><th>Cambio</th><th class="num">Días ${S.ciclo}</th><th></th></tr>
+    ${lista.length?`<div class="scroll"><table><tr><th>Fecha</th><th>Trabajador</th><th>Cambio</th><th class="num">Días ${CIC()}</th><th></th></tr>
       ${lista.map(t=>{const x=trabDe(t.trabajadorId), ult=transfDe(x.id).slice(-1)[0]?.id===t.id, y=Number(t.fecha.slice(0,4));
         return `<tr><td style="white-space:nowrap">${fmt(t.fecha)} ${y}</td><td><b>${esc(x.nombre)}</b>${t.nota?`<div class="muted">${esc(t.nota)}</div>`:''}</td>
         <td>${nombreModalidad(t.antes.modalidad)}, ${t.antes.diasDerecho} d → ${nombreModalidad(t.despues.modalidad)}, ${t.despues.diasDerecho} d</td>
@@ -2635,7 +2638,7 @@ function guardarTransf(){
   S.transf.push({id:uid(), trabajadorId:w.id, fecha:T.fecha, antes:estadoActual(w), despues, nota:T.nota||'', creado:Date.now()});
   Object.assign(w, despues);
   UI.tf = {trab:w.id, fecha:'', mod:'', der:'', dc:'', nota:''}; save(); render();
-  toast(`Registrada. ${w.nombre} tiene ${derechoCiclo(w).n} días en ${S.ciclo}`);
+  toast(`Registrada. ${w.nombre} tiene ${derechoCiclo(w).n} días en ${CIC()}`);
 }
 function borrarTransf(id){
   const t = S.transf.find(x=>x.id===id); if(!t) return; const w = trabDe(t.trabajadorId);
@@ -2654,7 +2657,7 @@ function vPDF(){
   const P = UI.pdf;
   if(P.grupo!=='all' && !gruposVis().some(g=>g.id===P.grupo)) P.grupo='all';
   const chk = (k,txt) => `<label class="chk"><input type="checkbox" ${P[k]?'checked':''} onchange="UI.pdf.${k}=this.checked;render()">${txt}</label>`;
-  return `<div class="intro"><button class="volver" onclick="go('vacaciones')">‹ Vacaciones</button><h2>Informe del producto</h2><p>Informe de ${esc(ctxTxt())}, ciclo ${S.ciclo}. Elige qué incluir y pulsa «Guardar PDF». En la ventana de impresión, escoge «Guardar como PDF» como destino.</p></div>
+  return `<div class="intro"><button class="volver" onclick="go('vacaciones')">‹ Vacaciones</button><h2>Informe del producto</h2><p>Informe de ${esc(ctxTxt())}, ciclo ${CIC()}. Elige qué incluir y pulsa «Guardar PDF». En la ventana de impresión, escoge «Guardar como PDF» como destino.</p></div>
   <div class="card"><div class="row">
       <label>Grupo<select onchange="UI.pdf.grupo=this.value;render()">${opts(gruposVis(), P.grupo, ['all','Todos los grupos'])}</select></label>
       <label>Orientación<select onchange="UI.pdf.orient=this.value;render()"><option value="landscape" ${P.orient==='landscape'?'selected':''}>Horizontal</option><option value="portrait" ${P.orient==='portrait'?'selected':''}>Vertical</option></select></label>
@@ -2673,7 +2676,7 @@ function ajustarHoja(){
 }
 function informeHTML(P){
   const ks = gruposActivos().filter(k=>P.grupo==='all' || k===P.grupo);
-  const y = S.ciclo, lenY = daysBetween(`${y}-01-01`,`${y+1}-01-01`);
+  const y = CIC(), lenY = daysBetween(`${y}-01-01`,`${y+1}-01-01`);
   const pos = s => (daysBetween(`${y}-01-01`,s)/lenY*100);
   const dim = m => new Date(Date.UTC(y,m+1,0)).getUTCDate();
   let acc=0; const lineas=[]; for(let m=0;m<11;m++){ acc+=dim(m); lineas.push(acc/lenY*100); }
@@ -2720,7 +2723,7 @@ function informeHTML(P){
 }
 function imprimir(){
   const P = UI.pdf;
-  imprimirHTML(informeHTML(P), P.orient, `Vacaciones ${S.ciclo} - ${nombreDep(S.ctx.dep)} - ${nombreProd(S.ctx.prod)}${P.grupo!=='all'?' - '+nombreGrupo(P.grupo):''}`);
+  imprimirHTML(informeHTML(P), P.orient, `Vacaciones ${CIC()} - ${nombreDep(S.ctx.dep)} - ${nombreProd(S.ctx.prod)}${P.grupo!=='all'?' - '+nombreGrupo(P.grupo):''}`);
 }
 function restaurar(f){
   if(!f) return; const r=new FileReader();
@@ -2742,6 +2745,14 @@ render();
    Para publicar: subir APP_VERSION, añadir sus pasos a NOVEDADES y poner la misma versión en version.json.
    ========================================================= */
 const NOVEDADES = {
+  '9.0.0': [
+    { titulo:'La asignación es la del año siguiente', donde:'Vacaciones › botón amarillo',
+      texto:'Si trabajas en el ciclo 2027 (barra superior), el botón amarillo es la asignación de 2028. Las vacaciones de 2027 las sigues metiendo a mano desde Consultar calendario.' },
+    { titulo:'Dentro de la asignación', donde:'Grupos de elección, Elección y Resumen',
+      texto:'Mientras estás en la asignación, la barra superior pone «Asignación» y el año que se está eligiendo. Todo lo que ves y apuntas ahí es de ese año: turnos, calendario, días y puntos. Al salir vuelves a tu ciclo de trabajo.' },
+    { titulo:'Terminar la asignación', donde:'Asignación › Resumen y cierre',
+      texto:'Cuando acabes, «Terminar y pasar al ciclo» lleva el ciclo de trabajo al año asignado, guarda sus puntos para la siguiente elección y descarga antes una copia. No se borra ninguna vacación.' },
+  ],
   '8.6.0': [
     { titulo:'Pincha y arrastra', donde:'Hoja del año (Editar y «A mano»)',
       texto:'Con el ratón, pincha en un día y arrastra hasta el último: se marcan todos y eliges si son vacaciones o una baja. En el móvil, sigue usando «Elegir el final en la hoja».' },
