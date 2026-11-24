@@ -271,6 +271,12 @@ label.gl-i{cursor:pointer} label.gl-i:hover{background:var(--hormigon)}
 .fd.rc.rlib{background:var(--tc);border-color:var(--tc);color:#fff;font-weight:700}
 .sel-mini{margin:0;padding:6px 8px;font-size:13px;min-width:150px;width:auto}
 .sel-mini+.sel-mini{margin-top:4px}
+.chip.cat-sup{background:var(--asfalto);color:var(--senal)}
+.chip.cat-ag{background:var(--hormigon);color:var(--gris)}
+.cupo-cat{display:grid;grid-template-columns:auto 110px 110px 1fr;gap:10px 14px;align-items:end;background:var(--senal-soft);border-radius:10px;padding:12px 14px;margin:0 0 16px}
+.cupo-cat .cc-t{font-family:var(--cond);font-weight:700;font-size:18px;align-self:center}
+.cupo-cat input{margin-top:4px;font-weight:700}
+.cupo-cat .cc-x{font-size:13.5px;color:var(--asfalto);align-self:center}
 .dp-layout{display:grid;grid-template-columns:270px 1fr;gap:16px;align-items:start}
 .dp-layout>*{min-width:0}
 .dp-lista{position:sticky;top:76px;max-height:calc(100vh - 96px);overflow:auto;padding:12px}
@@ -303,6 +309,7 @@ label.gl-i{cursor:pointer} label.gl-i:hover{background:var(--hormigon)}
 .ed.casi{border-color:var(--warn)}
 .ed.hoy{font-weight:800;text-decoration:underline}
 .ed.propio{background:var(--ctx);color:#fff;border-color:var(--ctx);cursor:default}
+.ed.rst{background:color-mix(in srgb,var(--tcr,#23864F) 75%,#fff);color:#fff;font-weight:700;cursor:not-allowed;border-color:transparent}
 .ed.blk{background:repeating-linear-gradient(135deg,#D3D7DE 0 3px,#EEF0F3 3px 7px);color:#8A919D;cursor:not-allowed;border-color:#E1E4E9}
 .ed.blk.lleno{background:repeating-linear-gradient(135deg,#F2C3BE 0 3px,#FBE4E1 3px 7px);color:var(--bad)}
 .ed.sel{background:var(--senal);color:var(--asfalto);border-color:var(--asfalto);font-weight:800}
@@ -431,6 +438,7 @@ body.bloqueada{overflow:hidden}
   .anual{--nw:112px;max-height:65vh}
   .selcal{grid-template-columns:repeat(2,1fr);gap:12px} .ed{font-size:11px}
   .tipo-fila{flex-wrap:wrap!important;gap:8px} .tipo-fila>input:nth-of-type(3){flex:1 1 140px!important}
+  .cupo-cat{grid-template-columns:1fr 1fr} .cupo-cat .cc-t,.cupo-cat .cc-x{grid-column:1/-1}
   .rsem{padding:8px} .rsem-d{gap:4px} .rdia{min-height:78px;padding:6px 2px;border-top-width:4px} .rdia .rd-c{font-size:26px} .rdia .rd-t{font-size:10px} .rdia .rd-n{font-size:10px}
   .dp-layout{grid-template-columns:1fr} .dp-lista{position:static;max-height:none} .solo-movil{display:block} .solo-ancho{display:none} .fcal{grid-template-columns:repeat(2,1fr);gap:12px} .fd{font-size:11px} .tc{font-size:7.5px} .an-nom{font-size:12.5px;padding:0 6px}
 }
@@ -461,7 +469,7 @@ body.bloqueada{overflow:hidden}
    Reglas base: Convenio Menzies (BOE-A-2023-25956), arts. 32 y 33
    Datos guardados en el navegador (localStorage). Haz copias.
    ========================================================= */
-const APP_VERSION = '5.5.0';   // súbela junto con version.json en cada publicación
+const APP_VERSION = '5.6.0';   // súbela junto con version.json en cada publicación
 const LS_KEY = 'vacaciones-agp-v1';
 const SIN = '_'; // clave interna para «sin grupo»
 
@@ -557,6 +565,8 @@ function normalizar(d){ // también migra datos de versiones anteriores
   }
   d.grupos.forEach(g=>{ if(g.rotacionId===undefined) g.rotacionId=''; });
   d.trabajadores.forEach(t=>{ if(t.rotacionId===undefined) t.rotacionId=''; });
+  d.skills.forEach(k=>{ if(k.super===undefined) k.super = /jefe|supervis/i.test(k.nombre); });
+  d.grupos.forEach(g=>{ if(g.cupoAg===undefined) g.cupoAg=1; if(g.cupoSup===undefined) g.cupoSup=1; });
   d.cupos.forEach(c=>{ c.skills ||= []; if(c.grupoId===undefined) c.grupoId=''; if(c.depId===undefined) c.depId=''; if(c.prodId===undefined) c.prodId = c.depId ? prod0 : ''; });
   delete d.vistaDep;
   d.version = 4;
@@ -587,6 +597,11 @@ const nombreProd = id => prodDeId(id)?.nombre || '';
 const skillsDe = w => (w && Array.isArray(w.skills) ? w.skills : []).filter(id=>skillDe(id));
 const skillsTxt = w => skillsDe(w).map(id=>skillDe(id).nombre).join(' / ') || 'Sin skill';
 const tieneSkill = (w,id) => skillsDe(w).includes(id);
+/* categoría de empresa: super si tiene alguna skill de super (jefe de servicio, jefe de turno, supervisor…); si no, agente */
+const esSuper = w => skillsDe(w).some(id=>skillDe(id)?.super);
+const catDe = w => esSuper(w) ? 'sup' : 'ag';
+const nombreCat = c => c==='sup' ? 'Super' : 'Agente';
+const catChip = w => esSuper(w) ? '<span class="chip cat-sup">Super</span>' : '<span class="chip cat-ag">Agente</span>';
 /* fijos discontinuos: periodos de cese (pueden cruzar de un año a otro) */
 const esDisc = w => w && w.modalidad==='discontinuo';
 const ceseDe = w => esDisc(w) && Array.isArray(w.cese) ? w.cese.filter(c=>c.desde && c.hasta && c.hasta>=c.desde) : [];
@@ -676,11 +691,14 @@ const esSS = s => enRango(s, S.semanaSanta);
 const esPuente = s => S.puentes.some(p=>enRango(s,p));
 function ptsBase(s){ const md = s.slice(5); const t = S.tramos.find(t=>md>=t.desde && md<=t.hasta); return t ? Number(t.pts)||0 : 0; }
 function ptsDia(s){ return ptsBase(s) + (esSS(s)?Number(S.ajustes.ptsSS):0) + (esPuente(s)?Number(S.ajustes.ptsPuente):0); }
-function statsRango(desde,hasta){
-  let naturales=0, computables=0, pts=0;
-  if(!desde||!hasta||hasta<desde) return {naturales,computables,pts};
-  for(const s of eachDay(desde,hasta)){ naturales++; if(cuentaDia(s)){ computables++; pts+=ptsDia(s); } }
-  return {naturales,computables,pts};
+/* un día es de vacaciones si computa y no es descanso o festivo según la rotación de la persona */
+const esDescanso = (w,s) => { const t = w ? turnoDia(w,s) : null; return !!(t && t.libre); };
+const diaVac = (w,s) => cuentaDia(s) && !esDescanso(w,s);
+function statsRango(desde,hasta,w){
+  let naturales=0, computables=0, pts=0, descansos=0;
+  if(!desde||!hasta||hasta<desde) return {naturales,computables,pts,descansos};
+  for(const s of eachDay(desde,hasta)){ naturales++; if(esDescanso(w,s)) descansos++; else if(cuentaDia(s)){ computables++; pts+=ptsDia(s); } }
+  return {naturales,computables,pts,descansos};
 }
 const baseDe = w => { const d = depDeId(depDe(w)); return Number(d?.baseDias) > 0 ? Number(d.baseDias) : Number(S.ajustes.baseDias); };
 /* Factor sobre los puntos brutos.
@@ -701,8 +719,8 @@ const desprogDe = (id, y=S.ciclo) => S.desprog.filter(d=>d.trabajadorId===id && 
 function statsTrab(w){
   const ps = periodosDe(w.id), dps = desprogDe(w.id);
   let diasPer=0, bruto=0, largo=false;
-  ps.forEach(p=>{ const st=statsRango(p.desde,p.hasta); diasPer+=st.computables; bruto+=st.pts; if(st.naturales>=15) largo=true; });
-  if(S.ajustes.desprogPuntua) dps.forEach(d=>{ if(cuentaDia(d.dia)) bruto+=ptsDia(d.dia); });
+  ps.forEach(p=>{ const st=statsRango(p.desde,p.hasta,w); diasPer+=st.computables; bruto+=st.pts; if(st.naturales>=15) largo=true; });
+  if(S.ajustes.desprogPuntua) dps.forEach(d=>{ if(diaVac(w,d.dia)) bruto+=ptsDia(d.dia); });
   const derecho = derechoCiclo(w).n, dias = diasPer + dps.length, pendientes = derecho - dias;
   const reservaPosible = Math.max(0, Number(S.ajustes.maxDesprog) - dps.length);
   const avisos = [];
@@ -724,7 +742,7 @@ function ordenEleccion(k){
 /* ---------- cupos ---------- */
 function ocupacion(excluirTrab){
   const occ = {};
-  S.periodos.forEach(p=>{ if(p.trabajadorId===excluirTrab) return; for(const s of eachDay(p.desde,p.hasta)) (occ[s] ||= []).push(p.trabajadorId); });
+  S.periodos.forEach(p=>{ if(p.trabajadorId===excluirTrab) return; const t=trabDe(p.trabajadorId); for(const s of eachDay(p.desde,p.hasta)) if(!esDescanso(t,s)) (occ[s] ||= []).push(p.trabajadorId); });
   return occ;
 }
 const reglaAplica = (c,w) => w && (!c.depId || c.depId===depDe(w)) && (!c.prodId || c.prodId===prodDe(w)) && (!c.grupoId || c.grupoId===w.grupoId) && (!c.skills.length || skillsDe(w).some(id=>c.skills.includes(id)));
@@ -733,6 +751,7 @@ const usadosCupo = (c, ids) => ids.filter(id=>reglaAplica(c,trabDe(id))).length;
 function conflictosCupo(w, desde, hasta){
   const occ = ocupacion(w.id), res = [];
   for(const s of eachDay(desde,hasta)){
+    if(esDescanso(w,s)) continue;
     S.cupos.forEach(c=>{
       if(!enRango(s,c) || !reglaAplica(c,w)) return;
       const u = usadosCupo(c, occ[s]||[]);
@@ -746,14 +765,22 @@ function cuposExcedidos(){
   S.cupos.filter(cupoVisible).forEach(c=>{ for(const s of eachDay(c.desde,c.hasta)) if(usadosCupo(c,occ[s]||[])>c.max) dias.add(s); });
   return dias.size;
 }
-/* días que ya tiene alguien del mismo grupo (dentro del mismo departamento y producto) */
+/* cupo del grupo por categoría: cuántos agentes y cuántos supers del mismo grupo pueden estar fuera a la vez */
+const cupoGrupo = (w) => { const g = w.grupoId ? grupoDe(w.grupoId) : null; if(!g) return Infinity; return Number(esSuper(w) ? g.cupoSup : g.cupoAg); };
+function companerosDia(w, s, excepto){ // de su grupo y su categoría que ese día están de vacaciones
+  const k = gk(w), cat = catDe(w), out = [];
+  S.periodos.forEach(p=>{ if(p.id===excepto || p.trabajadorId===w.id || s<p.desde || s>p.hasta) return; const t=trabDe(p.trabajadorId);
+    if(t && t.grupoId && t.grupoId===w.grupoId && catDe(t)===cat && !esDescanso(t,s)) out.push(t); });
+  return out;
+}
 function companerosEnFechas(w, desde, hasta, excepto){
-  if(!S.ajustes.bloqueoGrupo) return [];
-  const k = gk(w), out = new Set();
-  S.periodos.forEach(p=>{ if(p.id===excepto || p.trabajadorId===w.id) return; const t=trabDe(p.trabajadorId);
-    if(t && visible(t)===visible(w) && depDe(t)===depDe(w) && prodDe(t)===prodDe(w) && gk(t)===k && !(hasta<p.desde || desde>p.hasta)) out.add(t.nombre); });
+  if(!S.ajustes.bloqueoGrupo || !w.grupoId) return [];
+  const max = cupoGrupo(w), out = new Set();
+  for(const s of eachDay(desde,hasta)){ if(esDescanso(w,s)) continue; const c = companerosDia(w,s,excepto); if(c.length+1 > max) c.forEach(t=>out.add(t.nombre)); }
   return [...out];
 }
+function quedanDias(w, excepto){ const st=statsTrab(w); let q=st.pendientes; if(excepto){ const p=S.periodos.find(x=>x.id===excepto); if(p && delAnio(p.desde,S.ciclo)) q += statsRango(p.desde,p.hasta,w).computables; } return q; }
+const excedeDias = (w,desde,hasta,excepto) => statsRango(desde,hasta,w).computables > quedanDias(w,excepto);
 const solapePropio = (w,desde,hasta,excepto) => S.periodos.some(p=>p.id!==excepto && p.trabajadorId===w.id && !(hasta<p.desde || desde>p.hasta));
 const ambitoCupo = c => [!c.depId ? 'Todos los departamentos' : '', c.grupoId ? 'Solo '+esc(nombreGrupo(c.grupoId)) : 'Toda la plantilla', c.skills.length ? c.skills.map(t=>esc(skillDe(t)?.nombre)).filter(Boolean).join(', ') : 'todas las skills'].filter(Boolean).join(', ');
 
@@ -774,6 +801,7 @@ function problemasDesprog(d){
   if(S.periodos.some(p=>p.trabajadorId===w.id && enRango(d.dia,p))) out.push({nivel:'warn', txt:'Coincide con sus vacaciones'});
   if(propias.some(x=>x.id!==d.id && x.dia===d.dia)) out.push({nivel:'warn', txt:'Día repetido'});
   if(enCese(w,d.dia)) out.push({nivel:'bad', txt:'Cae en su periodo de cese'});
+  if(esDescanso(w,d.dia)) out.push({nivel:'bad', txt:`Es ${turnoDia(w,d.dia).nombre.toLowerCase()} según su rotación`});
   if(!delAnio(d.dia,S.ciclo)) out.push({nivel:'warn', txt:`Fuera del ciclo ${S.ciclo}`});
   return out;
 }
@@ -964,7 +992,7 @@ function vAjustes(){
         <option value="1" ${A.bloquear?'selected':''}>No dejar asignar</option>
         <option value="0" ${!A.bloquear?'selected':''}>Dejar asignar con aviso</option></select></label>
     </div>
-    <div class="row" style="margin-top:12px"><label class="chk"><input type="checkbox" ${A.bloqueoGrupo?'checked':''} onchange="S.ajustes.bloqueoGrupo=this.checked;save();render()">No dejar coger días que ya tiene alguien de su mismo grupo (los de otros grupos no bloquean)</label></div>
+    <div class="row" style="margin-top:12px"><label class="chk"><input type="checkbox" ${A.bloqueoGrupo?'checked':''} onchange="S.ajustes.bloqueoGrupo=this.checked;save();render()">Aplicar el cupo de cada grupo: agentes y supers a la vez (se edita en Grupos)</label></div>
   </div>
   <div class="card"><h2>Ponderación</h2>
     <p class="help">Quien tiene más días de vacaciones gastaría siempre más puntos. La ponderación lleva los puntos de todos a la misma base de días.</p>
@@ -1039,13 +1067,15 @@ function añadirPuente(){
 /* =========================================================
    PASO 1 · Skills
    ========================================================= */
-function nuevaSkill(n){ const t={id:uid(),nombre:n,color:COLORES[skillsVis().length%COLORES.length],depId:S.ctx.dep,prodId:S.ctx.prod}; S.skills.push(t); save(); return t; }
+function nuevaSkill(n){ const t={id:uid(),nombre:n,color:COLORES[skillsVis().length%COLORES.length],depId:S.ctx.dep,prodId:S.ctx.prod,super:/jefe|supervis/i.test(n)}; S.skills.push(t); save(); return t; }
 const buscaSkill = n => skillsVis().find(t=>t.nombre.toLowerCase()===n.toLowerCase());
 function vSkills(){
   const ks = skillsVis(), sug = (SUGERENCIAS[nombreDep(S.ctx.dep)]||[]).filter(n=>!buscaSkill(n));
   return `<div class="card"><h2>Skills de ${esc(ctxTxt())} (${ks.length})</h2>
+    <p class="help">De cara a la empresa hay dos categorías: <b>supers</b> (jefes de servicio, jefes de turno, supervisores) y <b>agentes</b> (el resto). Marca «Es de super» en las skills de super: quien tenga alguna de ellas es super; los demás, agentes. Ahora: ${trabsVis().filter(esSuper).length} supers y ${trabsVis().filter(t=>!esSuper(t)).length} agentes.</p>
     ${ks.length?ks.map(t=>{const n=trabsVis().filter(w=>tieneSkill(w,t.id)).length; return `<div class="row" style="margin-bottom:8px;align-items:center;flex-wrap:nowrap"><span class="dot" style="background:${t.color}"></span>
       <input style="flex:1;margin:0;min-width:0" value="${esc(t.nombre)}" aria-label="Nombre de la skill" onchange="skillDe('${t.id}').nombre=this.value.trim()||skillDe('${t.id}').nombre;save();render()">
+      <label class="chk" style="white-space:nowrap" title="Jefes de servicio, jefes de turno, supervisores…"><input type="checkbox" ${t.super?'checked':''} onchange="skillDe('${t.id}').super=this.checked;save();render()">Es de super</label>
       <span class="muted" style="white-space:nowrap">${n} pers.</span>
       <button class="btn small danger" onclick="borrarSkill('${t.id}')" aria-label="Eliminar skill">✕</button></div>`}).join(''):'<p class="help">Todavía no hay skills. Crea las funciones que existen en este departamento y producto.</p>'}
     <div class="row" style="margin-top:12px"><label style="flex:1">Nueva skill<input id="nSkill" placeholder="Agente de rampa" onkeydown="if(event.key==='Enter')añadirSkill()"></label><button class="btn primary" onclick="añadirSkill()">Crear skill</button></div>
@@ -1067,11 +1097,13 @@ function vGrupos(){
   const gs = gruposVis(), sinG = trabsVis().filter(t=>!t.grupoId).length;
   return `<div class="card"><h2>Grupos de elección de ${esc(ctxTxt())} (${gs.length})</h2>
     <p class="help">Sirven para el orden de elección de vacaciones y para el 10 % de desprogramaciones. Cada grupo puede llevar una rotación; quien tenga una rotación propia la conserva. Para meter o sacar gente, usa la burbuja <a href="#" onclick="go('equipos');return false">Grupos</a> del menú.</p>
-    ${gs.length ? `<table><tr><th>Grupo</th><th>Rotación</th><th class="num">Personas</th><th class="num hide-m">Máx. desprog. por día</th><th></th></tr>
+    ${gs.length ? `<div class="scroll"><table><tr><th>Grupo</th><th>Rotación</th><th class="num">Agentes a la vez</th><th class="num">Supers a la vez</th><th class="num">Personas</th><th class="num hide-m">Máx. desprog. por día</th><th></th></tr>
       ${gs.map(g=>`<tr><td><div class="row" style="align-items:center;flex-wrap:nowrap"><span class="dot" style="background:${g.color}"></span><input style="margin:0;min-width:0" value="${esc(g.nombre)}" aria-label="Nombre del grupo" onchange="grupoDe('${g.id}').nombre=this.value.trim()||grupoDe('${g.id}').nombre;save();render()"></div></td>
         <td><select style="margin:0;min-width:110px" aria-label="Rotación del grupo" onchange="grupoDe('${g.id}').rotacionId=this.value;save();render()">${opts(rotacionesVis(), g.rotacionId, ['','Sin rotación'])}</select></td>
-        <td class="num">${miembros(g.id).length}</td><td class="num hide-m">${maxDiaTurno(g.id)}</td>
-        <td class="num"><button class="btn small danger" onclick="borrarGrupo('${g.id}')" aria-label="Borrar grupo">✕</button></td></tr>`).join('')}</table>`
+        <td class="num"><input type="number" min="0" value="${g.cupoAg}" style="width:70px;margin:0 0 0 auto;text-align:right" aria-label="Agentes a la vez" onchange="grupoDe('${g.id}').cupoAg=Math.max(0,Number(this.value)||0);save();render()"></td>
+        <td class="num"><input type="number" min="0" value="${g.cupoSup}" style="width:70px;margin:0 0 0 auto;text-align:right" aria-label="Supers a la vez" onchange="grupoDe('${g.id}').cupoSup=Math.max(0,Number(this.value)||0);save();render()"></td>
+        <td class="num">${miembros(g.id).length} <span class="muted">(${miembros(g.id).filter(esSuper).length} sup.)</span></td><td class="num hide-m">${maxDiaTurno(g.id)}</td>
+        <td class="num"><button class="btn small danger" onclick="borrarGrupo('${g.id}')" aria-label="Borrar grupo">✕</button></td></tr>`).join('')}</table></div>`
       : '<p class="help">Todavía no hay grupos. Si todo el equipo elige junto, crea uno solo.</p>'}
     <div class="row" style="margin-top:12px"><label style="flex:1">Nuevo grupo<input id="nGrupo" placeholder="Turno A" onkeydown="if(event.key==='Enter')añadirGrupo()"></label><button class="btn primary" onclick="añadirGrupo()">Añadir grupo</button></div>
     ${sinG?`<p class="chip warn" style="margin-top:12px">${sinG} trabajador(es) sin grupo: asígnalos en Trabajadores</p>`:''}
@@ -1100,12 +1132,18 @@ function vEquipos(){
         <label style="flex:1 1 160px">Rotación<select onchange="grupoDe('${g.id}').rotacionId=this.value;save();render()">${opts(rotacionesVis(), g.rotacionId, ['','Sin rotación'])}</select></label>
         ${r?`<label style="flex:1 1 160px">El 1 de enero de ${S.ciclo} va en<select onchange="fijarSemanaEnero('g','${g.id}',this.value)">${r.semanas.map((_,k)=>`<option value="${k}" ${(()=>{const n=r.semanas.length*7,i=((daysBetween(inicioRot({grupoId:g.id},r),`${S.ciclo}-01-01`)%n)+n)%n;return Math.floor(i/7)===k})()?'selected':''}>Semana ${k+1}</option>`).join('')}</select></label>`:''}
         <button class="btn danger" onclick="borrarGrupo('${g.id}')">Eliminar grupo</button></div>
-      <h2>Miembros (${miem.length})</h2>
-      ${miem.length?`<div class="gl">${miem.map(t=>`<div class="gl-i"><span><b>${esc(t.nombre)}</b><span class="muted"> ${esc(skillsTxt(t))}${t.rotacionId&&rotDeId(t.rotacionId)?`, rotación propia: ${esc(rotDeId(t.rotacionId).nombre)}`:''}</span></span><button class="btn small" onclick="moverAGrupo(['${t.id}'],'')">Sacar</button></div>`).join('')}</div>`:'<p class="help">Este grupo todavía no tiene a nadie. Añádelos desde la lista de al lado.</p>'}
+      <div class="cupo-cat">
+        <div class="cc-t">De vacaciones a la vez</div>
+        <label>Agentes<input type="number" min="0" value="${g.cupoAg}" onchange="grupoDe('${g.id}').cupoAg=Math.max(0,Number(this.value)||0);save();render()"></label>
+        <label>Supers<input type="number" min="0" value="${g.cupoSup}" onchange="grupoDe('${g.id}').cupoSup=Math.max(0,Number(this.value)||0);save();render()"></label>
+        <div class="cc-x">En ${esc(g.nombre)} pueden coincidir de vacaciones <b>${g.cupoAg} agente(s)</b> y <b>${g.cupoSup} super(s)</b>. Dos de la misma categoría por encima de eso no.</div>
+      </div>
+      <h2>Miembros (${miem.length}: ${miem.filter(t=>!esSuper(t)).length} agentes, ${miem.filter(esSuper).length} supers)</h2>
+      ${miem.length?`<div class="gl">${[...miem].sort((a,b)=>(esSuper(b)?1:0)-(esSuper(a)?1:0)).map(t=>`<div class="gl-i"><span>${catChip(t)} <b>${esc(t.nombre)}</b><span class="muted"> ${esc(skillsTxt(t))}${t.rotacionId&&rotDeId(t.rotacionId)?`, rotación propia: ${esc(rotDeId(t.rotacionId).nombre)}`:''}</span></span><button class="btn small" onclick="moverAGrupo(['${t.id}'],'')">Sacar</button></div>`).join('')}</div>`:'<p class="help">Este grupo todavía no tiene a nadie. Añádelos desde la lista de al lado.</p>'}
     </div>
     <div class="card"><h2>Añadir a ${esc(g.nombre)}</h2>
       ${otros.length?`<input placeholder="Buscar" aria-label="Buscar trabajador" style="margin:0 0 10px" oninput="const q=this.value.toLowerCase();document.querySelectorAll('.gl-add .gl-i').forEach(e=>e.style.display=e.dataset.n.includes(q)?'':'none')">
-        <div class="gl gl-add">${otros.map(t=>`<label class="gl-i" data-n="${esc(t.nombre.toLowerCase())}"><span><input type="checkbox" class="gAdd" value="${t.id}"><b>${esc(t.nombre)}</b><span class="muted"> ${t.grupoId?'en '+esc(nombreGrupo(t.grupoId)):'sin grupo'}</span></span></label>`).join('')}</div>
+        <div class="gl gl-add">${otros.map(t=>`<label class="gl-i" data-n="${esc(t.nombre.toLowerCase())}"><span><input type="checkbox" class="gAdd" value="${t.id}">${catChip(t)} <b>${esc(t.nombre)}</b><span class="muted"> ${t.grupoId?'en '+esc(nombreGrupo(t.grupoId)):'sin grupo'}</span></span></label>`).join('')}</div>
         <div class="row" style="margin-top:12px"><button class="btn primary" onclick="moverAGrupo([...document.querySelectorAll('.gAdd:checked')].map(x=>x.value),'${g.id}')">Meter en ${esc(g.nombre)}</button>
         <span class="muted">Si ya estaban en otro grupo, se cambian a este.</span></div>`
         :'<p class="help">Todos los trabajadores ya están en este grupo.</p>'}
@@ -1137,7 +1175,7 @@ function calendarioRotacion(r, y, ini){
 }
 function crearGrupoSec(){
   const n=document.getElementById('nGrupo2').value.trim(); if(!n) return toast('Escribe el nombre del grupo');
-  const g={id:uid(),nombre:n,depId:S.ctx.dep,prodId:S.ctx.prod,color:COLORES[S.grupos.length%COLORES.length],rotacionId:rotacionesVis().length===1?rotacionesVis()[0].id:''};
+  const g={id:uid(),nombre:n,depId:S.ctx.dep,prodId:S.ctx.prod,cupoAg:1,cupoSup:1,color:COLORES[S.grupos.length%COLORES.length],rotacionId:rotacionesVis().length===1?rotacionesVis()[0].id:''};
   S.grupos.push(g); UI.gSel=g.id; save(); render(); toast('Grupo creado');
 }
 function moverAGrupo(ids, gid){
@@ -1147,7 +1185,7 @@ function moverAGrupo(ids, gid){
     w.grupoId = gid; });
   save(); render(); toast(gid ? `${ids.length} persona(s) en ${nombreGrupo(gid)}` : 'Sacado del grupo');
 }
-function añadirGrupo(){ const n=document.getElementById('nGrupo').value.trim(); if(!n) return; S.grupos.push({id:uid(),nombre:n,depId:S.ctx.dep,prodId:S.ctx.prod,color:COLORES[S.grupos.length%COLORES.length]}); save(); render(); document.getElementById('nGrupo')?.focus(); }
+function añadirGrupo(){ const n=document.getElementById('nGrupo').value.trim(); if(!n) return; S.grupos.push({id:uid(),nombre:n,depId:S.ctx.dep,prodId:S.ctx.prod,cupoAg:1,cupoSup:1,color:COLORES[S.grupos.length%COLORES.length]}); save(); render(); document.getElementById('nGrupo')?.focus(); }
 function borrarGrupo(id){
   const n = miembros(id).length;
   if(n) return toast(`Hay ${n} persona(s) en este grupo. Muévelas a otro antes de borrarlo.`);
@@ -1209,7 +1247,7 @@ function vTrabajadores(){
     ${filtroContrato('plantMod')}
     ${ks.length?`<div class="scroll"><table><tr><th>Nombre</th><th class="hide-m">Skills</th><th>Rotación</th><th class="num">Días</th><th class="num hide-m">Factor</th><th class="num">Pts ant.</th><th class="num hide-m">Pts −2</th><th></th></tr>
     ${ks.map(k=>{ const ts=ordenEleccion(k).filter(t=>pasaContrato(t,UI.plantMod)); if(!ts.length) return '';
-      return `<tr class="grp"><td colspan="8">${esc(nombreGrupo(k))} (${ts.length})</td></tr>` + ts.map((t,i)=>`<tr><td><span class="muted">${ordenEleccion(k).indexOf(t)+1}.</span> <b>${esc(t.nombre)}</b><div class="muted">${modalidadTxt(t)}<span class="solo-m">, ${esc(skillsTxt(t))}</span>${ceseDe(t).length?`<br>Cese: ${esc(ceseTxt(t))}`:(esDisc(t)?' <span class="chip grey">Sin cese</span>':'')}</div></td>
+      return `<tr class="grp"><td colspan="8">${esc(nombreGrupo(k))} (${ts.length})</td></tr>` + ts.map((t,i)=>`<tr><td><span class="muted">${ordenEleccion(k).indexOf(t)+1}.</span> <b>${esc(t.nombre)}</b> ${catChip(t)}<div class="muted">${modalidadTxt(t)}<span class="solo-m">, ${esc(skillsTxt(t))}</span>${ceseDe(t).length?`<br>Cese: ${esc(ceseTxt(t))}`:(esDisc(t)?' <span class="chip grey">Sin cese</span>':'')}</div></td>
       <td class="hide-m">${skillsChips(t)}</td>
       <td>${celdaRotacion(t)}</td>
       <td class="num">${t.diasDerecho}</td><td class="num hide-m muted">${factorInfo(t).txt}</td><td class="num">${nf(t.ptsAnt||0)}</td><td class="num hide-m">${nf(t.ptsAnt2||0)}</td>
@@ -1358,18 +1396,19 @@ function vEleccion(){
 function previewHTML(w, desde, hasta, excepto, bloquea){
   if(!desde || !hasta) return '';
   if(hasta < desde) return `<div class="preview bad">La fecha de fin es anterior a la de inicio.</div>`;
-  const st = statsTrab(w), r = statsRango(desde,hasta), conf = conflictosCupo(w,desde,hasta), sol = solapePropio(w,desde,hasta,excepto), ces = solapaCese(w,desde,hasta), comp = companerosEnFechas(w,desde,hasta,excepto);
+  const st = statsTrab(w), r = statsRango(desde,hasta,w), conf = conflictosCupo(w,desde,hasta), sol = solapePropio(w,desde,hasta,excepto), ces = solapaCese(w,desde,hasta), comp = companerosEnFechas(w,desde,hasta,excepto);
   let quedan = st.pendientes - r.computables;
-  if(excepto){ const p=S.periodos.find(x=>x.id===excepto); if(p && delAnio(p.desde,S.ciclo)) quedan += statsRango(p.desde,p.hasta).computables; }
+  if(excepto){ const p=S.periodos.find(x=>x.id===excepto); if(p && delAnio(p.desde,S.ciclo)) quedan += statsRango(p.desde,p.hasta,w).computables; }
   const diasConf = [...new Set(conf.map(c=>c.dia))];
-  const cls = (sol || ces || ((conf.length||comp.length) && bloquea)) ? 'bad' : (conf.length || comp.length || quedan<0) ? 'warn' : 'ok';
+  const cls = (sol || ces || quedan<0 || !r.computables || ((conf.length||comp.length) && bloquea)) ? 'bad' : (conf.length || comp.length) ? 'warn' : 'ok';
   return `<div class="preview ${cls}">
-    <div class="stats"><div><b>${r.computables}</b>días${r.computables!==r.naturales?` (${r.naturales} naturales)`:''}</div><div><b>${nf(r.pts)}</b>puntos brutos</div><div><b>${nf(r.pts*st.f)}</b>puntos finales</div><div><b>${quedan}</b>días le quedarían</div></div>
+    <div class="stats"><div><b>${r.computables}</b>días de vacaciones${r.computables!==r.naturales?` (${r.naturales} naturales${r.descansos?`, ${r.descansos} de descanso que no cuentan`:''})`:''}</div><div><b>${nf(r.pts)}</b>puntos brutos</div><div><b>${nf(r.pts*st.f)}</b>puntos finales</div><div><b>${quedan}</b>días le quedarían</div></div>
     ${sol?'<p><b>Se solapa con otro periodo suyo.</b></p>':''}
     ${ces?`<p><b>Cae dentro de su periodo de cese</b> (${esc(ceseTxt(w))}).</p>`:''}
-    ${comp.length?`<p><b>Coincide con alguien de su grupo:</b> ${esc(comp.join(', '))}.</p>`:''}
+    ${comp.length?`<p><b>Se pasa del cupo de ${nombreCat(catDe(w)).toLowerCase()}s de su grupo</b> (${cupoGrupo(w)} a la vez): ${esc(comp.join(', '))}.</p>`:''}
+    ${!r.computables?'<p><b>Todos esos días son descanso o festivo según su rotación.</b></p>':''}
     ${conf.length?`<p><b>${bloquea?'No hay cupo':'Supera el cupo'} ${diasConf.length} día(s):</b> ${resumenConflictos(conf)}</p>`:'<p>Hay cupo todos los días.</p>'}
-    ${quedan<0?`<p><b>Se pasa ${-quedan} día(s) de su derecho.</b></p>`:''}
+    ${quedan<0?`<p><b>No le quedan días: se pasaría ${-quedan} día(s) de los ${st.derecho} que tiene.</b></p>`:''}
     ${!delAnio(desde,S.ciclo)?`<p><b>Ojo:</b> estas fechas no son del ciclo ${S.ciclo}; no cuentan para sus puntos de este ciclo.</p>`:''}
   </div>`;
 }
@@ -1383,18 +1422,19 @@ function vTurnos(ks){
     ? `<div class="cartel"><div class="flecha" aria-hidden="true">➜</div><div class="cuerpo"><div class="txt">
          <div class="ctx">${esc(nombreGrupo(k))}, ronda ${t.ronda} de ${S.ajustes.rondas}. Le toca a</div>
          <div class="who">${esc(actual.nombre)}</div>
-         <div class="sub">${esc(skillsTxt(actual))}, ${nf(actual.ptsAnt||0)} puntos el año anterior</div></div>
+         <div class="sub">${nombreCat(catDe(actual))}: ${esc(skillsTxt(actual))}, ${nf(actual.ptsAnt||0)} puntos el año anterior</div></div>
        <div class="row">${actual.id!==UI.trab?`<button class="btn" onclick="selTrab('${actual.id}')">Ver su elección</button>`:''}
        <button class="btn ink" onclick="terminarTurno('${k}','${actual.id}')">Pasar al siguiente ›</button>
        <button class="btn" onclick="deshacerTurno('${k}')" ${(!h.length&&t.ronda===1)?'disabled':''}>↶ Deshacer</button></div></div></div>`
     : `<div class="cartel fin"><div class="flecha" aria-hidden="true">✓</div><div class="cuerpo"><div class="txt"><div class="who">${esc(nombreGrupo(k))} ha terminado</div><div class="sub">Todas las rondas están cerradas.</div></div><button class="btn" onclick="deshacerTurno('${k}')">↶ Deshacer</button></div></div>`;
-  const puede = UI.desde && UI.hasta && UI.hasta>=UI.desde && !solapePropio(w,UI.desde,UI.hasta) && !solapaCese(w,UI.desde,UI.hasta) && !companerosEnFechas(w,UI.desde,UI.hasta).length && !(S.ajustes.bloquear && conflictosCupo(w,UI.desde,UI.hasta).length);
-  const sel = UI.desde && UI.hasta ? statsRango(UI.desde,UI.hasta) : null;
+  const puede = UI.desde && UI.hasta && UI.hasta>=UI.desde && !solapePropio(w,UI.desde,UI.hasta) && !solapaCese(w,UI.desde,UI.hasta) && !companerosEnFechas(w,UI.desde,UI.hasta).length && !excedeDias(w,UI.desde,UI.hasta) && statsRango(UI.desde,UI.hasta,w).computables>0 && !(S.ajustes.bloquear && conflictosCupo(w,UI.desde,UI.hasta).length);
+  const sel = UI.desde && UI.hasta ? statsRango(UI.desde,UI.hasta,w) : null;
   return `${selector}${cartel}
   <div class="card">
     <div class="row" style="align-items:flex-end;margin-bottom:12px">
       <label style="flex:1 1 240px">Eligiendo para<select onchange="selTrab(this.value)">${orden.map((x,i)=>`<option value="${x.id}" ${x.id===UI.trab?'selected':''}>${i+1}. ${esc(x.nombre)}</option>`).join('')}</select></label>
-      <div class="muted" style="flex:2 1 300px;padding-bottom:6px">${matchMedia('(pointer:coarse)').matches?'Toca el primer día y luego el último.':'Pincha un día, o pincha y arrastra para marcar varios seguidos.'} Los días rayados no se pueden coger.</div>
+      <div class="muted" style="flex:2 1 300px;padding-bottom:6px">${matchMedia('(pointer:coarse)').matches?'Toca el primer día y luego el último.':'Pincha un día, o pincha y arrastra para marcar varios seguidos.'} Los rayados no se pueden coger; los descansos se cruzan sin gastar días.
+        <br><b>${catChip(w)} Le quedan ${Math.max(0,st.pendientes)} de ${st.derecho} días.</b>${w.grupoId?` En ${esc(nombreGrupo(gk(w)))} pueden estar fuera a la vez ${grupoDe(w.grupoId).cupoAg} agente(s) y ${grupoDe(w.grupoId).cupoSup} super(s).`:''}</div>
     </div>
     ${selectorAnual(w)}
     <div class="selbar ${sel?'on':''}">
@@ -1415,10 +1455,11 @@ function vTurnos(ks){
   </div>`;
 }
 /* ----- calendario de elección: pinchar o arrastrar días ----- */
-let selLibres = new Set(), selArrastre = null, selTipo = 'mouse';
+let selLibres = new Set(), selPaso = new Set(), selCuenta = new Set(), selQuedan = 0, selArrastre = null, selTipo = 'mouse';
 function selectorAnual(w){
-  const y = S.ciclo, occ = ocupacion(w.id), k = gk(w), hoyS = hoy();
-  const propios = new Set(); S.periodos.filter(p=>p.trabajadorId===w.id).forEach(p=>{ for(const d of eachDay(p.desde,p.hasta)) propios.add(d); });
+  const y = S.ciclo, occ = ocupacion(w.id), k = gk(w), hoyS = hoy(), cat = catDe(w), maxG = cupoGrupo(w);
+  selPaso = new Set(); selCuenta = new Set(); selQuedan = statsTrab(w).pendientes;
+  const propios = new Set(); S.periodos.filter(p=>p.trabajadorId===w.id).forEach(p=>{ for(const d of eachDay(p.desde,p.hasta)) if(!esDescanso(w,d)) propios.add(d); });
   selLibres = new Set();
   let html = '<div class="selcal" id="selcal">';
   for(let m=0;m<12;m++){
@@ -1427,27 +1468,33 @@ function selectorAnual(w){
     for(let d=1; d<=dim; d++){
       const s=`${y}-${mm}-${String(d).padStart(2,'0')}`, wd=pd(s).getUTCDay();
       const otros = (occ[s]||[]).map(trabDe).filter(t=>t && visible(t));
-      const mismos = S.ajustes.bloqueoGrupo ? otros.filter(t=>gk(t)===k) : [];
-      const deOtros = otros.filter(t=>gk(t)!==k);
+      const mismos = S.ajustes.bloqueoGrupo && w.grupoId ? otros.filter(t=>t.grupoId===w.grupoId && catDe(t)===cat) : [];
+      const deOtros = otros.filter(t=>!mismos.includes(t));
+      const descanso = esDescanso(w,s);
       const cupoLleno = S.cupos.some(c=>enRango(s,c) && reglaAplica(c,w) && usadosCupo(c, occ[s]||[])+1 > Number(c.max));
       let st='libre', motivo='';
       if(propios.has(s)){ st='propio'; motivo='Ya son vacaciones suyas'; }
       else if(enCese(w,s)){ st='blk ces'; motivo='Periodo de cese'; }
-      else if(mismos.length){ st='blk'; motivo=`Lo tiene ${mismos.map(t=>t.nombre).join(', ')} (mismo grupo)`; }
-      else if(cupoLleno && S.ajustes.bloquear){ st='blk lleno'; motivo='Sin cupo'; }
-      if(st==='libre') selLibres.add(s);
+      else if(descanso){ st='rst'; motivo=`${turnoDia(w,s).nombre}: no se puede coger, pero un periodo puede pasar por encima sin gastarlo`; }
+      else if(mismos.length>=maxG){ st='blk'; motivo=`Cupo de ${nombreCat(cat).toLowerCase()}s del grupo lleno (${maxG} a la vez): ${mismos.map(t=>t.nombre).join(', ')}`; }
+      else if(cupoLleno && S.ajustes.bloquear){ st='blk lleno'; motivo='Sin cupo de plantilla'; }
+      if(st==='libre'){ selLibres.add(s); selPaso.add(s); if(cuentaDia(s)) selCuenta.add(s); }
+      if(st==='rst' || (st==='propio' && false)) selPaso.add(s);
       const cls = ['ed', st, (wd===0||wd===6)?'we':'', esSS(s)?'ss':'', esPuente(s)?'pu':'', deOtros.length?'og':'', cupoLleno&&!S.ajustes.bloquear&&st==='libre'?'casi':'', s===hoyS?'hoy':'', (UI.desde&&s>=UI.desde&&s<=UI.hasta)?'sel':''].filter(Boolean).join(' ');
-      const tit = `${fmt(s)}: ${ptsDia(s)} pts${esSS(s)?', Semana Santa':''}${esPuente(s)?', puente':''}${motivo?'. '+motivo:''}${deOtros.length?`. De otros grupos: ${deOtros.map(t=>t.nombre).join(', ')}`:''}`;
+      const tit = `${fmt(s)}: ${ptsDia(s)} pts${esSS(s)?', Semana Santa':''}${esPuente(s)?', puente':''}${motivo?'. '+motivo:''}${deOtros.length?`. También fuera (no bloquea): ${deOtros.map(t=>`${t.nombre} (${t.grupoId===w.grupoId?nombreCat(catDe(t)).toLowerCase():nombreGrupo(gk(t))})`).join(', ')}`:''}`;
       const tt = turnoDia(w,s);
-      html += `<span class="${cls}${tt&&tt.libre&&st==='libre'?' lib':''}" data-d="${s}" data-m="${esc(motivo)}" title="${esc(tit)}${tt?'. Turno '+esc(tt.nombre):''}">${d}${tt?`<i class="tc" style="color:${st==='propio'?'#fff':tt.color}">${esc(tt.cod)}</i>`:''}</span>`;
+      html += `<span class="${cls}" ${st==='rst'?`style="--tcr:${tt.color}"`:''} data-d="${s}" data-m="${esc(motivo)}" title="${esc(tit)}${tt&&st!=='rst'?'. Turno '+esc(tt.nombre):''}">${d}${tt?`<i class="tc" style="color:${st==='propio'?'#fff':tt.color}">${esc(tt.cod)}</i>`:''}</span>`;
     }
     html += '</div></div>';
   }
-  return html + `</div><div class="legend"><span style="--c:var(--senal)">Seleccionado</span><span style="--c:var(--ctx)">Sus vacaciones</span><span style="--c:repeating-linear-gradient(135deg,#C9CED6 0 2px,#EEF0F3 2px 4px)">No disponible</span><span class="lg-og">Alguien de otro grupo</span><span style="--c:var(--senal-soft)">Semana Santa</span></div>`;
+  return html + `</div><div class="legend"><span style="--c:var(--senal)">Seleccionado</span><span style="--c:var(--ctx)">Sus vacaciones</span><span style="--c:repeating-linear-gradient(135deg,#C9CED6 0 2px,#EEF0F3 2px 4px)">No disponible (cupo o cese)</span><span style="--c:#5FA77A">Descanso o festivo de su rotación</span><span class="lg-og">Alguien de otro grupo</span><span style="--c:var(--senal-soft)">Semana Santa</span></div>`;
 }
-function selLimitar(a, b){ // avanza desde a hacia b y se para antes del primer día no disponible
-  const paso = b>=a ? 1 : -1; let fin = a;
-  for(let s=addDays(a,paso); paso>0 ? s<=b : s>=b; s=addDays(s,paso)){ if(!selLibres.has(s)) break; fin = s; }
+function selLimitar(a, b){ // avanza desde a hacia b; cruza descansos, se para en lo no disponible o al acabarse sus días
+  const paso = b>=a ? 1 : -1; let fin = a, usados = selCuenta.has(a) ? 1 : 0;
+  for(let s=addDays(a,paso); paso>0 ? s<=b : s>=b; s=addDays(s,paso)){
+    if(!selPaso.has(s)) break;
+    if(selLibres.has(s)){ const n = usados + (selCuenta.has(s)?1:0); if(n > selQuedan) break; usados = n; fin = s; }
+  }
   return fin;
 }
 function selPintar(a, b){
@@ -1457,6 +1504,7 @@ function selPintar(a, b){
 function selFijar(a, b){ const [d,h] = a<=b ? [a,b] : [b,a]; UI.desde=d; UI.hasta=h; render(); }
 function selToque(s, el){
   if(!selLibres.has(s)) return toast(el?.dataset.m || 'Ese día no está disponible');
+  if(selQuedan<=0) return toast('Ya tiene todos sus días de vacaciones');
   if(UI.desde && UI.desde===UI.hasta && s!==UI.desde && selLibres.has(UI.desde)) return selFijar(UI.desde, selLimitar(UI.desde, s));
   if(UI.desde===s && UI.hasta===s){ UI.desde=''; UI.hasta=''; return render(); }
   selFijar(s, s);
@@ -1467,6 +1515,7 @@ document.addEventListener('pointerdown', e=>{
   if(selTipo==='touch') return;               // en táctil se marca con dos toques
   e.preventDefault();
   if(!selLibres.has(el.dataset.d)) return toast(el.dataset.m || 'Ese día no está disponible');
+  if(selQuedan<=0) return toast('Ya tiene todos sus días de vacaciones');
   selArrastre = {a:el.dataset.d, b:el.dataset.d, movido:false}; selPintar(el.dataset.d, el.dataset.d);
 });
 document.addEventListener('pointerover', e=>{
@@ -1486,9 +1535,9 @@ function fichaTrab(w, st){
   return `<h3>${esc(w.nombre)}</h3>
     <div class="muted">${esc(skillsTxt(w))}, ${modalidadTxt(w)}, ${st.derecho} días. Factor ${factorInfo(w).txt}</div>
     ${(st.periodos.length||st.desprog.length) ? `<div class="scroll"><table><tr><th>Periodo</th><th class="num">Días</th><th class="num">Puntos</th><th></th></tr>
-      ${st.periodos.map(p=>{const r=statsRango(p.desde,p.hasta);return `<tr><td>${fmt(p.desde)} – ${fmt(p.hasta)} <span class="muted">(${r.naturales} nat.)</span> ${p.manual?'<span class="chip mano">A mano</span>':''} ${p.forzado?'<span class="chip bad">Sin cupo</span>':''}</td><td class="num">${r.computables}</td><td class="num">${nf(r.pts*st.f)}</td>
+      ${st.periodos.map(p=>{const r=statsRango(p.desde,p.hasta,w);return `<tr><td>${fmt(p.desde)} – ${fmt(p.hasta)} <span class="muted">(${r.naturales} nat.${r.descansos?`, ${r.descansos} desc.`:''})</span> ${p.manual?'<span class="chip mano">A mano</span>':''} ${p.forzado?'<span class="chip bad">Sin cupo</span>':''}</td><td class="num">${r.computables}</td><td class="num">${nf(r.pts*st.f)}</td>
         <td class="num" style="white-space:nowrap"><button class="btn small" onclick="editarPeriodo('${p.id}')">Editar</button> <button class="btn small danger" onclick="borrarPeriodo('${p.id}')" aria-label="Borrar">✕</button></td></tr>`}).join('')}
-      ${st.desprog.length?`<tr><td>Desprogramaciones <span class="muted">(${st.desprog.map(d=>fmt(d.dia)).join(', ')})</span></td><td class="num">${st.desprog.length}</td><td class="num">${S.ajustes.desprogPuntua?nf(st.desprog.reduce((a,d)=>a+(cuentaDia(d.dia)?ptsDia(d.dia):0),0)*st.f):'—'}</td><td></td></tr>`:''}
+      ${st.desprog.length?`<tr><td>Desprogramaciones <span class="muted">(${st.desprog.map(d=>fmt(d.dia)).join(', ')})</span></td><td class="num">${st.desprog.length}</td><td class="num">${S.ajustes.desprogPuntua?nf(st.desprog.reduce((a,d)=>a+(diaVac(w,d.dia)?ptsDia(d.dia):0),0)*st.f):'—'}</td><td></td></tr>`:''}
       <tr><th>Total ${S.ciclo}</th><th class="num">${st.dias} / ${st.derecho}</th><th class="num">${nf(st.pts)}</th><th></th></tr></table></div>`
       : `<p class="muted">Todavía no tiene vacaciones en ${S.ciclo}.</p>`}
     ${st.pendientes>0 && st.pendientes<=st.reservaPosible ? `<div class="chip" style="margin:6px 6px 0 0">Le quedan ${st.pendientes}: puede dejarlos para desprogramar</div>`:''}
@@ -1509,7 +1558,9 @@ function añadirPeriodo(){
   const w = trabDe(UI.trab); if(!w) return;
   if(solapePropio(w,UI.desde,UI.hasta)) return toast('Se solapa con otro periodo suyo');
   if(solapaCese(w,UI.desde,UI.hasta)) return toast('Esas fechas caen en su periodo de cese');
-  if(companerosEnFechas(w,UI.desde,UI.hasta).length) return toast('Esos días ya los tiene alguien de su grupo');
+  if(companerosEnFechas(w,UI.desde,UI.hasta).length) return toast(`Se pasa del cupo de ${nombreCat(catDe(w)).toLowerCase()}s de su grupo`);
+  if(excedeDias(w,UI.desde,UI.hasta)) return toast('No le quedan días suficientes');
+  if(!statsRango(UI.desde,UI.hasta,w).computables) return toast('Esos días son descanso o festivo según su rotación');
   if(S.ajustes.bloquear && conflictosCupo(w,UI.desde,UI.hasta).length) return toast('No hay cupo en esas fechas');
   const forz = conflictosCupo(w,UI.desde,UI.hasta).length>0;
   S.periodos.push({id:uid(), trabajadorId:w.id, desde:UI.desde, hasta:UI.hasta, ronda:tState(gk(w)).ronda, forzado:forz});
@@ -1530,7 +1581,7 @@ function vMano(){
   const w = trabDe(M.trab);
   const rango = M.desde && M.hasta && M.hasta>=M.desde;
   const conf = rango ? [...conflictosCupo(w,M.desde,M.hasta), ...companerosEnFechas(w,M.desde,M.hasta,M.edit)] : [];
-  const puede = M.desde && M.hasta && M.hasta>=M.desde && !solapePropio(w,M.desde,M.hasta,M.edit) && !solapaCese(w,M.desde,M.hasta) && (!conf.length || M.forzar);
+  const puede = M.desde && M.hasta && M.hasta>=M.desde && !solapePropio(w,M.desde,M.hasta,M.edit) && !solapaCese(w,M.desde,M.hasta) && !excedeDias(w,M.desde,M.hasta,M.edit) && statsRango(M.desde,M.hasta,w).computables>0 && (!conf.length || M.forzar);
   const lista = S.periodos.filter(p=>{ const t=trabDe(p.trabajadorId); return t && visible(t) && delAnio(p.desde,S.ciclo) && (M.filtro==='all' || gk(t)===M.filtro); })
     .sort((a,b)=>a.desde.localeCompare(b.desde) || trabDe(a.trabajadorId).nombre.localeCompare(trabDe(b.trabajadorId).nombre,'es'));
   return `<div class="grid2">
@@ -1551,7 +1602,7 @@ function vMano(){
    <div class="card"><h2>Vacaciones de ${S.ciclo} (${lista.length})</h2>
     <label style="margin-bottom:10px">Grupo<select onchange="UI.m.filtro=this.value;render()">${opts(gruposVis(), M.filtro, ['all','Todos los grupos'])}</select></label>
     ${lista.length?`<div class="scroll"><table><tr><th>Trabajador</th><th>Fechas</th><th class="num">Días</th><th></th></tr>
-      ${lista.map(p=>{const t=trabDe(p.trabajadorId), r=statsRango(p.desde,p.hasta);return `<tr>
+      ${lista.map(p=>{const t=trabDe(p.trabajadorId), r=statsRango(p.desde,p.hasta,t);return `<tr>
         <td><b>${esc(t.nombre)}</b>${p.manual?' <span class="chip mano">A mano</span>':''}${p.forzado?' <span class="chip bad">Sin cupo</span>':''}${p.nota?`<div class="muted">${esc(p.nota)}</div>`:''}</td>
         <td style="white-space:nowrap">${fmt(p.desde)} – ${fmt(p.hasta)}</td><td class="num">${r.computables}</td>
         <td class="num" style="white-space:nowrap"><button class="btn small" onclick="editarPeriodo('${p.id}')">Editar</button> <button class="btn small danger" onclick="borrarPeriodo('${p.id}')" aria-label="Borrar">✕</button></td></tr>`}).join('')}</table></div>`
@@ -1564,6 +1615,8 @@ function guardarMano(){
   if(!(M.desde&&M.hasta&&M.hasta>=M.desde)) return toast('Pon una fecha de inicio y una de fin posterior');
   if(solapePropio(w,M.desde,M.hasta,M.edit)) return toast('Se solapa con otro periodo suyo');
   if(solapaCese(w,M.desde,M.hasta)) return toast('Esas fechas caen en su periodo de cese');
+  if(excedeDias(w,M.desde,M.hasta,M.edit)) return toast('No le quedan días suficientes');
+  if(!statsRango(M.desde,M.hasta,w).computables) return toast('Esos días son descanso o festivo según su rotación');
   const forz = conflictosCupo(w,M.desde,M.hasta).length>0 || companerosEnFechas(w,M.desde,M.hasta,M.edit).length>0;
   if(forz && !M.forzar) return toast('No hay cupo o coincide con alguien de su grupo. Marca la casilla si quieres apuntarlas igual');
   if(M.edit){ Object.assign(S.periodos.find(p=>p.id===M.edit), {desde:M.desde, hasta:M.hasta, nota:M.nota, forzado:forz, manual:true}); toast('Vacaciones actualizadas'); }
@@ -1633,7 +1686,7 @@ function vDesprog(){
 /* calendario de 12 meses de una persona: vacaciones en verde, desprogramaciones en rojo */
 function calendarioFicha(w, y, interactivo){
   const vac = new Set(), dps = new Set(desprogDe(w.id,y).map(d=>d.dia));
-  S.periodos.filter(p=>p.trabajadorId===w.id).forEach(p=>{ for(const d of eachDay(p.desde,p.hasta)) vac.add(d); });
+  S.periodos.filter(p=>p.trabajadorId===w.id).forEach(p=>{ for(const d of eachDay(p.desde,p.hasta)) if(!esDescanso(w,d)) vac.add(d); });
   let html = `<div class="fcal">`;
   for(let m=0;m<12;m++){
     const mm=String(m+1).padStart(2,'0'), first=`${y}-${mm}-01`, dim=new Date(Date.UTC(y,m+1,0)).getUTCDate(), off=(pd(first).getUTCDay()+6)%7;
@@ -1642,7 +1695,7 @@ function calendarioFicha(w, y, interactivo){
       const s=`${y}-${mm}-${String(d).padStart(2,'0')}`, wd=pd(s).getUTCDay(), tt=turnoDia(w,s);
       const cls = ['fd', dps.has(s)?'dp':vac.has(s)?'vac':enCese(w,s)?'ces':'', (wd===0||wd===6)?'we':'', esSS(s)?'ss':'', tt&&tt.libre&&!vac.has(s)&&!dps.has(s)?'lib':'', interactivo&&UI.dpDia===s?'sel':''].filter(Boolean).join(' ');
       const tit = `${fmt(s)}${dps.has(s)?': desprogramado':vac.has(s)?': vacaciones':enCese(w,s)?': cese':''}${tt?`. Turno ${tt.nombre}`:''}`;
-      const click = interactivo && !vac.has(s) && !enCese(w,s) ? ` onclick="UI.dpDia='${s}';render()" role="button" tabindex="0"` : '';
+      const click = interactivo && !vac.has(s) && !enCese(w,s) && !esDescanso(w,s) ? ` onclick="UI.dpDia='${s}';render()" role="button" tabindex="0"` : '';
       html += `<span class="${cls}" title="${esc(tit)}"${click}>${d}${tt?`<i class="tc" style="color:${(vac.has(s)||dps.has(s))?'#fff':tt.color}">${esc(tt.cod)}</i>`:''}</span>`;
     }
     html += '</div></div>';
@@ -1651,6 +1704,7 @@ function calendarioFicha(w, y, interactivo){
 }
 function añadirDesprog(){
   if(!(UI.dpTrab&&UI.dpDia&&UI.dpSol)) return;
+  if(esDescanso(trabDe(UI.dpTrab), UI.dpDia)) return toast('Ese día es descanso o festivo según su rotación');
   S.desprog.push({id:uid(), trabajadorId:UI.dpTrab, dia:UI.dpDia, solicitud:UI.dpSol, creado:Date.now()});
   UI.dpDia=''; save(); render(); toast('Desprogramación registrada');
 }
@@ -1692,7 +1746,7 @@ function exportarCSV(){
     const base = [nombreDep(depDe(t)),nombreProd(prodDe(t)),nombreGrupo(k),i+1,t.nombre,skillsTxt(t),modalidadTxt(t),t.diasDerecho,t.ptsAnt];
     const fin = [st.desprog.map(d=>d.dia).join(' '), dec(st.bruto), dec(st.f), dec(st.pts)];
     if(!st.periodos.length) rows.push([...base,'','','','','','','','','',...fin]);
-    st.periodos.forEach((p,j)=>{ const r=statsRango(p.desde,p.hasta); rows.push([...base,j+1,p.desde,p.hasta,r.naturales,r.computables,dec(r.pts*st.f),p.manual?'sí':'',p.forzado?'sí':'',p.nota||'',...fin]); });
+    st.periodos.forEach((p,j)=>{ const r=statsRango(p.desde,p.hasta,t); rows.push([...base,j+1,p.desde,p.hasta,r.naturales,r.computables,dec(r.pts*st.f),p.manual?'sí':'',p.forzado?'sí':'',p.nota||'',...fin]); });
   }));
   descargar(`vacaciones-${S.ciclo}-${nombreDep(S.ctx.dep)}-${nombreProd(S.ctx.prod)}.csv`, '﻿'+rows.map(r=>r.map(q).join(';')).join('\r\n'), 'text/csv;charset=utf-8');
 }
@@ -1717,7 +1771,7 @@ function vCalendario(){
   const seg = `<div class="seg"><button class="${UI.cal.modo==='anual'?'on':''}" onclick="UI.cal.modo='anual';render()">Año completo</button><button class="${UI.cal.modo==='mes'?'on':''}" onclick="UI.cal.modo='mes';render()">Mes y cupos</button></div>`;
   return UI.cal.modo==='mes' ? vCalMes(seg) : vCalAnual(seg);
 }
-const pasaFiltroCal = t => t && visible(t) && (UI.cal.grupo==='all'||gk(t)===UI.cal.grupo) && (UI.cal.skill==='all'||tieneSkill(t,UI.cal.skill)) && pasaContrato(t, UI.cal.mod)
+const pasaFiltroCal = t => t && visible(t) && (UI.cal.grupo==='all'||gk(t)===UI.cal.grupo) && (UI.cal.skill==='all'||tieneSkill(t,UI.cal.skill)) && pasaContrato(t, UI.cal.mod) && (!UI.cal.cat || UI.cal.cat==='all' || catDe(t)===UI.cal.cat)
   && (!UI.cal.buscar || t.nombre.toLowerCase().includes(UI.cal.buscar.toLowerCase()));
 function aniosDisponibles(){
   const ys = new Set([S.ciclo-1, S.ciclo, S.ciclo+1]);
@@ -1771,6 +1825,7 @@ function vCalAnual(seg){
       <div class="an-anio"><button class="btn small" onclick="UI.cal.anio=${ys[iy-1]??y-1};render()" aria-label="Año anterior">‹</button><b>${y}</b><button class="btn small" onclick="UI.cal.anio=${ys[iy+1]??y+1};render()" aria-label="Año siguiente">›</button></div>
       <label>Grupo<select onchange="UI.cal.grupo=this.value;render()">${opts(gruposVis(), UI.cal.grupo, ['all','Todos'])}</select></label>
       <label>Skill<select onchange="UI.cal.skill=this.value;render()">${opts(skillsVis(), UI.cal.skill, ['all','Todas'])}</select></label>
+      <label>Categoría<select onchange="UI.cal.cat=this.value;render()"><option value="all">Todas</option><option value="ag" ${UI.cal.cat==='ag'?'selected':''}>Agentes</option><option value="sup" ${UI.cal.cat==='sup'?'selected':''}>Supers</option></select></label>
       <label>Contrato<select onchange="UI.cal.mod=this.value;render()">${CONTRATOS.map(([k,n])=>`<option value="${k}" ${(UI.cal.mod||'all')===k?'selected':''}>${n}</option>`).join('')}</select></label>
       <label>Buscar<input value="${esc(UI.cal.buscar)}" placeholder="Nombre" oninput="UI.cal.buscar=this.value;clearTimeout(window._bt);window._bt=setTimeout(()=>{render();const i=document.querySelector('.an-barra input');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}},250)"></label>
       <span class="esp"></span>
@@ -2100,7 +2155,7 @@ function fichaHTML(w){
     </div>
     ${calendarioFicha(w, S.ciclo, false)}
     <h2><span class="barra"></span>Periodos</h2>
-    ${st.periodos.length?`<table><tr><th>Desde</th><th>Hasta</th><th class="num">Días</th></tr>${st.periodos.map(p=>{const x=statsRango(p.desde,p.hasta); return `<tr><td>${fmtL(p.desde)}</td><td>${fmtL(p.hasta)}</td><td class="num">${x.computables}</td></tr>`}).join('')}</table>`:'<p>Sin vacaciones asignadas.</p>'}
+    ${st.periodos.length?`<table><tr><th>Desde</th><th>Hasta</th><th class="num">Días</th></tr>${st.periodos.map(p=>{const x=statsRango(p.desde,p.hasta,w); return `<tr><td>${fmtL(p.desde)}</td><td>${fmtL(p.hasta)}</td><td class="num">${x.computables}</td></tr>`}).join('')}</table>`:'<p>Sin vacaciones asignadas.</p>'}
     ${st.desprog.length?`<h2><span class="barra"></span>Desprogramaciones</h2><table><tr><th>Día</th><th>Solicitada</th></tr>${st.desprog.map(d=>`<tr><td>${fmtL(d.dia)}</td><td>${fmtL(d.solicitud)}</td></tr>`).join('')}</table>`:''}
     ${tf.length?`<h2><span class="barra"></span>Cambios de contrato</h2><table>${tf.map(t=>`<tr><td>${fmtL(t.fecha)}</td><td>${nombreModalidad(t.antes.modalidad)}, ${t.antes.diasDerecho} días → ${nombreModalidad(t.despues.modalidad)}, ${t.despues.diasDerecho} días</td></tr>`).join('')}</table>`:''}
     <div class="ficha-firma"><div>Recibido:</div><div>Fecha:</div></div>
@@ -2206,6 +2261,16 @@ render();
    Para publicar: subir APP_VERSION, añadir sus pasos a NOVEDADES y poner la misma versión en version.json.
    ========================================================= */
 const NOVEDADES = {
+  '5.6.0': [
+    { titulo:'Agentes y supers', donde:'Skills',
+      texto:'Marca «Es de super» en las skills de jefe de servicio, jefe de turno y supervisor. Quien tenga alguna es super; el resto, agente. Lo verás con una etiqueta en Plantilla, Grupos y Elección.' },
+    { titulo:'Cupo del grupo por categoría', donde:'Grupos y Asignación › Grupos de elección',
+      texto:'Cada grupo tiene ahora «Agentes a la vez» y «Supers a la vez» (1 y 1 de serie). En un grupo con 1 y 1 pueden coincidir un agente y un super, pero no dos agentes ni dos supers. Al elegir solo bloquean los de tu misma categoría.' },
+    { titulo:'Tope de días', donde:'Elección',
+      texto:'Cuando alguien ha cogido todos sus días, no se le pueden añadir más. Al arrastrar, la selección se para al llegar a los días que le quedan.' },
+    { titulo:'Descansos y festivos', donde:'Elección y Desprogramaciones',
+      texto:'Los días de descanso o festivo de su rotación no se pueden coger ni desprogramar. Un periodo puede cruzarlos, pero no cuentan como vacaciones ni gastan días ni puntos.' },
+  ],
   '5.5.0': [
     { titulo:'Descansos y festivos claros', donde:'Menú › Calendario',
       texto:'Los días que en la rotación son de no trabajar (R, X…) salen como bloques de color sólido en la fila de cada persona. Con el zoom «Semanas» o «Días» llevan su letra dentro. El sombreado de fines de semana ya no se mezcla con ellos.' },

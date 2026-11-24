@@ -1,9 +1,9 @@
 {
-  "version": "5.5.0",
-  "fecha": "2026-11-23",
+  "version": "5.6.0",
+  "fecha": "2026-11-24",
   "novedades": [
-    "Calendario: descansos y festivos de la rotación en bloques de color con su letra",
-    "Rotación individual desde la tabla de Plantilla",
-    "Filtro por tipo de contrato en Plantilla y Calendario"
+    "Agentes y supers con cupo propio dentro de cada grupo",
+    "No se pueden añadir más vacaciones que los días que tiene cada persona",
+    "Los descansos y festivos de la rotación no se pueden coger y no gastan días"
   ]
 }
