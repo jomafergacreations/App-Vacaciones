@@ -184,9 +184,12 @@ main{max-width:1760px;margin:0 auto;padding:24px clamp(18px,2.5vw,40px) 8px}
 .asig-linea{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--senal);border-radius:14px;padding:12px 16px;font-size:14.5px}
 .vac-modos{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
 .vac-modos .volver{margin:0}
-.vm-t{font-size:34px;margin:2px 0 0}
+.vm-t{font-size:28px;margin:0}
+.vac-modos>div{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
 .cons-barra{display:flex;flex-wrap:wrap;gap:10px 12px;align-items:flex-end}
 .cons-barra .esp{flex:1}
+.cons-barra{padding:10px 16px!important;margin-bottom:10px} .cons-barra input,.cons-barra select{padding-top:7px;padding-bottom:7px} .cons-mes button{padding:6px 7px;font-size:12.5px} .cons-acc{display:flex;gap:6px;align-self:flex-end}
+.cg-card .ley-dias{margin-top:8px;padding:6px 10px;font-size:12.5px} .cg-card .ley-dias .li b{height:18px;min-width:22px;font-size:11px}
 .cons-mes{display:flex;flex-wrap:wrap;gap:2px;align-self:flex-end}
 .cons-mes button{border:1px solid var(--linea);background:#fff;border-radius:7px;padding:7px 8px;font:inherit;font-size:13px;font-weight:600;text-transform:capitalize;cursor:pointer}
 .cons-mes button:hover{border-color:var(--asfalto)}
@@ -209,7 +212,12 @@ table.cg{border-collapse:separate;border-spacing:0;width:max-content;font-size:1
 .cg tbody td{cursor:pointer;height:30px;text-align:center;font-weight:700;font-size:11px}
 .cg-grp th,.cg-grp td{background:var(--hormigon)!important;height:26px}
 .cg-grp th{font-family:var(--cond);font-size:14px;padding-left:10px!important;color:var(--gris)}
-.ed-cab{display:flex;flex-wrap:wrap;gap:14px 24px;align-items:flex-end}
+.ed-cab{display:flex;flex-wrap:wrap;gap:10px 24px;align-items:flex-end;padding-top:14px;padding-bottom:14px}
+.eg-card{padding:10px 14px} .ley-ayuda{margin-left:auto;font-weight:500;color:var(--gris)}
+body.ancho main{padding-top:14px}
+.ed-cab{padding:10px 16px!important;margin-bottom:10px} .ed-cab .per-mini b{font-size:18px} .ed-cab .per-mini{font-size:12px;gap:4px 20px} .ed-cab label{font-size:12.5px}
+.vac-modos{margin-bottom:8px} .vm-t{font-size:24px!important}
+.eg-card .ley-dias{margin-top:6px;padding:6px 10px;font-size:12.5px} .eg-card .ley-dias .li b{height:18px;min-width:22px;font-size:11px}
 .ed-sel{flex:0 1 320px}
 .ed-acc{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap}
 .eg-scroll{overflow-x:auto}
@@ -588,88 +596,44 @@ body.bloqueada{overflow:hidden}
   .inf{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .inf tr,.gantt .fila{break-inside:avoid}
 }
-/* ---- calendarios: aprovechar la pantalla y leer mejor meses y leyendas ---- */
-body.ancho main{max-width:none}
-.ley-dias{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:16px;padding:12px 16px;background:#F4F5F8;border-radius:12px;font-size:14.5px;font-weight:600;color:var(--asfalto)}
-.ley-dias .li{display:inline-flex;align-items:center;gap:8px}
-.ley-dias .li b{display:inline-grid;place-items:center;min-width:28px;height:24px;padding:0 4px;border-radius:6px;font-size:12.5px;font-weight:800}
+/* ---- calendarios: a todo el ancho, ajustados al alto de la pantalla, tamaño moderado ---- */
+body.ancho main{max-width:1900px}
+.ley-dias{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:10px;padding:8px 12px;background:#F4F5F8;border-radius:10px;font-size:13.5px;font-weight:600;color:var(--asfalto)}
+.ley-dias .li{display:inline-flex;align-items:center;gap:7px}
+.ley-dias .li b{display:inline-grid;place-items:center;min-width:24px;height:20px;padding:0 4px;border-radius:5px;font-size:11.5px;font-weight:800}
 .ley-dias .lb-b{background:repeating-linear-gradient(135deg,#F3C2BD 0 3px,#FBE7E5 3px 7px);color:#8C2A20}
-.ley-dias .lb-fs{background:#DDE1E8;box-shadow:inset 0 4px 0 #22262E}
-.ley-dias .lb-ss{background:var(--senal-soft);box-shadow:inset 0 0 0 3px var(--senal)}
-.legend{font-size:14px;color:var(--asfalto);gap:10px 20px;margin-top:14px}
-.legend span::before{width:15px;height:15px;border-radius:4px;vertical-align:-2px;margin-right:7px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
-/* hoja anual (Editar y «A mano») */
-.eg-mes{width:118px;font-size:19px!important;font-weight:700}
-.eg thead th{font-size:14px;font-weight:700;color:var(--asfalto);padding:4px 0}
-.eg td{height:clamp(44px, calc((100vh - 380px) / 12), 72px)}
-.eg td b{font-size:clamp(13px, 1.1vw, 18px)}
-.eg td small{font-size:10px;top:3px;left:4px}
-/* consultar */
-.cg-scroll{max-height:calc(100vh - 250px);min-height:360px}
-.cg-d{width:var(--cw,32px);min-width:var(--cw,32px);height:40px;font-size:13.5px}
-.cg-d small{font-size:10.5px}
-.cg thead tr:first-child th{height:34px}
-.cg thead tr:nth-child(2) th{top:34px}
-.cg-mes{font-size:19px!important;color:var(--asfalto)}
-.cg-mes span{position:sticky;left:var(--nomw,200px);padding-right:12px}
-.cg tbody td{height:34px;font-size:12.5px}
-.cg-nom{min-width:200px;max-width:200px}
-.cg-nom button{height:34px;line-height:34px;font-size:13.5px}
-.cg-grp th{font-size:16px!important;color:var(--asfalto)!important}
+.ley-dias .lb-fs{background:#DDE1E8;box-shadow:inset 0 3px 0 #22262E}
+.ley-dias .lb-ss{background:var(--senal-soft);box-shadow:inset 0 0 0 2px var(--senal)}
+.legend{font-size:13.5px;color:var(--asfalto);gap:8px 18px;margin-top:12px}
+.legend span::before{width:13px;height:13px;border-radius:4px;vertical-align:-2px;margin-right:6px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+/* hoja anual (Editar y «A mano»): la altura de fila la calcula ajustarAltos() para que quepa sin desplazar */
+.eg-mes{width:100px;font-size:16px!important;font-weight:700}
+.eg thead th{font-size:13px;font-weight:700;color:var(--asfalto);padding:2px 0}
+.eg td{height:var(--egh,40px);padding:0!important;line-height:1}
+.eg thead th{padding:2px 0!important}
+.eg tbody th.eg-mes{padding:0 6px 0 0!important;line-height:1}
+.eg td b{font-size:clamp(12px, .9vw, 15px)}
+.eg td small{font-size:9px;top:2px;left:3px}
+/* consultar: el alto del cuadro también se ajusta a la pantalla */
+.cg-scroll{max-height:none;height:var(--cgh,calc(100vh - 260px));min-height:280px}
+.cg-d{width:var(--cw,30px);min-width:var(--cw,30px);height:36px;font-size:12.5px}
+.cg-d small{font-size:10px}
+.cg thead tr:first-child th{height:28px}
+.cg thead tr:nth-child(2) th{top:28px}
+.cg-mes{font-size:16px!important;color:var(--asfalto)}
+.cg-mes span{position:sticky;left:var(--nomw,184px);padding-right:12px}
+.cg tbody td{height:30px;font-size:11.5px}
+.cg-nom{min-width:184px;max-width:184px}
+.cg-nom button{height:30px;line-height:30px;font-size:12.5px}
+.cg-grp th{font-size:14.5px!important;color:var(--asfalto)!important}
 /* calendarios de 12 meses (fichas, elección, grupos) */
-.fcal{grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:20px 26px}
-.smes-t{font-size:20px;margin-bottom:6px;color:var(--asfalto)}
-.sdow{font-size:12px;font-weight:700}
-.fd{font-size:13.5px}
-@media (min-width:1700px){ .fcal{grid-template-columns:repeat(6,1fr)} .ley-dias{font-size:15.5px} }
+.fcal{grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:16px 22px}
+.smes-t{font-size:17px;margin-bottom:4px;color:var(--asfalto)}
+.sdow{font-size:11px;font-weight:700}
+.fd{font-size:12.5px}
+@media (min-width:1600px){ .fcal{grid-template-columns:repeat(6,1fr)} }
 @media (max-width:760px){
-  .eg-mes{width:72px;font-size:15px!important} .eg td{height:44px} .cg-nom{min-width:124px;max-width:124px} .cg-mes span{left:124px}
-  .fcal{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px} .fd{font-size:11.5px} .smes-t{font-size:17px} .ley-dias{font-size:13px;gap:8px 14px}
-}
-/* descansos y festivos con la paleta común en todos los calendarios de 12 meses */
-.fd.lib{background:var(--cc,#5E6B82);color:var(--ct,#fff);border-color:transparent;font-weight:700}
-.fd.lib .tc{color:var(--ct,#fff)!important}
-.ed.rst .tc{color:var(--tct,#fff)!important}
-.ed.we:not(.rst):not(.propio):not(.sel),.fd.we:not(.lib):not(.vac):not(.dp):not(.mk){background:#DDE1E8}
-.ed.we,.fd.we{box-shadow:inset 0 3px 0 #22262E}
-.ed.ss,.fd.ss{box-shadow:inset 0 0 0 3px var(--senal)}
-.ed.we.ss,.fd.we.ss{box-shadow:inset 0 3px 0 #22262E,inset 0 0 0 3px var(--senal)}
-/* ---- calendarios: aprovechar la pantalla y leer mejor meses y leyendas ---- */
-body.ancho main{max-width:none}
-.ley-dias{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:16px;padding:12px 16px;background:#F4F5F8;border-radius:12px;font-size:14.5px;font-weight:600;color:var(--asfalto)}
-.ley-dias .li{display:inline-flex;align-items:center;gap:8px}
-.ley-dias .li b{display:inline-grid;place-items:center;min-width:28px;height:24px;padding:0 4px;border-radius:6px;font-size:12.5px;font-weight:800}
-.ley-dias .lb-b{background:repeating-linear-gradient(135deg,#F3C2BD 0 3px,#FBE7E5 3px 7px);color:#8C2A20}
-.ley-dias .lb-fs{background:#DDE1E8;box-shadow:inset 0 4px 0 #22262E}
-.ley-dias .lb-ss{background:var(--senal-soft);box-shadow:inset 0 0 0 3px var(--senal)}
-.legend{font-size:14px;color:var(--asfalto);gap:10px 20px;margin-top:14px}
-.legend span::before{width:15px;height:15px;border-radius:4px;vertical-align:-2px;margin-right:7px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
-/* hoja anual (Editar y «A mano») */
-.eg-mes{width:118px;font-size:19px!important;font-weight:700}
-.eg thead th{font-size:14px;font-weight:700;color:var(--asfalto);padding:4px 0}
-.eg td{height:clamp(44px, calc((100vh - 380px) / 12), 72px)}
-.eg td b{font-size:clamp(13px, 1.1vw, 18px)}
-.eg td small{font-size:10px;top:3px;left:4px}
-/* consultar */
-.cg-scroll{max-height:calc(100vh - 250px);min-height:360px}
-.cg-d{width:var(--cw,32px);min-width:var(--cw,32px);height:40px;font-size:13.5px}
-.cg-d small{font-size:10.5px}
-.cg thead tr:first-child th{height:34px}
-.cg thead tr:nth-child(2) th{top:34px}
-.cg-mes{font-size:19px!important;color:var(--asfalto)}
-.cg-mes span{position:sticky;left:var(--nomw,200px);padding-right:12px}
-.cg tbody td{height:34px;font-size:12.5px}
-.cg-nom{min-width:200px;max-width:200px}
-.cg-nom button{height:34px;line-height:34px;font-size:13.5px}
-.cg-grp th{font-size:16px!important;color:var(--asfalto)!important}
-/* calendarios de 12 meses (fichas, elección, grupos) */
-.fcal{grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:20px 26px}
-.smes-t{font-size:20px;margin-bottom:6px;color:var(--asfalto)}
-.sdow{font-size:12px;font-weight:700}
-.fd{font-size:13.5px}
-@media (min-width:1700px){ .fcal{grid-template-columns:repeat(6,1fr)} .ley-dias{font-size:15.5px} }
-@media (max-width:760px){
-  .eg-mes{width:72px;font-size:15px!important} .eg td{height:44px} .cg-nom{min-width:124px;max-width:124px} .cg-mes span{left:124px}
+  .eg-mes{width:64px;font-size:14px!important} .cg-nom{min-width:124px;max-width:124px} .cg-mes span{left:124px}
   .fcal{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px} .fd{font-size:11.5px} .smes-t{font-size:17px} .ley-dias{font-size:13px;gap:8px 14px}
 }
 /* descansos y festivos con la paleta común en todos los calendarios de 12 meses */
@@ -700,7 +664,7 @@ body.ancho main{max-width:none}
    Reglas base: Convenio Menzies (BOE-A-2023-25956), arts. 32 y 33
    Datos guardados en el navegador (localStorage). Haz copias.
    ========================================================= */
-const APP_VERSION = '9.1.0';   // súbela junto con version.json en cada publicación
+const APP_VERSION = '9.1.1';   // súbela junto con version.json en cada publicación
 const LS_KEY = 'vacaciones-agp-v1';
 const SIN = '_'; // clave interna para «sin grupo»
 
@@ -1217,6 +1181,7 @@ function render(){
   const on = document.querySelector('.step.on'); if(on) on.scrollIntoView({block:'nearest',inline:'center'});
   if(UI.vista==='pdf') ajustarHoja();
   if(UI.vista==='gestion' && UI.gTab==='rotaciones' && UI.rotEdit) document.querySelector('.dlg-op.on, .dlg-op')?.focus();
+  ajustarAltos();
   if(UI.vista==='vacaciones' && UI.vacModo==='consultar') colocarConsultar();
   if(UI.ed && document.querySelector('.hoja-acc')) colocarHoja(); else UI._hojaClave = '';
 }
@@ -1466,10 +1431,10 @@ const COD_DIA = e => e.k==='vac' ? 'H' : e.k==='dp' ? 'D' : e.k==='mk' ? e.cod :
 const PAL_DIA = {H:['#23864F','#FFFFFF'], D:['#C23B30','#FFFFFF'], R:['#5E6B82','#FFFFFF'], F:['#F0A35E','#22262E'], X:['#8E2A6B','#FFFFFF'], AJ:['#0E7A8A','#FFFFFF'], B:['#F6D3CF','#8C2A20'], C:['#D5D8DE','#5F6775']};
 const COLOR_DIA = e => { const c = COD_DIA(e); if(!c) return ''; const p = PAL_DIA[c] || [e.t?.color||'#5F6775','#FFFFFF']; return `--cc:${p[0]};--ct:${p[1]}`; };
 const claseDia = (e, s) => { const wd = pd(s).getUTCDay(); return [`c-${e.k||'t'}`, COD_DIA(e)?'pinta':'', (wd===0||wd===6)?'fs':'', esSS(s)?'ss':''].filter(Boolean).join(' '); };
-function leyendaDias(){
+function leyendaDias(ayuda=''){
   const m = (c,t) => `<span class="li"><b style="background:${PAL_DIA[c][0]};color:${PAL_DIA[c][1]}">${c}</b>${t}</span>`;
   return `<div class="ley-dias" aria-label="Leyenda">${m('H','Vacaciones')}${m('R','Descanso')}${m('F','Festivo')}${m('X','Festivo de empresa')}${m('AJ','Ajuste de jornada')}${m('D','Desprogramado')}
-    <span class="li"><b class="lb-b">B</b>Baja</span><span class="li"><b class="lb-fs"></b>Fin de semana</span><span class="li"><b class="lb-ss"></b>Semana Santa</span></div>`;
+    <span class="li"><b class="lb-b">B</b>Baja</span><span class="li"><b class="lb-fs"></b>Fin de semana</span><span class="li"><b class="lb-ss"></b>Semana Santa</span>${ayuda?`<span class="ley-ayuda">${ayuda}</span>`:''}</div>`;
 }
 
 /* ---------- Consultar: todo el año en celdas, nombres fijos ---------- */
@@ -1488,15 +1453,14 @@ function vConsultar(){
         return `<td class="${claseDia(e,s)} ${s.endsWith('-01')?'ini':''}"${col?` style="${col}"`:''}>${c}</td>`; }).join('')}</tr>`; }).join('');
   }).join('');
   return `<div class="card cons-barra">
-      <label style="flex:0 1 220px">Grupo<select onchange="UI.cons.grupo=this.value;render()">${opts(gruposVis(), C.grupo, ['all','Todos los grupos'])}</select></label>
-      <label style="flex:0 1 220px">Buscar<input value="${esc(C.buscar)}" placeholder="Nombre" oninput="UI.cons.buscar=this.value;clearTimeout(window._cb);window._cb=setTimeout(()=>{render();const i=document.querySelector('.cons-barra input');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}},250)"></label>
+      <label style="flex:0 1 190px">Grupo<select onchange="UI.cons.grupo=this.value;render()">${opts(gruposVis(), C.grupo, ['all','Todos los grupos'])}</select></label>
+      <label style="flex:0 1 190px">Buscar<input value="${esc(C.buscar)}" placeholder="Nombre" oninput="UI.cons.buscar=this.value;clearTimeout(window._cb);window._cb=setTimeout(()=>{render();const i=document.querySelector('.cons-barra input');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}},250)"></label>
       <div class="cons-mes" role="group" aria-label="Ir al mes">${MESES.map((m,i)=>`<button onclick="irMesCons(${i})">${m.slice(0,3)}</button>`).join('')}</div>
       <span class="esp"></span>
-      <button class="btn" onclick="descargarZIP()">${ico('descarga')} Todas las fichas (ZIP)</button>
-      <button class="btn" onclick="go('pdf')">Informe del producto</button>
+      <div class="cons-acc"><button class="btn small" onclick="descargarZIP()">${ico('descarga')} Fichas (ZIP)</button><button class="btn small" onclick="go('pdf')">Informe</button></div>
     </div>
     <div class="card cg-card"><div class="cg-scroll" id="cgScroll"><table class="cg" onclick="clicCons(event)"><thead><tr>${cabM}</tr><tr>${cabD}</tr></thead><tbody>${filas || `<tr><td class="muted" style="padding:14px">Nadie con ese nombre.</td></tr>`}</tbody></table></div>
-      <p class="muted" style="margin:10px 0 0">Desliza en horizontal para avanzar por el año. Toca un día para editarlo, o un nombre para ver su hoja entera.</p>${leyendaDias()}</div>`;
+      ${leyendaDias('Desliza para avanzar. Toca un día para editarlo, o un nombre para ver su hoja.')}</div>`;
 }
 function clicCons(ev){
   const td = ev.target.closest('td'), tr = td && td.parentElement; if(!td || !tr.dataset.w) return;
@@ -1506,8 +1470,8 @@ function clicCons(ev){
 function irMesCons(m){ const c = document.getElementById('cgScroll'), th = document.getElementById('cgm'+m), nom = c?.querySelector('.cg-esq'); if(c && th) c.scrollTo({left: th.offsetLeft - (nom?nom.offsetWidth:0), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'}); }
 function colocarConsultar(){
   const c = document.getElementById('cgScroll'); if(!c) return;
-  const nom = c.querySelector('.cg-esq')?.offsetWidth || 200, dias = innerWidth < 760 ? 9 : 42;   // unas 6 semanas a la vista
-  c.style.setProperty('--cw', Math.max(32, Math.floor((c.clientWidth - nom - 2) / dias)) + 'px');
+  const nom = c.querySelector('.cg-esq')?.offsetWidth || 200, dias = innerWidth < 760 ? 9 : 56;   // unos dos meses a la vista
+  c.style.setProperty('--cw', Math.max(28, Math.min(40, Math.floor((c.clientWidth - nom - 2) / dias))) + 'px');
   if(UI.cons._x != null && UI.cons._pintado){ c.scrollLeft = UI.cons._x; }
   else { const h = hoy(); const m = delAnio(h,CIC()) ? Number(h.slice(5,7))-1 : 0; const th = document.getElementById('cgm'+m), nom = c.querySelector('.cg-esq'); if(th) c.scrollLeft = th.offsetLeft - (nom?nom.offsetWidth:0); UI.cons._pintado = true; }
   c.onscroll = () => { UI.cons._x = c.scrollLeft; };
@@ -1540,9 +1504,9 @@ function vEditar(){
       </div>
       <div class="ed-acc"><button class="btn" onclick="descargarPDFPersona('${w.id}')">${ico('descarga')} Descargar PDF</button><button class="btn" onclick="UI.perTrab='${w.id}';UI.perModo='ficha';UI.perTab='datos';UI.perNuevo=false;go('personal')">Su ficha</button></div>
     </div>
-    <div class="card"><div class="row" style="justify-content:space-between;align-items:center;margin-bottom:10px"><h2 style="margin:0">${esc(w.nombre)}, ${y}</h2><span class="muted">${E&&E.paso==='fin'?'Ahora toca el último día.':'Toca un día para ver qué puedes hacer, o pincha y arrastra para elegir varios.'}</span></div>
+    <div class="card eg-card">
       <div class="eg-scroll" onscroll="colocarHoja()"><table class="eg" onpointerdown="arrIni(event)"><thead><tr><th class="eg-mes"></th>${Array.from({length:31},(_,i)=>`<th>${i+1}</th>`).join('')}</tr></thead><tbody>${filas}</tbody></table></div>
-      ${leyendaDias()}</div>
+      ${leyendaDias(E&&E.paso==='fin'?'<b>Ahora toca el último día.</b>':'Toca un día para ver qué hacer, o pincha y arrastra para elegir varios.')}</div>
     ${E ? hojaAcciones(w, E) : ''}`;
 }
 function tocarDia(s){
@@ -1572,6 +1536,16 @@ function arrIni(ev){
   document.addEventListener('pointermove', mover); document.addEventListener('pointerup', soltar);
 }
 /* el menú del día sale flotando junto al último día tocado */
+/* hoja anual y cuadro de consultar: que quepan en el alto de la ventana sin desplazar la página */
+function ajustarAltos(){
+  if(innerWidth < 760) return;   // en el móvil se desplaza con normalidad
+  const sobra = () => document.documentElement.scrollHeight - innerHeight;
+  const eg = document.querySelector('.eg'), cg = document.getElementById('cgScroll');
+  if(eg){ let h = 44; eg.style.setProperty('--egh', h+'px');
+    for(let k=0; k<8 && sobra()>0 && h>26; k++){ h = Math.max(26, h - Math.ceil(sobra()/12) - 1); eg.style.setProperty('--egh', h+'px'); } }
+  if(cg){ let h = Math.max(280, Math.floor(innerHeight - cg.getBoundingClientRect().top - scrollY - 90)); cg.style.setProperty('--cgh', h+'px');
+    for(let k=0; k<3 && sobra()>0 && h>280; k++){ h = Math.max(280, h - sobra()); cg.style.setProperty('--cgh', h+'px'); } }
+}
 function colocarHoja(){
   const h = document.querySelector('.hoja-acc'), E = UI.ed; if(!h || !E) return;
   const td = document.querySelector(`.eg td[data-d="${E.ancla||E.hasta||E.dia}"]`);
@@ -1587,7 +1561,7 @@ function colocarHoja(){
   h.classList.toggle('arriba', arriba);
   if(top + alto > innerHeight) h.scrollIntoView({block:'nearest', behavior:'smooth'});
 }
-window.addEventListener('resize', ()=>{ colocarHoja(); if(UI.vista==='vacaciones' && UI.vacModo==='consultar') colocarConsultar(); });
+window.addEventListener('resize', ()=>{ ajustarAltos(); colocarHoja(); if(UI.vista==='vacaciones' && UI.vacModo==='consultar') colocarConsultar(); });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape' && UI.ed && !document.getElementById('bloqueo')){ UI.ed=null; render(); } });
 function hojaAcciones(w, E){
   const s = E.dia, {vac, dps} = diasDe(w, CIC()), e = estadoDia(w, s, vac, dps);
@@ -2842,6 +2816,10 @@ render();
    Para publicar: subir APP_VERSION, añadir sus pasos a NOVEDADES y poner la misma versión en version.json.
    ========================================================= */
 const NOVEDADES = {
+  '9.1.1': [
+    { titulo:'Calendarios a la medida de tu pantalla', donde:'Calendario y Editar',
+      texto:'La hoja del año y el calendario de todos se ajustan al alto de la ventana: caben enteros sin desplazar la página y con un tamaño más contenido. En el calendario de todos, desliza dentro del cuadro para ver más personas o más días.' },
+  ],
   '9.1.0': [
     { titulo:'Calendarios más grandes', donde:'Calendario, Editar, Elección y fichas',
       texto:'Los calendarios ocupan todo el ancho de la pantalla y la hoja del año crece con la altura de tu monitor. Las celdas, las letras y los nombres de los meses son más grandes, y el mes se queda fijo mientras deslizas.' },

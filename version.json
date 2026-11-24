@@ -1,8 +1,5 @@
 {
-  "version": "9.1.0",
+  "version": "9.1.1",
   "fecha": "2026-11-24",
-  "novedades": [
-    "Calendarios a todo el ancho, con meses y leyendas más claros",
-    "Los mismos colores en todos los calendarios"
-  ]
+  "novedades": ["Calendarios ajustados al alto de la pantalla, sin desplazar"]
 }
