@@ -15,7 +15,12 @@ Si `version.json` lleva una versión mayor que la de `index.html`, la app entrar
 ## Estructura
 
 - Inicio: departamento (Pasaje, Rampa, Operaciones) → producto (GroundHandling azul, RedBull naranja) → menú del producto (`vMenu`). Todo lo de dentro se filtra por ese contexto (`S.ctx`).
-- Menú: tarjeta «Asignación de vacaciones» (único sitio con barra de pasos: Grupos de elección › Elección › Resumen y cierre, `PASOS`; en el menú muestra el estado de cada paso y lleva al siguiente) y secciones sueltas (`SECCIONES`) agrupadas en tres bloques (Personas; Turnos, jornada y contratos; Consultar), con iconos SVG de `ICONOS`/`ico()`: Plantilla (pestañas Trabajadores y Cupos de plantilla), Grupos (vista `equipos`: miembros a mano y año con la rotación del grupo), Skills, Rotaciones, Jornada, Transformaciones, Desprogramaciones, Calendario y Exportar PDF.
+- Menú del producto (`vMenu`): tres globos.
+  - Personal (vista `personal`): lista y ficha por pestañas (`PER_TABS`: Datos con `formTrab`, Jornada con `fichaJornada`, Vacaciones con `fichaVacaciones`, Contrato con `vTransformaciones(id)`), y modo Tabla (`tablaPersonal`) con el pegado desde Excel (`pegarCard`).
+  - Grupos (vista `gestion`): pestañas `G_TABS` que reutilizan `vEquipos`, `vSkills`, `vRotaciones` y `vCupos`.
+  - Vacaciones (vista `vacaciones`): tarjeta de asignación (`asignacionCard`, única con barra de pasos `PASOS`: Grupos de elección › Elección › Resumen y cierre), calendario general (`vCalendario`, por defecto «2 meses» con desplazamiento horizontal y nombres fijos) o el de una persona (`vistaPersonaVac`), «Descargar PDF» (`pdfPersona`) y ZIP con todas las fichas (`descargarZIP`). El informe del producto es la vista `pdf`.
+  - Las secciones antiguas (plantilla, jornada, desprog, equipos, rotaciones, calendario…) se redirigen a su globo con `ALIAS`.
+- PDF y ZIP se generan en la app sin librerías: `nuevoPDF()` (Helvetica, WinAnsi) y `hacerZIP()` (sin compresión). Nombre de cada ficha: «Nombre - año.pdf».
 - Categorías: una skill puede ser «de super» (`skill.super`); quien tenga alguna es super, el resto agente (`catDe`). Cada grupo tiene cupo por categoría (`cupoAg`, `cupoSup`): cuántos agentes y supers del grupo pueden estar fuera a la vez (`companerosEnFechas`).
 - Días de vacaciones: no se puede pasar de `derechoCiclo` (`excedeDias`). Los descansos y festivos de la rotación (`esDescanso`) no se pueden coger y, si un periodo los cruza, no cuentan (`statsRango(desde, hasta, w)`).
 - Grupos de elección ≠ cupos de plantilla: los grupos solo marcan quién elige con quién y en qué orden (y el 10 % de desprogramaciones); los cupos limitan cuántos pueden estar fuera a la vez.
