@@ -150,6 +150,48 @@ table.plantilla{width:100%;border-collapse:collapse;font-variant-numeric:tabular
 .periodo label{flex:1 1 150px}
 .periodo .dias{font-weight:700;padding-bottom:11px;min-width:90px}
 .quitar{border:0;background:#F1F3F6;border-radius:8px;width:40px;height:42px;cursor:pointer;font-size:18px}
+/* horas hechas */
+.prog{height:6px;background:#E3E6EB;border-radius:3px;overflow:hidden;margin-top:5px;min-width:90px}
+.prog i{display:block;height:100%;background:var(--ok);border-radius:3px;transition:width .3s}
+.prog.pasa i{background:var(--mal)}
+.plantilla .hecha{font-family:var(--cond);font-size:20px;font-weight:700}
+.de-mas{color:var(--mal);font-weight:700}
+.semanas{display:flex;flex-direction:column;gap:6px}
+.semana{display:grid;grid-template-columns:1fr 130px 40px;gap:10px;align-items:center;border:1px solid var(--linea);border-radius:10px;padding:6px 6px 6px 12px}
+.semana .qs{font-weight:600}
+.semana .qs small{display:block;color:var(--gris);font-weight:600;font-size:12.5px}
+.semana .hcampo{display:flex;align-items:center;gap:6px}
+.semana input{padding:8px 10px;text-align:right;font-family:var(--cond);font-size:20px;font-weight:700}
+.semana .quitar{height:38px}
+.calculo .hq{display:flex;gap:18px;flex-wrap:wrap;color:#fff;font-weight:600}
+.calculo .hq em{font-style:normal;font-family:var(--cond);font-size:24px;color:var(--senal);margin-left:4px}
+/* importar turnos */
+.dlg.ancho{width:min(1000px,100%)}
+.fondo.quieto,.fondo.quieto .dlg{animation:none}
+.soltar{border:2px dashed var(--linea);border-radius:14px;padding:26px 16px;text-align:center;cursor:pointer;color:var(--asfalto);display:flex;flex-direction:column;align-items:center;gap:4px;transition:border-color .15s,background .15s}
+.soltar:hover,.soltar.encima{border-color:var(--asfalto);background:var(--senal-suave)}
+.soltar b{font-family:var(--cond);font-size:22px}
+.soltar input{display:none}
+.imp-ajustes{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;background:#F4F5F8;border-radius:14px;padding:14px}
+.imp-ajustes .semtxt{font-size:13px;color:var(--gris);font-weight:600}
+.cols{display:flex;flex-wrap:wrap;gap:6px}
+.cols label{flex-direction:row;align-items:center;gap:6px;border:1px solid var(--linea);background:#fff;border-radius:999px;padding:5px 11px;font-size:13px;cursor:pointer;color:var(--asfalto)}
+.cols label.on{border-color:var(--asfalto);background:var(--senal-suave)}
+.cols input{width:auto;margin:0}
+.imp-res{display:flex;flex-wrap:wrap;gap:8px}
+.imp-res span{border-radius:999px;padding:3px 11px;font-size:13px;font-weight:700;background:#F1F3F6}
+.imp-filas{display:flex;flex-direction:column;border-top:2px solid var(--asfalto)}
+.imp-fila{display:grid;grid-template-columns:minmax(0,1.3fr) 90px minmax(0,1.5fr) 190px;gap:10px;align-items:center;padding:8px 2px;border-bottom:1px solid var(--linea)}
+.imp-fila.tit{font-family:var(--cond);font-weight:700;color:var(--gris);font-size:15px}
+.imp-fila .nf{font-weight:700;overflow-wrap:anywhere}
+.imp-fila .hf{text-align:right;font-family:var(--cond);font-size:20px;font-weight:700}
+.imp-fila select{padding:8px 10px;font-size:14.5px}
+.imp-fila.ign{opacity:.55}
+.est{border-radius:999px;padding:3px 10px;font-size:12.5px;font-weight:700;justify-self:start}
+.est.ok{background:#DDF1E4;color:var(--ok)}
+.est.duda{background:var(--senal-suave);color:#7A5600}
+.est.no{background:#FBE7E5;color:var(--mal)}
+.est.nuevo{background:#E4ECF9;color:var(--pista)}
 
 /* bloqueo de actualización y recorrido */
 .bloqueo{position:fixed;inset:0;z-index:100;background:rgba(22,25,31,.82);display:grid;place-items:center;padding:16px}
@@ -185,6 +227,12 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
   .tm .l2{display:flex;justify-content:space-between;margin-top:8px;font-size:14px;color:var(--gris)}
   .tm .l2 b{font-family:var(--cond);font-size:22px;color:var(--asfalto)}
   .contratos,.jornada{grid-template-columns:1fr}
+  .tm .l3{margin-top:8px;font-size:13.5px;color:var(--gris);display:flex;justify-content:space-between;gap:8px}
+  .tm .l3 b{color:var(--asfalto)}
+  .imp-fila{grid-template-columns:minmax(0,1fr) auto;gap:6px 10px}
+  .imp-fila select{grid-column:1/-1} .imp-fila .est{grid-column:1/-1}
+  .imp-fila.tit{display:none}
+  .semana{grid-template-columns:1fr 110px 40px}
   .barra-herr .buscar{max-width:none} .seg{overflow-x:auto;max-width:100%}
   .dlg{border-radius:16px}
 }
@@ -208,9 +256,19 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
    Control Planning 10 — rehecha desde cero
    Datos en localStorage, con una clave nueva.
    ========================================================= */
-const APP_VERSION = '10.3.0';
+const APP_VERSION = '10.4.0';
 const CLAVE = 'control-planning-v10';
 const NOVEDADES = {
+  '10.4.0': [
+    { titulo:'Importar turnos', donde:'Personal › Importar turnos',
+      texto:'Sube el Excel (.xlsx) o el .csv de los turnos de una semana, o pega las filas. La app busca sola los nombres y las horas, y empareja a cada persona aunque su nombre esté en otro orden o escrito de otra forma. Antes de apuntar nada te lo enseña para que lo revises: puedes cambiar la semana, la columna de las horas y a quién va cada fila.' },
+    { titulo:'Lo que la app recuerda', donde:'Personal › Importar turnos',
+      texto:'Cuando eliges a mano a quién va un nombre, la próxima vez lo empareja sola. Si importas otra vez la misma semana, sus horas se sustituyen, no se suman.' },
+    { titulo:'Hechas y quedan', donde:'Personal',
+      texto:'La lista tiene dos columnas nuevas: las horas que lleva cada trabajador en el año y las que le quedan de su jornada, con una barra de avance. Si se pasa, verás las horas de más en rojo.' },
+    { titulo:'Bajas y semanas en la ficha', donde:'Personal › ficha del trabajador',
+      texto:'Apunta sus bajas (desde y hasta) y su jornada anual se recalcula con una regla de tres sobre los días del año, o sobre los de actividad si es fijo discontinuo. Debajo están sus horas semana a semana: puedes corregirlas, quitarlas o añadir una semana a mano.' },
+  ],
   '10.3.0': [
     { titulo:'Horario concretado y jornada reducida, por separado', donde:'Personal › ficha del trabajador',
       texto:'Ahora son dos opciones distintas y puedes marcar las dos. «¿Tiene horario concretado?»: eliges su turno (mañanas, tardes o noches) y, si quieres, el horario; no cambia sus horas. «¿Tiene jornada reducida?»: escribes las horas que hace a la semana o el porcentaje de su jornada, y se recalcula su jornada anual.' },
@@ -240,11 +298,22 @@ const pd = s => new Date(s+'T00:00:00Z');
 const fmt = s => s ? pd(s).toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}) : '';
 const diasEntre = (a,b) => Math.round((pd(b)-pd(a))/864e5) + 1;
 const diasAnio = y => (y%4===0 && y%100!==0) || y%400===0 ? 366 : 365;
+const isoDe = d => d.toISOString().slice(0,10);
+const sumaDias = (s, n) => { const d = pd(s); d.setUTCDate(d.getUTCDate()+n); return isoDe(d); };
+const lunesDe = s => { const d = pd(s); d.setUTCDate(d.getUTCDate() - (d.getUTCDay()+6)%7); return isoDe(d); };
+const hoyIso = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+/* una semana (por su lunes) cuenta en el año de su jueves, como las semanas del calendario */
+const anioSemana = l => Number(sumaDias(l,3).slice(0,4));
+const numSemana = l => Math.round((pd(l) - pd(lunesDe(`${anioSemana(l)}-01-04`))) / 6048e5) + 1;
+const fCorto = s => pd(s).toLocaleDateString('es-ES',{day:'numeric',month:'short',timeZone:'UTC'}).replace('.','');
+const semanaTxt = l => `${fCorto(l)} – ${fCorto(sumaDias(l,6))}${anioSemana(l)!==S.anio?' '+anioSemana(l):''}`;
+const r2 = n => Math.round(n*100)/100;
 function toast(t){ const d = document.createElement('div'); d.className='aviso-toast'; d.textContent=t; document.body.appendChild(d); setTimeout(()=>d.remove(), 2600); }
 const ICO = {
   flecha:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
   personal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="17" cy="9" r="2.4"/><path d="M16 14.2c2.3.2 3.9 1.8 4.5 4.8"/></svg>',
   mas:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  subir:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M7.5 8.5 12 4l4.5 4.5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>',
   pegar:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4.5h6M9 10h6M9 14h6M9 18h3"/></svg>',
 };
 
@@ -259,7 +328,9 @@ const CONTRATOS = {
 
 /* ---------- estado ---------- */
 function anioInicial(){ const d = new Date(); return d.getFullYear() + (d.getMonth()>=9 ? 1 : 0); }   // de octubre en adelante, el año siguiente
-function estadoInicial(){ return { v:10, anio:anioInicial(), ajustes:{hSemana:40, hAnio:1700}, trabajadores:[], versionVista:'0' }; }
+function estadoInicial(){ return { v:10, anio:anioInicial(), ajustes:{hSemana:40, hAnio:1700}, trabajadores:[], alias:{}, versionVista:'0' }; }
+/* un trabajador vacío, con todos sus campos */
+const nuevoTrabajador = (o={}) => ({ id:null, nombre:'', num:'', contrato:'completo', modo:'semana', valor:null, actividad:[], reducido:false, red:{modo:'semana', valor:null}, concretado:false, horario:{turno:'', desde:'', hasta:''}, bajas:[], horas:{}, ...o });
 function normalizar(d){
   const b = estadoInicial();
   d = Object.assign(b, d || {});
@@ -271,7 +342,11 @@ function normalizar(d){
     ...(t.red===undefined && t.conc ? { reducido: !!t.concretado, red: t.conc, concretado: false } : {}),
   })).map(t=>({ ...t,
     reducido: !!t.reducido, red: { modo: t.red?.modo==='pct' ? 'pct' : 'semana', valor: t.red?.valor ?? null },
-    concretado: !!t.concretado, horario: { turno: t.horario?.turno || '', desde: t.horario?.desde || '', hasta: t.horario?.hasta || '' } }));
+    concretado: !!t.concretado, horario: { turno: t.horario?.turno || '', desde: t.horario?.desde || '', hasta: t.horario?.hasta || '' },
+    bajas: Array.isArray(t.bajas) ? t.bajas.filter(b=>b && b.desde && b.hasta) : [],
+    horas: Object.fromEntries(Object.entries(t.horas && typeof t.horas==='object' ? t.horas : {}).filter(([k,v])=>/^\d{4}-\d{2}-\d{2}$/.test(k) && typeof v==='number' && isFinite(v)).map(([k,v])=>[lunesDe(k), v])) }));
+  const ids = new Set(d.trabajadores.map(t=>t.id));
+  d.alias = Object.fromEntries(Object.entries(d.alias && typeof d.alias==='object' ? d.alias : {}).filter(([k,id])=>ids.has(id)));
   return d;
 }
 let S;
@@ -305,12 +380,21 @@ const semanaEf = t => { const p = pctEf(t); return p==null ? null : p/100 * S.aj
 const pctDeSuJornada = t => { const pc = pctDe(t), pe = pctEf(t); return pc && pe!=null ? pe / pc * 100 : null; };
 const anualBase = t => { const p = pctEf(t); return p==null ? null : p/100 * S.ajustes.hAnio; };
 /* días de actividad de un fijo discontinuo dentro del año */
-function diasActividad(t, y=S.anio){
+/* días de una lista de periodos que caen dentro del año, sin contar dos veces los que se pisan */
+function diasDe(periodos, y){
   const ini = `${y}-01-01`, fin = `${y}-12-31`; const dias = new Set();
-  (t.actividad||[]).forEach(p=>{ if(!p.desde || !p.hasta || p.hasta<p.desde) return;
+  (periodos||[]).forEach(p=>{ if(!p || !p.desde || !p.hasta || p.hasta<p.desde) return;
     let d = p.desde < ini ? ini : p.desde; const h = p.hasta > fin ? fin : p.hasta;
-    while(d<=h){ dias.add(d); const x = pd(d); x.setUTCDate(x.getUTCDate()+1); d = x.toISOString().slice(0,10); } });
-  return dias.size;
+    while(d<=h){ dias.add(d); d = sumaDias(d,1); } });
+  return dias;
+}
+const diasActividad = (t, y=S.anio) => diasDe(t.actividad, y).size;
+/* días del año con los que se calcula su jornada: todo el año, o los de actividad si es fijo discontinuo */
+const diasJornada = (t, y=S.anio) => t.contrato==='discontinuo' ? diasActividad(t, y) : diasAnio(y);
+/* días de baja que caen en esos días */
+function diasBaja(t, y=S.anio){
+  const b = diasDe(t.bajas, y); if(t.contrato!=='discontinuo') return b.size;
+  const a = diasDe(t.actividad, y); let n = 0; b.forEach(d=>{ if(a.has(d)) n++; }); return n;
 }
 /* jornada anual del año elegido */
 function anualDe(t, y=S.anio){
@@ -318,6 +402,16 @@ function anualDe(t, y=S.anio){
   if(t.contrato!=='discontinuo') return base;
   return base * diasActividad(t, y) / diasAnio(y);
 }
+/* cómputo: la jornada anual descontando las bajas con una regla de tres
+   (si en x días tiene que hacer A horas, en x − bajas tiene que hacer A × (x − bajas) / x) */
+function computoDe(t, y=S.anio){
+  const a = anualDe(t, y); if(a==null) return null;
+  const x = diasJornada(t, y); if(!x) return 0;
+  return a * (x - Math.min(x, diasBaja(t, y))) / x;
+}
+const semanasDe = (t, y=S.anio) => Object.keys(t.horas||{}).filter(l=>anioSemana(l)===y).sort();
+const hechasDe = (t, y=S.anio) => semanasDe(t, y).reduce((a,l)=>a+(num(t.horas[l])||0), 0);
+const quedanDe = (t, y=S.anio) => { const c = computoDe(t, y); return c==null ? null : c - hechasDe(t, y); };
 const faltaJornada = t => (t.contrato!=='completo' && pctDe(t)==null) || (t.reducido && pctEf(t)==null);
 const faltaActividad = t => t.contrato==='discontinuo' && diasActividad(t)===0;
 
@@ -340,7 +434,7 @@ function vInicio(){
   const ts = S.trabajadores, pend = ts.filter(t=>faltaJornada(t)||faltaActividad(t)).length;
   return `<div class="globos">
     <button class="globo anim" style="--i:0" onclick="ir('personal')"><span class="gi">${ICO.personal}</span><span class="gt">Personal</span>
-      <span class="gp">Los trabajadores, su tipo de contrato y su jornada.</span>
+      <span class="gp">Los trabajadores, su contrato, su jornada y las horas que llevan.</span>
       <span class="gd">${ts.length?`<span>${ts.length} trabajador${ts.length===1?'':'es'}</span>`:'<span>Sin trabajadores todavía</span>'}${pend?`<span>${pend} por completar</span>`:''}</span></button>
   </div>`;
 }
@@ -348,11 +442,12 @@ function vInicio(){
 function vPersonal(){
   const todos = plantilla();
   const cab = `<div class="portada anim"><button class="volver" onclick="ir('inicio')">‹ Inicio</button><h2>Personal</h2>
-    <p>Los trabajadores con su contrato y su jornada.</p></div>`;
+    <p>Los trabajadores con su contrato, su jornada y las horas que llevan.</p></div>`;
   if(!todos.length) return cab + `<div class="tarjeta vacio anim" style="--i:1"><h3>Todavía no hay nadie</h3><p>Añade a los trabajadores uno a uno o pega la lista desde tu Excel.</p>
     <div class="fila" style="justify-content:center"><button class="btn primario" onclick="abrirFicha()">${ICO.mas} Añadir trabajador</button><button class="btn" onclick="abrirPegar()">${ICO.pegar} Pegar lista</button></div></div>`;
   const cuenta = c => todos.filter(t=>t.contrato===c).length;
-  const total = todos.reduce((a,t)=>a+(anualDe(t)||0),0);
+  const total = todos.reduce((a,t)=>a+(computoDe(t)||0),0);
+  const totalHechas = todos.reduce((a,t)=>a+hechasDe(t),0);
   const q = UI.buscar.trim().toLowerCase();
   const ts = todos.filter(t=>(UI.filtro==='todos'||t.contrato===UI.filtro) && (!q || t.nombre.toLowerCase().includes(q) || String(t.num).includes(q)))
     .sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
@@ -364,16 +459,19 @@ function vPersonal(){
       <td class="num">${semanaEf(t)==null?'—':nh(semanaEf(t))+' h'}${t.reducido&&semanaDe(t)!=null?`<div class="sub">de ${nh(semanaDe(t))} h</div>`:''}</td>
       <td class="num">${pctEf(t)==null?'—':nh(pctEf(t))+' %'}</td>
       <td class="num">${t.contrato==='discontinuo'?`${diasActividad(t)} días`:'<span class="muted">Todo el año</span>'}</td>
-      <td class="num">${avisos(t) || `<span class="anual">${nh(anualDe(t))} h</span>`}</td></tr>`; }).join('');
+      <td class="num">${avisos(t) || `<span class="anual">${nh(computoDe(t))} h</span>${diasBaja(t)?`<div class="sub">de ${nh(anualDe(t))} h · ${diasBaja(t)} días de baja</div>`:''}`}</td>
+      <td class="num">${horasCelda(t)}</td>
+      <td class="num">${quedanCelda(t)}</td></tr>`; }).join('');
   const tarjetas = ts.map(t=>`<button class="tm" onclick="abrirFicha('${t.id}')"><div class="l1"><b>${esc(t.nombre)}</b><span class="chip ${t.contrato}">${CONTRATOS[t.contrato].corto}</span></div>
-      <div class="l2"><span>${semanaEf(t)==null?'—':nh(semanaEf(t))+' h/sem'} · ${pctEf(t)==null?'—':nh(pctEf(t))+' %'}${t.reducido?' · reducida':''}${t.concretado?' · '+esc(horarioTxt(t)):''}</span>${avisos(t) || `<b>${nh(anualDe(t))} h</b>`}</div></button>`).join('');
+      <div class="l2"><span>${semanaEf(t)==null?'—':nh(semanaEf(t))+' h/sem'} · ${pctEf(t)==null?'—':nh(pctEf(t))+' %'}${t.reducido?' · reducida':''}${t.concretado?' · '+esc(horarioTxt(t)):''}</span>${avisos(t) || `<b>${nh(computoDe(t))} h</b>`}</div>
+      ${faltaJornada(t)||faltaActividad(t) ? '' : `<div class="l3"><span>Hechas <b>${nh(hechasDe(t))} h</b></span><span>${quedanCelda(t, true)}</span></div>${barra(t)}`}</button>`).join('');
   const fb = (k,t) => `<button class="${UI.filtro===k?'on':''}" onclick="UI.filtro='${k}';pintar()">${t}</button>`;
   return cab + `<div class="resumen anim" style="--i:1">
       <div class="cifra"><b>${todos.length}</b><span>trabajadores${[todos.filter(t=>t.reducido).length && `${todos.filter(t=>t.reducido).length} con reducción`, todos.filter(t=>t.concretado).length && `${todos.filter(t=>t.concretado).length} con horario concretado`].filter(Boolean).map(x=>', '+x).join('')}</span></div>
       <div class="cifra" style="--cc:var(--c-completo)"><b>${cuenta('completo')}</b><span>tiempo completo</span></div>
       <div class="cifra" style="--cc:var(--c-parcial)"><b>${cuenta('parcial')}</b><span>tiempo parcial</span></div>
       <div class="cifra" style="--cc:var(--c-disc)"><b>${cuenta('discontinuo')}</b><span>fijos discontinuos</span></div>
-      <div class="cifra" style="--cc:var(--senal)"><b>${nh(total)} h</b><span>jornada anual en ${S.anio}</span></div>
+      <div class="cifra" style="--cc:var(--senal)"><b>${nh(total)} h</b><span>jornada anual en ${S.anio}${totalHechas?`, ${nh(totalHechas)} h hechas`:''}</span></div>
     </div>
     <div class="tarjeta anim" style="--i:2">
       <div class="barra-herr">
@@ -381,12 +479,30 @@ function vPersonal(){
         <div class="seg" role="group" aria-label="Filtrar por contrato">${fb('todos','Todos')}${fb('completo','Completo')}${fb('parcial','Parcial')}${fb('discontinuo','Discontinuo')}</div>
         <div class="anio" title="Año de la jornada anual"><button onclick="cambiarAnio(-1)" aria-label="Año anterior">‹</button><b>${S.anio}</b><button onclick="cambiarAnio(1)" aria-label="Año siguiente">›</button></div>
         <span class="esp"></span>
+        <button class="btn" onclick="abrirImportar()">${ICO.subir} Importar turnos</button>
         <button class="btn" onclick="abrirPegar()">${ICO.pegar} Pegar lista</button>
         <button class="btn primario" onclick="abrirFicha()">${ICO.mas} Añadir trabajador</button>
       </div>
-      ${ts.length ? `<div class="tabla-escritorio"><table class="plantilla"><thead><tr><th>Trabajador</th><th>Contrato</th><th class="num">Horas a la semana</th><th class="num">Porcentaje</th><th class="num">Actividad</th><th class="num">Jornada anual ${S.anio}</th></tr></thead><tbody>${filas}</tbody></table></div>
+      ${ts.length ? `<div class="tabla-escritorio"><table class="plantilla"><thead><tr><th>Trabajador</th><th>Contrato</th><th class="num">Horas a la semana</th><th class="num">Porcentaje</th><th class="num">Actividad</th><th class="num">Jornada anual ${S.anio}</th><th class="num">Hechas</th><th class="num">Quedan</th></tr></thead><tbody>${filas}</tbody></table></div>
         <div class="tarjetas-movil">${tarjetas}</div>` : '<p class="muted" style="margin:10px 0">Nadie coincide con la búsqueda.</p>'}
     </div>`;
+}
+
+/* hechas y quedan, en la lista */
+function barra(t){
+  const c = computoDe(t), h = hechasDe(t); if(c==null || faltaJornada(t) || faltaActividad(t)) return '';
+  const p = c>0 ? Math.min(100, h/c*100) : (h>0?100:0);
+  return `<div class="prog ${h>c+0.005?'pasa':''}" title="${nh(c>0?h/c*100:0)} % hecho"><i style="width:${p}%"></i></div>`;
+}
+function horasCelda(t){
+  const n = semanasDe(t).length;
+  if(faltaJornada(t) || faltaActividad(t)) return n ? `<span class="hecha">${nh(hechasDe(t))} h</span>` : '<span class="muted">—</span>';
+  return `<span class="hecha">${nh(hechasDe(t))} h</span>${barra(t)}<div class="sub">${n ? `${n} semana${n===1?'':'s'}` : 'Sin semanas'}</div>`;
+}
+function quedanCelda(t, corto){
+  const q = quedanDe(t); if(q==null || faltaJornada(t) || faltaActividad(t)) return corto ? '' : '<span class="muted">—</span>';
+  if(q < -0.005) return `<span class="de-mas">${nh(-q)} h de más</span>`;
+  return corto ? `Quedan <b>${nh(q)} h</b>` : `<span class="hecha">${nh(q)} h</span>`;
 }
 
 /* =========================================================
@@ -394,12 +510,12 @@ function vPersonal(){
    ========================================================= */
 function abrirFicha(id){
   const t = id ? S.trabajadores.find(x=>x.id===id) : null;
-  UI.edit = t ? JSON.parse(JSON.stringify(t)) : { id:null, nombre:'', num:'', contrato:'completo', modo:'semana', valor:null, actividad:[], reducido:false, red:{modo:'semana', valor:null}, concretado:false, horario:{turno:'', desde:'', hasta:''} };
+  UI.edit = t ? JSON.parse(JSON.stringify(t)) : nuevoTrabajador();
   pintarFicha(true);
 }
 function pintarFicha(primera){
   const e = UI.edit, A = S.ajustes;
-  const pct = pctDe(e), sem = semanaDe(e), real = anualDe(e);
+  const pct = pctDe(e), sem = semanaDe(e);
   const campo = (modo, titulo, valor, ud) => { const activo = e.contrato!=='completo' && e.modo===modo;
     return `<div class="jcampo ${activo?'on':''}" onclick="${e.contrato==='completo'?'':`if(UI.edit.modo!=='${modo}'){cambiarModo('${modo}')}`}"><small>${titulo}</small>
       <input id="j_${modo}" inputmode="decimal" ${e.contrato==='completo'?'disabled':''} value="${valor==null?'':nh(valor).replace(/\./g,'')}" aria-label="${titulo}"
@@ -413,7 +529,6 @@ function pintarFicha(primera){
         <button type="button" class="quitar" aria-label="Quitar periodo" onclick="UI.edit.actividad.splice(${i},1);pintarFicha()">×</button></div>`).join('')}
       </div>
       <div class="fila" style="margin-top:8px"><button type="button" class="btn" onclick="UI.edit.actividad.push({desde:'',hasta:''});pintarFicha()">${ICO.mas} Añadir periodo</button></div></div>`;
-  const formula = formulaDe(e);
   const cc = e.red, cSem = semanaEf(e), cPct = pctDeSuJornada(e);
   const ccampo = (modo, titulo, valor, ud) => `<div class="jcampo ${cc.modo===modo?'on':''}"><small>${titulo}</small>
       <input id="r_${modo}" inputmode="decimal" value="${e.reducido && valor!=null ? nh(valor).replace(/\./g,'') : ''}" aria-label="${titulo}"
@@ -434,7 +549,8 @@ function pintarFicha(primera){
           <div class="jcampo fijo"><small>Sobre un tiempo completo</small><span class="valor" id="r_tc">${pctEf(e)==null?'—':nh(pctEf(e))}</span> <span class="ud">%</span></div></div>
         <p class="muted" style="margin:8px 0 0;font-size:13.5px">Escribe las horas que hace a la semana o el porcentaje de su jornada (por ejemplo, 80 % si tiene reducido un 20 %). Lo demás se calcula solo.</p>` : ''}
     </div>`;
-  $('#capa').innerHTML = `<div class="fondo" onclick="if(event.target===this)cerrarFicha()"><div class="dlg" role="dialog" aria-modal="true" aria-labelledby="fTit">
+  const dPrev = $('#capa .dlg'), sc = dPrev ? dPrev.scrollTop : 0;
+  $('#capa').innerHTML = `<div class="fondo${primera?'':' quieto'}" onclick="if(event.target===this)cerrarFicha()"><div class="dlg" role="dialog" aria-modal="true" aria-labelledby="fTit">
     <div class="dlg-cab"><h2 id="fTit">${e.id?esc(e.nombre||'Trabajador'):'Nuevo trabajador'}</h2><button class="cerrar" onclick="cerrarFicha()" aria-label="Cerrar">×</button></div>
     <div class="dlg-cuerpo">
       <div class="fila"><label style="flex:3 1 260px">Nombre y apellidos<input id="fNombre" value="${esc(e.nombre)}" oninput="UI.edit.nombre=this.value" autocomplete="off"></label>
@@ -446,11 +562,13 @@ function pintarFicha(primera){
       ${bConcretado}
       ${bReducido}
       ${periodos}
-      <div class="calculo" id="calc"><span>Jornada anual ${S.anio}</span><b>${real==null?'—':nh(real)+' h'}</b><span class="f">${formula}</span></div>
+      ${bloqueBajas(e)}
+      ${bloqueHoras(e)}
+      <div class="calculo" id="calc">${calculoHTML(e)}</div>
     </div>
     <div class="dlg-pie">${e.id?`<button class="btn peligro izq" onclick="borrarTrabajador('${e.id}')">Borrar</button>`:''}<button class="btn" onclick="cerrarFicha()">Cancelar</button><button class="btn primario" onclick="guardarFicha()">${e.id?'Guardar cambios':'Añadir trabajador'}</button></div>
   </div></div>`;
-  if(primera) setTimeout(()=>$('#fNombre')?.focus(), 30);
+  if(primera) setTimeout(()=>$('#fNombre')?.focus(), 30); else if($('#capa .dlg')) $('#capa .dlg').scrollTop = sc;
 }
 /* pasar a escribir en otra unidad: se convierte el valor actual */
 function cambiarModo(modo, input){
@@ -471,8 +589,45 @@ function recalcular(){
     if(e.red.modo!=='pct') pon('r_pct', pctDeSuJornada(e));
     const tc = $('#r_tc'); if(tc) tc.textContent = pctEf(e)==null ? '—' : nh(pctEf(e));
   }
-  const real = anualDe(e), c = $('#calc');
-  if(c){ c.querySelector('b').textContent = real==null ? '—' : nh(real)+' h'; c.querySelector('.f').textContent = formulaDe(e); }
+  const c = $('#calc'); if(c) c.innerHTML = calculoHTML(e);
+}
+/* caja oscura del final de la ficha: jornada con bajas, hechas y quedan */
+function calculoHTML(e){
+  const c = computoDe(e), ok = c!=null && !faltaActividad(e);
+  const q = ok ? c - hechasDe(e) : null;
+  return `<span>Jornada anual ${S.anio}</span><b>${c==null?'—':nh(c)+' h'}</b>
+    ${ok ? `<span class="hq"><span>Hechas<em>${nh(hechasDe(e))} h</em></span><span>${q < -0.005 ? `De más<em>${nh(-q)} h</em>` : `Quedan<em>${nh(q)} h</em>`}</span></span>` : ''}
+    <span class="f">${esc(formulaDe(e))}</span>`;
+}
+/* bajas: periodos a mano que descuentan su parte de la jornada */
+function bloqueBajas(e){
+  const x = diasJornada(e), b = diasBaja(e);
+  return `<div class="bloque"><h3>Bajas</h3>
+    <div class="periodos">${e.bajas.map((p,i)=>`<div class="periodo">
+      <label>Desde<input type="date" value="${p.desde||''}" onchange="UI.edit.bajas[${i}].desde=this.value;pintarFicha()"></label>
+      <label>Hasta<input type="date" value="${p.hasta||''}" onchange="UI.edit.bajas[${i}].hasta=this.value;pintarFicha()"></label>
+      <span class="dias">${p.desde&&p.hasta&&p.hasta>=p.desde?`${diasDe([p], S.anio).size} días en ${S.anio}`:''}</span>
+      <button type="button" class="quitar" aria-label="Quitar baja" onclick="UI.edit.bajas.splice(${i},1);pintarFicha()">×</button></div>`).join('')}</div>
+    <div class="fila" style="margin-top:8px"><button type="button" class="btn" onclick="UI.edit.bajas.push({desde:'',hasta:''});pintarFicha()">${ICO.mas} Añadir baja</button></div>
+    ${b ? `<p class="muted" style="margin:8px 0 0;font-size:13.5px">${b} día${b===1?'':'s'} de baja de ${x}${e.contrato==='discontinuo'?' de actividad':''}: su jornada de ${S.anio} se queda en ${x-b}/${x} partes.</p>` : ''}
+  </div>`;
+}
+/* horas apuntadas por semana en el año elegido */
+function bloqueHoras(e){
+  const ls = semanasDe(e);
+  return `<div class="bloque"><h3>Horas trabajadas en ${S.anio}</h3>
+    ${ls.length ? `<div class="semanas">${ls.map(l=>`<div class="semana"><span class="qs">Semana ${numSemana(l)}<small>${semanaTxt(l)}</small></span>
+        <span class="hcampo"><input inputmode="decimal" aria-label="Horas de la semana ${numSemana(l)}" data-l="${l}" value="${e.horas[l]==null?'':nh(e.horas[l]).replace(/\./g,'')}" oninput="UI.edit.horas['${l}']=num(this.value);recalcular()"> <span class="ud muted">h</span></span>
+        <button type="button" class="quitar" aria-label="Quitar semana" onclick="delete UI.edit.horas['${l}'];pintarFicha()">×</button></div>`).join('')}</div>`
+      : `<p class="muted" style="margin:0 0 4px;font-size:14px">Todavía no hay semanas. Se llenan solas con «Importar turnos», o añádelas aquí.</p>`}
+    <div class="fila" style="margin-top:8px;align-items:flex-end"><label style="flex:0 1 230px">Añadir la semana del día<input type="date" onchange="anadirSemana(this.value)"></label></div>
+  </div>`;
+}
+function anadirSemana(v){
+  if(!v) return; const l = lunesDe(v);
+  if(UI.edit.horas[l]===undefined) UI.edit.horas[l] = null;
+  if(anioSemana(l)!==S.anio) toast(`Esa semana cuenta en ${anioSemana(l)}`);
+  pintarFicha(); setTimeout(()=>{ const i = document.querySelector(`.semana input[data-l="${l}"]`); if(i){ i.focus(); i.scrollIntoView({block:'center'}); } }, 30);
 }
 /* explicación del cálculo de la jornada anual */
 function formulaDe(e){
@@ -484,6 +639,8 @@ function formulaDe(e){
         : e.contrato==='completo' ? `Tiempo completo: ${nh(A.hSemana)} h a la semana, ${nh(A.hAnio)} h al año`
         : `${nh(pe)} % de ${nh(A.hAnio)} h`;
   if(e.contrato==='discontinuo') f += `, y ${nh(base)} h × ${diasActividad(e)} días de actividad / ${diasAnio(S.anio)} días del año`;
+  const b = diasBaja(e), x = diasJornada(e);
+  if(b && x) f += `. Con ${b} día${b===1?'':'s'} de baja: ${nh(anualDe(e))} h × ${x-Math.min(b,x)} / ${x} días`;
   return f + '.';
 }
 /* al cambiar de casilla en la jornada reducida se repinta para marcar la activa sin perder el foco */
@@ -502,7 +659,11 @@ function guardarFicha(){
     if(pe<=0 || pe>p+0.001){ toast('La jornada reducida tiene que ser menor que la de su contrato'); return; }
   }
   if(e.contrato==='discontinuo' && e.actividad.some(x=>x.desde&&x.hasta&&x.hasta<x.desde)){ toast('Hay un periodo que acaba antes de empezar'); return; }
+  if(e.bajas.some(x=>x.desde&&x.hasta&&x.hasta<x.desde)){ toast('Hay una baja que acaba antes de empezar'); return; }
+  if(Object.values(e.horas).some(v=>v!=null && v<0)){ toast('Las horas de una semana no pueden ser negativas'); return; }
   e.actividad = e.actividad.filter(x=>x.desde && x.hasta);
+  e.bajas = e.bajas.filter(x=>x.desde && x.hasta);
+  e.horas = Object.fromEntries(Object.entries(e.horas).filter(([,v])=>v!=null).map(([k,v])=>[k, r2(v)]));
   if(e.contrato==='completo'){ e.valor = null; e.modo = 'semana'; }
   if(!e.concretado) e.horario = {turno:'', desde:'', hasta:''};
   delete e.conc;
@@ -515,7 +676,8 @@ function guardarFicha(){
 function borrarTrabajador(id){
   const t = S.trabajadores.find(x=>x.id===id); if(!t) return;
   if(!confirm(`¿Borrar a ${t.nombre}? No se puede deshacer.`)) return;
-  S.trabajadores = S.trabajadores.filter(x=>x.id!==id); guardar(); cerrarFicha(); pintar(); toast('Trabajador borrado');
+  S.trabajadores = S.trabajadores.filter(x=>x.id!==id);
+  Object.keys(S.alias).forEach(k=>{ if(S.alias[k]===id) delete S.alias[k]; }); guardar(); cerrarFicha(); pintar(); toast('Trabajador borrado');
 }
 
 /* ---------- pegar lista desde Excel ---------- */
@@ -537,10 +699,295 @@ function importarPegado(){
   filas.forEach(([nombre, contrato='', horas=''])=>{
     const c = /^disc|^fijo/i.test(contrato) ? 'discontinuo' : /^parc/i.test(contrato) ? 'parcial' : 'completo';
     const h = num(horas);
-    S.trabajadores.push({ id:uid(), nombre:nombre.replace(/\s+/g,' '), num:'', contrato:c, modo:'semana', valor: c==='completo' ? null : h, actividad:[], reducido:false, red:{modo:'semana', valor:null}, concretado:false, horario:{turno:'', desde:'', hasta:''} });
+    S.trabajadores.push(nuevoTrabajador({ id:uid(), nombre:nombre.replace(/\s+/g,' '), contrato:c, valor: c==='completo' ? null : h }));
     n++;
   });
   guardar(); $('#capa').innerHTML=''; pintar(); toast(`${n} trabajador${n===1?'':'es'} añadido${n===1?'':'s'}`);
+}
+
+/* =========================================================
+   Importar turnos semanales
+   Lee un Excel (.xlsx / .xlsm), un .csv o filas pegadas, busca
+   la columna de los nombres y la de las horas, empareja cada
+   nombre con un trabajador aunque esté en otro orden y apunta
+   las horas de esa semana. Volver a importar la misma semana
+   sustituye lo que había, no lo suma.
+   ========================================================= */
+let IMP = null;
+function abrirImportar(){
+  IMP = null;
+  $('#capa').innerHTML = `<div class="fondo" onclick="if(event.target===this)cerrarImportar()"><div class="dlg" role="dialog" aria-modal="true" aria-labelledby="iTit">
+    <div class="dlg-cab"><h2 id="iTit">Importar turnos</h2><button class="cerrar" onclick="cerrarImportar()" aria-label="Cerrar">×</button></div>
+    <div class="dlg-cuerpo">
+      <p style="margin:0">Sube el archivo de turnos de una semana. La app busca sola los nombres y las horas, y te lo enseña para que lo revises antes de apuntar nada.</p>
+      <label class="soltar" id="soltar" ondragover="event.preventDefault();this.classList.add('encima')" ondragleave="this.classList.remove('encima')" ondrop="event.preventDefault();this.classList.remove('encima');leerArchivo(event.dataTransfer.files[0])">
+        <input type="file" accept=".xlsx,.xlsm,.csv,.txt" onchange="leerArchivo(this.files[0])">
+        ${ICO.subir.replace('<svg','<svg width="30" height="30"')}<b>Elegir archivo</b><span class="muted">o arrástralo aquí · Excel (.xlsx) o .csv</span></label>
+      <label>O pega aquí las filas copiadas de tu Excel<textarea id="impPegado" style="min-height:110px" placeholder="GARCÍA LÓPEZ, ANA&#9;37,5&#10;PÉREZ RUIZ, LUIS&#9;30"></textarea></label>
+    </div>
+    <div class="dlg-pie"><button class="btn" onclick="cerrarImportar()">Cancelar</button><button class="btn primario" onclick="leerPegadoImp()">Leer lo pegado</button></div></div></div>`;
+}
+function cerrarImportar(){ IMP = null; $('#capa').innerHTML = ''; }
+
+/* ---------- lectura de archivos ---------- */
+async function leerArchivo(f){
+  if(!f) return;
+  if(/\.xls$/i.test(f.name)) return toast('Ese Excel es del formato antiguo (.xls). Guárdalo como .xlsx o .csv y vuelve a subirlo');
+  try {
+    const buf = await f.arrayBuffer(), b = new Uint8Array(buf);
+    const hojas = (b[0]===0x50 && b[1]===0x4B) ? await leerXlsx(buf) : [{ nombre: f.name, filas: leerCSV(textoDe(b)) }];
+    prepararImport(hojas, f.name);
+  } catch(e){ console.error(e); toast('No se ha podido leer el archivo. Prueba a guardarlo como .xlsx o .csv'); }
+}
+function leerPegadoImp(){
+  const t = $('#impPegado')?.value || '';
+  if(!t.trim()) return toast('Elige un archivo o pega las filas');
+  prepararImport([{ nombre:'Filas pegadas', filas: leerCSV(t) }], 'Filas pegadas');
+}
+function textoDe(b){ try { return new TextDecoder('utf-8', {fatal:true}).decode(b); } catch(e){ return new TextDecoder('windows-1252').decode(b); } }
+function leerCSV(t){
+  t = t.replace(/^﻿/, '');
+  const primera = t.split(/\r?\n/).find(l=>l.trim()) || '';
+  const sep = ['\t',';',','].map(c=>[c, primera.split(c).length]).sort((a,b)=>b[1]-a[1])[0][0];
+  const filas = []; let fila = [], campo = '', comillas = false;
+  for(let i=0; i<t.length; i++){
+    const c = t[i];
+    if(comillas){ if(c==='"'){ if(t[i+1]==='"'){ campo+='"'; i++; } else comillas = false; } else campo += c; }
+    else if(c==='"' && campo==='') comillas = true;
+    else if(c===sep){ fila.push(campo); campo=''; }
+    else if(c==='\n' || c==='\r'){ if(c==='\r' && t[i+1]==='\n') i++; fila.push(campo); filas.push(fila); fila=[]; campo=''; }
+    else campo += c;
+  }
+  if(campo!=='' || fila.length){ fila.push(campo); filas.push(fila); }
+  return filas.map(f=>f.map(x=>x.trim()));
+}
+/* .xlsx: es un zip con XML dentro; se descomprime con el navegador, sin librerías */
+async function leerXlsx(buf){
+  const dv = new DataView(buf), u8 = new Uint8Array(buf), dec = new TextDecoder();
+  let e = -1; for(let i=u8.length-22; i>=Math.max(0, u8.length-70000); i--){ if(dv.getUint32(i,true)===0x06054b50){ e = i; break; } }
+  if(e<0) throw new Error('zip sin directorio');
+  const n = dv.getUint16(e+10,true); let p = dv.getUint32(e+16,true); const ent = {};
+  for(let k=0; k<n; k++){
+    const met = dv.getUint16(p+10,true), tam = dv.getUint32(p+20,true), ln = dv.getUint16(p+28,true), lx = dv.getUint16(p+30,true), lc = dv.getUint16(p+32,true), off = dv.getUint32(p+42,true);
+    ent[dec.decode(u8.subarray(p+46, p+46+ln))] = {met, tam, off}; p += 46+ln+lx+lc;
+  }
+  const leer = async nombre => {
+    const x = ent[nombre]; if(!x) return null;
+    const ini = x.off + 30 + dv.getUint16(x.off+26,true) + dv.getUint16(x.off+28,true), datos = u8.subarray(ini, ini+x.tam);
+    if(x.met===0) return dec.decode(datos);
+    const s = new Blob([datos]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+    return dec.decode(await new Response(s).arrayBuffer());
+  };
+  const xml = t => new DOMParser().parseFromString(t, 'application/xml');
+  const tags = (n, t) => Array.from(n.getElementsByTagName(t));
+  const ss = await leer('xl/sharedStrings.xml');
+  const compartidas = ss ? tags(xml(ss), 'si').map(si=>tags(si,'t').map(x=>x.textContent).join('')) : [];
+  const wb = xml(await leer('xl/workbook.xml')), rels = xml(await leer('xl/_rels/workbook.xml.rels') || '<r/>');
+  const destino = {}; tags(rels, 'Relationship').forEach(r=>destino[r.getAttribute('Id')] = r.getAttribute('Target'));
+  const hojas = [];
+  for(const h of tags(wb, 'sheet')){
+    const rid = h.getAttribute('r:id') || h.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships','id');
+    let ruta = destino[rid] || ''; ruta = ruta.startsWith('/') ? ruta.slice(1) : 'xl/' + ruta.replace(/^\.\//,'');
+    const t = await leer(ruta); if(!t) continue;
+    const filas = [];
+    tags(xml(t), 'row').forEach(row=>{
+      const r = Number(row.getAttribute('r')) - 1 || filas.length, fila = [];
+      tags(row, 'c').forEach((c, i)=>{
+        const ref = c.getAttribute('r'); let col = i;
+        if(ref){ col = 0; for(const ch of ref.replace(/\d+/g,'')) col = col*26 + ch.charCodeAt(0) - 64; col--; }
+        const tipo = c.getAttribute('t'), v = c.getElementsByTagName('v')[0]?.textContent;
+        let val = '';
+        if(tipo==='s') val = compartidas[Number(v)] ?? '';
+        else if(tipo==='inlineStr') val = tags(c,'t').map(x=>x.textContent).join('');
+        else if(tipo==='b') val = v==='1' ? 'VERDADERO' : 'FALSO';
+        else if(v!=null) val = tipo==='str' || tipo==='e' ? v : Number(v);
+        fila[col] = val;
+      });
+      filas[r] = Array.from(fila, x=>x ?? '');
+    });
+    hojas.push({ nombre: h.getAttribute('name') || `Hoja ${hojas.length+1}`, filas: Array.from(filas, f=>f || []) });
+  }
+  if(!hojas.length) throw new Error('sin hojas');
+  return hojas;
+}
+
+/* ---------- interpretar lo leído ---------- */
+const sinAcentos = s => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '');
+const normNombre = s => sinAcentos(s).toUpperCase().replace(/[^A-Z0-9]+/g, ' ').trim();
+const PARTICULAS = new Set(['DE','DEL','LA','LAS','LOS','Y','I','DA','DO','DOS','VAN','VON','SAN']);
+const fichasDe = s => normNombre(s).split(' ').filter(x=>x && !PARTICULAS.has(x));
+const CABECERAS = /^(nombre|nombres|apellidos?|trabajador(es)?|emplead[oa]s?|agente|personal|total(es)?|semana|turnos?|lunes|martes|mi[eé]rcoles|jueves|viernes|s[aá]bado|domingo|horas?|departamento|puesto|categor[ií]a)\b/i;
+/* una celda parece un nombre: palabras con letras, sin números */
+const esNombre = v => typeof v==='string' && v.length<=70 && !/\d/.test(v) && !CABECERAS.test(v.trim()) && sinAcentos(v).split(/[\s,]+/).filter(w=>/^[A-Za-zÑñ'.·-]{2,}$/.test(w)).length >= 2;
+/* horas de una celda: 37,5 · 37:30 · 06:00-14:00 · 6-14 / 16-20; los códigos (R, F, X, LIBRE…) cuentan 0 */
+function horasDe(v){
+  if(typeof v==='number') return isFinite(v) ? {h:v, num:true} : null;
+  const s = String(v ?? '').trim(); if(!s) return null;
+  const t = s.replace(',', '.');
+  if(/^-?\d+(\.\d+)?\s*h?$/i.test(t)) return {h:parseFloat(t), num:true};
+  let m = t.match(/^(\d{1,3}):(\d{2})(?::\d{2})?$/); if(m) return {h:Number(m[1]) + Number(m[2])/60, num:true};
+  const re = /(\d{1,2})(?:[:.h](\d{2}))?\s*(?:-|–|—|a)\s*(\d{1,2})(?:[:.h](\d{2}))?/g; let suma = 0, hay = false;
+  while((m = re.exec(t))){ const a = Number(m[1]) + Number(m[2]||0)/60; let b = Number(m[3]) + Number(m[4]||0)/60;
+    if(a>24 || b>24) continue; if(b<=a) b += 24; suma += b - a; hay = true; }
+  if(hay) return {h:suma, num:true};
+  if(/^[A-Za-zÑñ.\/ ]{1,8}$/.test(s)) return {h:0, num:false};
+  return null;
+}
+const letraCol = i => { let s = ''; i++; while(i>0){ const r = (i-1)%26; s = String.fromCharCode(65+r) + s; i = Math.floor((i-1)/26); } return s; };
+
+function prepararImport(hojas, archivo){
+  hojas.forEach(h=>{ const n = Math.max(0, ...h.filas.map(f=>f.length)); h.filas = h.filas.map(f=>Array.from({length:n}, (_,i)=>f[i] ?? '')); });
+  const cuenta = h => { const n = h.filas[0]?.length || 0; let mx = 0; for(let c=0;c<n;c++) mx = Math.max(mx, h.filas.filter(f=>esNombre(f[c])).length); return mx; };
+  const hoja = hojas.map((h,i)=>[i, cuenta(h)]).sort((a,b)=>b[1]-a[1])[0][0];
+  IMP = { hojas, hoja, archivo };
+  analizarHoja();
+  if(IMP.colNombre<0){ IMP = null; return toast('No encuentro nombres de trabajadores en el archivo'); }
+  pintarImport(true);
+}
+/* busca la columna de nombres, la cabecera, las columnas de horas y la semana */
+function analizarHoja(colNombre){
+  const filas = IMP.hojas[IMP.hoja].filas, n = filas[0]?.length || 0;
+  if(colNombre==null){ let mx = 0; colNombre = -1;
+    for(let c=0;c<n;c++){ const k = filas.filter(f=>esNombre(f[c])).length; if(k>mx){ mx = k; colNombre = c; } } }
+  IMP.colNombre = colNombre;
+  const datos = colNombre<0 ? [] : filas.map((f,i)=>i).filter(i=>esNombre(filas[i][colNombre]));
+  const primera = datos[0] ?? 0;
+  let cab = -1; for(let i=primera-1; i>=0; i--){ if(filas[i].filter(x=>x!=='' && x!=null).length>=2){ cab = i; break; } }
+  IMP.datos = datos; IMP.cab = cab;
+  IMP.titulos = Array.from({length:n}, (_,c)=>{ const t = cab>=0 ? String(filas[cab][c] ?? '').trim() : ''; return t && typeof filas[cab][c]!=='number' ? t : ''; });
+  /* columnas que pueden llevar horas */
+  const info = Array.from({length:n}, (_,c)=>{
+    if(c===colNombre) return null;
+    const vals = datos.map(i=>filas[i][c]).filter(v=>v!=='' && v!=null);
+    if(!vals.length) return null;
+    const p = vals.map(horasDe), nums = p.filter(x=>x && x.num).map(x=>x.h);
+    if(!nums.length || p.filter(Boolean).length < vals.length*0.7) return null;
+    const max = Math.max(...nums);
+    if(max>24*7 || nums.some(x=>x<0)) return null;
+    if(/n[º°o]\b|n[uú]m|c[oó]d|\bid\b|dni|nif|emplead/i.test(IMP.titulos[c])) return null;
+    if(nums.length>3 && nums.every((x,k)=>x===k+1)) return null;            // una columna 1, 2, 3…
+    const dia = max<3 && nums.some(x=>x%1!==0);                              // horas guardadas como fracción del día
+    return { c, dia };
+  }).filter(Boolean);
+  IMP.candidatas = info;
+  const val = (i,c) => { const x = horasDe(filas[i][c]); const d = info.find(z=>z.c===c)?.dia; return x ? x.h * (d?24:1) : 0; };
+  let elegidas;
+  const total = info.filter(z=>/total|suma|horas|h\.?\s*sem|semana/i.test(IMP.titulos[z.c]));
+  if(total.length) elegidas = [total[total.length-1].c];
+  else if(info.length===1) elegidas = [info[0].c];
+  else if(info.length>1){
+    const ult = info[info.length-1].c, resto = info.slice(0,-1).map(z=>z.c);
+    const cuadra = datos.filter(i=>Math.abs(val(i,ult) - resto.reduce((a,c)=>a+val(i,c),0)) < 0.05).length;
+    elegidas = cuadra >= datos.length*0.8 ? [ult] : info.map(z=>z.c);
+  } else elegidas = [];
+  IMP.colsHoras = elegidas;
+  IMP.lunes = semanaDelArchivo(filas, primera) || IMP.lunes || lunesDe(hoyIso());
+  construirFilas();
+}
+/* la semana: una fecha escrita en el archivo, un número de fecha de Excel encima de los datos o «semana 12» */
+function semanaDelArchivo(filas, primera){
+  const fechas = [];
+  const zona = filas.slice(0, Math.max(primera, 1));
+  filas.forEach((f, i)=>f.forEach(v=>{
+    if(typeof v==='number'){ if(i<primera && v>36000 && v<60000 && v%1===0) fechas.push(isoDe(new Date(Date.UTC(1899,11,30) + v*864e5))); return; }
+    const s = String(v); let m;
+    const re = /\b(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2}|\d{4})\b/g;
+    while((m = re.exec(s))){ const y = m[3].length===2 ? 2000+Number(m[3]) : Number(m[3]), mo = Number(m[2]), d = Number(m[1]);
+      if(mo>=1 && mo<=12 && d>=1 && d<=31) fechas.push(`${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`); }
+    const re2 = /\b(\d{4})-(\d{2})-(\d{2})\b/g; while((m = re2.exec(s))) fechas.push(m[0]);
+  }));
+  if(fechas.length) return lunesDe(fechas.sort()[0]);
+  for(const f of zona) for(const v of f){ const m = String(v).match(/semana\s*(?:n[º°o.]?\s*)?(\d{1,2})\b/i);
+    if(m){ const w = Number(m[1]); if(w>=1 && w<=53) return sumaDias(lunesDe(`${S.anio}-01-04`), (w-1)*7); } }
+  return null;
+}
+/* empareja un nombre del archivo con un trabajador */
+function emparejar(nombre, fila){
+  const ts = S.trabajadores, k = normNombre(nombre);
+  const al = S.alias[k]; if(al && ts.some(t=>t.id===al)) return {id:al, como:'guardado'};
+  const celdas = new Set(fila.map(v=>String(v).trim()).filter(Boolean));
+  const pn = ts.filter(t=>t.num && celdas.has(String(t.num).trim())); if(pn.length===1) return {id:pn[0].id, como:'numero'};
+  const ex = ts.filter(t=>normNombre(t.nombre)===k); if(ex.length===1) return {id:ex[0].id, como:'exacto'};
+  const fa = fichasDe(nombre), clave = [...fa].sort().join(' ');
+  const or = ts.filter(t=>[...fichasDe(t.nombre)].sort().join(' ')===clave); if(or.length===1) return {id:or[0].id, como:'orden'};
+  const A = new Set(fa);
+  const notas = ts.map(t=>{ const B = new Set(fichasDe(t.nombre)); let com = 0; A.forEach(x=>{ if(B.has(x)) com++; });
+    const sub = com>=2 && (com===A.size || com===B.size);
+    return {t, j: com / (A.size + B.size - com || 1), sub}; });
+  const subs = notas.filter(x=>x.sub); if(subs.length===1) return {id:subs[0].t.id, como:'posible'};
+  const mej = notas.filter(x=>x.j>=0.6).sort((a,b)=>b.j-a.j);
+  if(mej.length && (mej.length===1 || mej[0].j>mej[1].j)) return {id:mej[0].t.id, como:'posible'};
+  return {id:'', como:'nada'};
+}
+function construirFilas(){
+  const filas = IMP.hojas[IMP.hoja].filas, prev = IMP.filas || [];
+  const fac = c => IMP.candidatas.find(z=>z.c===c)?.dia ? 24 : 1;
+  IMP.filas = IMP.datos.map(i=>{
+    const f = filas[i], nombre = String(f[IMP.colNombre]).replace(/\s+/g,' ').trim();
+    const ps = IMP.colsHoras.map(c=>{ const x = horasDe(f[c]); return x ? x.h * fac(c) : null; });
+    const horas = ps.some(x=>x!=null) ? r2(ps.reduce((a,x)=>a+(x||0),0)) : null;
+    const antes = prev.find(p=>p.nombre===nombre && p.manual);
+    const m = antes ? {id:antes.id, como:'manual'} : emparejar(nombre, f);
+    return { nombre, horas, id:m.id, como:m.como, manual:!!antes };
+  });
+}
+
+/* ---------- pantalla de revisión ---------- */
+const ESTADOS = { exacto:['ok','Mismo nombre'], orden:['ok','Mismo nombre, en otro orden'], numero:['ok','Por nº de empleado'], guardado:['ok','Emparejado otras veces'],
+  manual:['ok','Elegido a mano'], posible:['duda','¿Es esta persona? Revísalo'], nada:['no','Sin emparejar: no se apunta'], nuevo:['nuevo','Se añade como trabajador nuevo'] };
+function pintarImport(primera){
+  const dlgPrev = document.querySelector('#capa .dlg'), sc = dlgPrev ? dlgPrev.scrollTop : 0;
+  const filas = IMP.hojas[IMP.hoja].filas, n = filas[0]?.length || 0;
+  const tit = c => `${letraCol(c)}${IMP.titulos[c] ? ' · ' + IMP.titulos[c] : ''}`;
+  const opciones = S.trabajadores.slice().sort((a,b)=>a.nombre.localeCompare(b.nombre,'es')).map(t=>`<option value="${t.id}">${esc(t.nombre)}</option>`).join('');
+  const usados = {}; IMP.filas.forEach(f=>{ if(f.id && f.id!=='nuevo') usados[f.id] = (usados[f.id]||0) + 1; });
+  const apuntar = IMP.filas.filter(f=>f.id && f.horas!=null);
+  const yaTenian = new Set(IMP.filas.filter(f=>f.id && f.id!=='nuevo' && f.horas!=null).map(f=>f.id).filter(id=>S.trabajadores.find(t=>t.id===id)?.horas?.[IMP.lunes]!==undefined));
+  const ok = IMP.filas.filter(f=>f.id && f.id!=='nuevo' && ESTADOS[f.como][0]==='ok').length, duda = IMP.filas.filter(f=>f.id && f.como==='posible').length,
+        no = IMP.filas.filter(f=>!f.id).length, nuevos = IMP.filas.filter(f=>f.id==='nuevo').length;
+  const filasHTML = IMP.filas.map((f,i)=>{ const est = f.id==='nuevo' ? 'nuevo' : !f.id ? 'nada' : f.como; const [cls, txt] = ESTADOS[est];
+    return `<div class="imp-fila ${f.id?'':'ign'}"><span class="nf">${esc(f.nombre)}</span><span class="hf">${f.horas==null?'—':nh(f.horas)+' h'}</span>
+      <select aria-label="Trabajador para ${esc(f.nombre)}" onchange="IMP.filas[${i}].id=this.value;IMP.filas[${i}].como='manual';IMP.filas[${i}].manual=true;pintarImport()">
+        <option value="">No apuntar</option><option value="nuevo">Añadir como trabajador nuevo</option>${opciones}</select>
+      <span class="est ${cls}">${f.id && f.id!=='nuevo' && usados[f.id]>1 ? 'Sale ' + usados[f.id] + ' veces: se suman' : txt}</span></div>`; }).join('');
+  $('#capa').innerHTML = `<div class="fondo${primera?'':' quieto'}" onclick="if(event.target===this)cerrarImportar()"><div class="dlg ancho" role="dialog" aria-modal="true" aria-labelledby="iTit">
+    <div class="dlg-cab"><h2 id="iTit">Revisa antes de apuntar</h2><button class="cerrar" onclick="cerrarImportar()" aria-label="Cerrar">×</button></div>
+    <div class="dlg-cuerpo">
+      <p class="muted" style="margin:0;font-size:14px">${esc(IMP.archivo)}</p>
+      <div class="imp-ajustes">
+        <label>Semana<input type="date" value="${IMP.lunes}" onchange="if(this.value){IMP.lunes=lunesDe(this.value);pintarImport()}"><span class="semtxt">Semana ${numSemana(IMP.lunes)} · ${fCorto(IMP.lunes)} – ${fCorto(sumaDias(IMP.lunes,6))} ${anioSemana(IMP.lunes)}${anioSemana(IMP.lunes)!==S.anio?` (cuenta en ${anioSemana(IMP.lunes)})`:''}</span></label>
+        ${IMP.hojas.length>1 ? `<label>Hoja<select onchange="IMP.hoja=Number(this.value);IMP.filas=null;analizarHoja();pintarImport()">${IMP.hojas.map((h,i)=>`<option value="${i}" ${i===IMP.hoja?'selected':''}>${esc(h.nombre)}</option>`).join('')}</select></label>` : ''}
+        <label>Nombres en la columna<select onchange="IMP.filas=null;analizarHoja(Number(this.value));pintarImport()">${Array.from({length:n},(_,c)=>`<option value="${c}" ${c===IMP.colNombre?'selected':''}>${esc(tit(c))}</option>`).join('')}</select></label>
+        <div style="grid-column:1/-1"><label style="margin-bottom:6px">Horas de la semana${IMP.colsHoras.length>1?' (se suman las columnas marcadas)':''}</label>
+          <div class="cols">${Array.from({length:n},(_,c)=>c).filter(c=>c!==IMP.colNombre && IMP.datos.some(i=>filas[i][c]!=='' && filas[i][c]!=null)).map(c=>`<label class="${IMP.colsHoras.includes(c)?'on':''}"><input type="checkbox" ${IMP.colsHoras.includes(c)?'checked':''} onchange="marcarColHoras(${c}, this.checked)">${esc(tit(c))}</label>`).join('')}</div></div>
+      </div>
+      <div class="imp-res"><span>${IMP.filas.length} filas</span>${ok?`<span class="est ok">${ok} emparejadas</span>`:''}${duda?`<span class="est duda">${duda} por revisar</span>`:''}${nuevos?`<span class="est nuevo">${nuevos} nuevas</span>`:''}${no?`<span class="est no">${no} sin apuntar</span>`:''}</div>
+      ${!IMP.colsHoras.length ? '<p class="aviso" style="margin:0">Marca en qué columna están las horas</p>' : ''}
+      ${yaTenian.size ? `<p class="muted" style="margin:0;font-size:14px">Esta semana ya tenía horas apuntadas para ${yaTenian.size} trabajador${yaTenian.size===1?'':'es'}: se sustituyen por las del archivo.</p>` : ''}
+      <div class="imp-filas"><div class="imp-fila tit"><span>En el archivo</span><span style="text-align:right">Horas</span><span>Trabajador</span><span></span></div>${filasHTML}</div>
+    </div>
+    <div class="dlg-pie"><button class="btn" onclick="abrirImportar()">Otro archivo</button><button class="btn primario" ${apuntar.length?'':'disabled'} onclick="guardarImport()">Apuntar horas${apuntar.length?` (${new Set(apuntar.map((f,i)=>f.id==='nuevo'?'n'+i:f.id)).size})`:''}</button></div></div></div>`;
+  document.querySelectorAll('#capa .imp-fila select').forEach((s,i)=>{ s.value = IMP.filas[i].id; });
+  const d = document.querySelector('#capa .dlg'); if(d && !primera) d.scrollTop = sc;
+}
+function marcarColHoras(c, si){
+  IMP.colsHoras = si ? [...new Set([...IMP.colsHoras, c])].sort((a,b)=>a-b) : IMP.colsHoras.filter(x=>x!==c);
+  construirFilas(); pintarImport();
+}
+function guardarImport(){
+  const filas = IMP.filas.filter(f=>f.id && f.horas!=null); if(!filas.length) return;
+  const suma = {};
+  filas.forEach(f=>{
+    let id = f.id;
+    if(id==='nuevo'){ const t = nuevoTrabajador({ id:uid(), nombre:f.nombre }); S.trabajadores.push(t); id = t.id; }
+    else if(f.como==='posible' || f.como==='manual') S.alias[normNombre(f.nombre)] = id;   // la próxima vez se empareja solo
+    suma[id] = (suma[id]||0) + f.horas;
+  });
+  Object.entries(suma).forEach(([id,h])=>{ const t = S.trabajadores.find(x=>x.id===id); if(t){ t.horas = t.horas || {}; t.horas[IMP.lunes] = r2(h); } });
+  const n = Object.keys(suma).length, total = Object.values(suma).reduce((a,b)=>a+b,0), l = IMP.lunes;
+  if(anioSemana(l)!==S.anio) S.anio = anioSemana(l);
+  guardar(); cerrarImportar(); pintar();
+  toast(`Semana ${numSemana(l)}: ${nh(total)} h apuntadas a ${n} trabajador${n===1?'':'es'}`);
 }
 
 /* ---------- año de cálculo ---------- */
