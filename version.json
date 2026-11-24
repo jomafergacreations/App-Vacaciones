@@ -1,8 +1,8 @@
 {
-  "version": "9.0.0",
+  "version": "9.1.0",
   "fecha": "2026-11-24",
   "novedades": [
-    "La asignación de vacaciones es siempre la del año siguiente al ciclo de trabajo",
-    "Dentro de la asignación, todo se muestra y se apunta en ese año"
+    "Calendarios a todo el ancho, con meses y leyendas más claros",
+    "Los mismos colores en todos los calendarios"
   ]
 }

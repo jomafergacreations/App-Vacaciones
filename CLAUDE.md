@@ -38,5 +38,6 @@ Si `version.json` lleva una versión mayor que la de `index.html`, la app entrar
 
 - Todo el texto de la interfaz en español, en tono claro y directo.
 - Identidad visual: señalética de aeropuerto (asfalto `#22262E`, hormigón `#ECEEF1`, amarillo señal `#F6C300`, azul pista `#1F5FBF`; Barlow y Barlow Condensed).
+- Calendarios: pantallas de calendario a todo el ancho (`body.ancho`); la hoja anual crece con la altura de la pantalla; leyenda común `leyendaDias()`. Los colores de R y F de la rotación son los de `PAL_DIA` (migrado en `normalizar` con `paleta9`). Los estilos nuevos van en el `<style>` principal, nunca en `#pageStyle` (se sobrescribe al imprimir).
 - Animación: solo una entrada escalonada al cambiar de pantalla (`main.entrando` + `.anim` con `--i`) y respuestas a lo que se toca; respetar `prefers-reduced-motion`.
 - Probar en móvil (390 px) y escritorio antes de publicar.

@@ -447,8 +447,8 @@ label.gl-i{cursor:pointer} label.gl-i:hover{background:var(--hormigon)}
 .ed.og::after{content:"";position:absolute;top:3px;right:3px;width:5px;height:5px;border-radius:50%;background:var(--gris)}
 .ed.casi{border-color:var(--warn)}
 .ed.hoy{font-weight:800;text-decoration:underline}
-.ed.propio{background:var(--ctx);color:#fff;border-color:var(--ctx);cursor:default}
-.ed.rst{background:color-mix(in srgb,var(--tcr,#23864F) 75%,#fff);color:#fff;font-weight:700;cursor:not-allowed;border-color:transparent}
+.ed.propio{background:var(--ok);color:#fff;border-color:var(--ok);cursor:default}
+.ed.rst{background:var(--tcr,#5E6B82);color:var(--tct,#fff);font-weight:700;cursor:not-allowed;border-color:transparent}
 .ed.blk{background:repeating-linear-gradient(135deg,#D3D7DE 0 3px,#EEF0F3 3px 7px);color:#8A919D;cursor:not-allowed;border-color:#E1E4E9}
 .ed.blk.lleno{background:repeating-linear-gradient(135deg,#F2C3BE 0 3px,#FBE4E1 3px 7px);color:var(--bad)}
 .ed.sel{background:var(--senal);color:var(--asfalto);border-color:var(--asfalto);font-weight:800}
@@ -588,6 +588,98 @@ body.bloqueada{overflow:hidden}
   .inf{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .inf tr,.gantt .fila{break-inside:avoid}
 }
+/* ---- calendarios: aprovechar la pantalla y leer mejor meses y leyendas ---- */
+body.ancho main{max-width:none}
+.ley-dias{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:16px;padding:12px 16px;background:#F4F5F8;border-radius:12px;font-size:14.5px;font-weight:600;color:var(--asfalto)}
+.ley-dias .li{display:inline-flex;align-items:center;gap:8px}
+.ley-dias .li b{display:inline-grid;place-items:center;min-width:28px;height:24px;padding:0 4px;border-radius:6px;font-size:12.5px;font-weight:800}
+.ley-dias .lb-b{background:repeating-linear-gradient(135deg,#F3C2BD 0 3px,#FBE7E5 3px 7px);color:#8C2A20}
+.ley-dias .lb-fs{background:#DDE1E8;box-shadow:inset 0 4px 0 #22262E}
+.ley-dias .lb-ss{background:var(--senal-soft);box-shadow:inset 0 0 0 3px var(--senal)}
+.legend{font-size:14px;color:var(--asfalto);gap:10px 20px;margin-top:14px}
+.legend span::before{width:15px;height:15px;border-radius:4px;vertical-align:-2px;margin-right:7px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+/* hoja anual (Editar y «A mano») */
+.eg-mes{width:118px;font-size:19px!important;font-weight:700}
+.eg thead th{font-size:14px;font-weight:700;color:var(--asfalto);padding:4px 0}
+.eg td{height:clamp(44px, calc((100vh - 380px) / 12), 72px)}
+.eg td b{font-size:clamp(13px, 1.1vw, 18px)}
+.eg td small{font-size:10px;top:3px;left:4px}
+/* consultar */
+.cg-scroll{max-height:calc(100vh - 250px);min-height:360px}
+.cg-d{width:var(--cw,32px);min-width:var(--cw,32px);height:40px;font-size:13.5px}
+.cg-d small{font-size:10.5px}
+.cg thead tr:first-child th{height:34px}
+.cg thead tr:nth-child(2) th{top:34px}
+.cg-mes{font-size:19px!important;color:var(--asfalto)}
+.cg-mes span{position:sticky;left:var(--nomw,200px);padding-right:12px}
+.cg tbody td{height:34px;font-size:12.5px}
+.cg-nom{min-width:200px;max-width:200px}
+.cg-nom button{height:34px;line-height:34px;font-size:13.5px}
+.cg-grp th{font-size:16px!important;color:var(--asfalto)!important}
+/* calendarios de 12 meses (fichas, elección, grupos) */
+.fcal{grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:20px 26px}
+.smes-t{font-size:20px;margin-bottom:6px;color:var(--asfalto)}
+.sdow{font-size:12px;font-weight:700}
+.fd{font-size:13.5px}
+@media (min-width:1700px){ .fcal{grid-template-columns:repeat(6,1fr)} .ley-dias{font-size:15.5px} }
+@media (max-width:760px){
+  .eg-mes{width:72px;font-size:15px!important} .eg td{height:44px} .cg-nom{min-width:124px;max-width:124px} .cg-mes span{left:124px}
+  .fcal{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px} .fd{font-size:11.5px} .smes-t{font-size:17px} .ley-dias{font-size:13px;gap:8px 14px}
+}
+/* descansos y festivos con la paleta común en todos los calendarios de 12 meses */
+.fd.lib{background:var(--cc,#5E6B82);color:var(--ct,#fff);border-color:transparent;font-weight:700}
+.fd.lib .tc{color:var(--ct,#fff)!important}
+.ed.rst .tc{color:var(--tct,#fff)!important}
+.ed.we:not(.rst):not(.propio):not(.sel),.fd.we:not(.lib):not(.vac):not(.dp):not(.mk){background:#DDE1E8}
+.ed.we,.fd.we{box-shadow:inset 0 3px 0 #22262E}
+.ed.ss,.fd.ss{box-shadow:inset 0 0 0 3px var(--senal)}
+.ed.we.ss,.fd.we.ss{box-shadow:inset 0 3px 0 #22262E,inset 0 0 0 3px var(--senal)}
+/* ---- calendarios: aprovechar la pantalla y leer mejor meses y leyendas ---- */
+body.ancho main{max-width:none}
+.ley-dias{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:16px;padding:12px 16px;background:#F4F5F8;border-radius:12px;font-size:14.5px;font-weight:600;color:var(--asfalto)}
+.ley-dias .li{display:inline-flex;align-items:center;gap:8px}
+.ley-dias .li b{display:inline-grid;place-items:center;min-width:28px;height:24px;padding:0 4px;border-radius:6px;font-size:12.5px;font-weight:800}
+.ley-dias .lb-b{background:repeating-linear-gradient(135deg,#F3C2BD 0 3px,#FBE7E5 3px 7px);color:#8C2A20}
+.ley-dias .lb-fs{background:#DDE1E8;box-shadow:inset 0 4px 0 #22262E}
+.ley-dias .lb-ss{background:var(--senal-soft);box-shadow:inset 0 0 0 3px var(--senal)}
+.legend{font-size:14px;color:var(--asfalto);gap:10px 20px;margin-top:14px}
+.legend span::before{width:15px;height:15px;border-radius:4px;vertical-align:-2px;margin-right:7px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+/* hoja anual (Editar y «A mano») */
+.eg-mes{width:118px;font-size:19px!important;font-weight:700}
+.eg thead th{font-size:14px;font-weight:700;color:var(--asfalto);padding:4px 0}
+.eg td{height:clamp(44px, calc((100vh - 380px) / 12), 72px)}
+.eg td b{font-size:clamp(13px, 1.1vw, 18px)}
+.eg td small{font-size:10px;top:3px;left:4px}
+/* consultar */
+.cg-scroll{max-height:calc(100vh - 250px);min-height:360px}
+.cg-d{width:var(--cw,32px);min-width:var(--cw,32px);height:40px;font-size:13.5px}
+.cg-d small{font-size:10.5px}
+.cg thead tr:first-child th{height:34px}
+.cg thead tr:nth-child(2) th{top:34px}
+.cg-mes{font-size:19px!important;color:var(--asfalto)}
+.cg-mes span{position:sticky;left:var(--nomw,200px);padding-right:12px}
+.cg tbody td{height:34px;font-size:12.5px}
+.cg-nom{min-width:200px;max-width:200px}
+.cg-nom button{height:34px;line-height:34px;font-size:13.5px}
+.cg-grp th{font-size:16px!important;color:var(--asfalto)!important}
+/* calendarios de 12 meses (fichas, elección, grupos) */
+.fcal{grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:20px 26px}
+.smes-t{font-size:20px;margin-bottom:6px;color:var(--asfalto)}
+.sdow{font-size:12px;font-weight:700}
+.fd{font-size:13.5px}
+@media (min-width:1700px){ .fcal{grid-template-columns:repeat(6,1fr)} .ley-dias{font-size:15.5px} }
+@media (max-width:760px){
+  .eg-mes{width:72px;font-size:15px!important} .eg td{height:44px} .cg-nom{min-width:124px;max-width:124px} .cg-mes span{left:124px}
+  .fcal{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px} .fd{font-size:11.5px} .smes-t{font-size:17px} .ley-dias{font-size:13px;gap:8px 14px}
+}
+/* descansos y festivos con la paleta común en todos los calendarios de 12 meses */
+.fd.lib{background:var(--cc,#5E6B82);color:var(--ct,#fff);border-color:transparent;font-weight:700}
+.fd.lib .tc{color:var(--ct,#fff)!important}
+.ed.rst .tc{color:var(--tct,#fff)!important}
+.ed.we:not(.rst):not(.propio):not(.sel),.fd.we:not(.lib):not(.vac):not(.dp):not(.mk){background:#DDE1E8}
+.ed.we,.fd.we{box-shadow:inset 0 3px 0 #22262E}
+.ed.ss,.fd.ss{box-shadow:inset 0 0 0 3px var(--senal)}
+.ed.we.ss,.fd.we.ss{box-shadow:inset 0 3px 0 #22262E,inset 0 0 0 3px var(--senal)}
 </style>
 </head>
 <body>
@@ -608,7 +700,7 @@ body.bloqueada{overflow:hidden}
    Reglas base: Convenio Menzies (BOE-A-2023-25956), arts. 32 y 33
    Datos guardados en el navegador (localStorage). Haz copias.
    ========================================================= */
-const APP_VERSION = '9.0.0';   // súbela junto con version.json en cada publicación
+const APP_VERSION = '9.1.0';   // súbela junto con version.json en cada publicación
 const LS_KEY = 'vacaciones-agp-v1';
 const SIN = '_'; // clave interna para «sin grupo»
 
@@ -661,7 +753,7 @@ const SUGERENCIAS = { // ideas para crear skills rápido; se pueden ignorar
   Rampa:['Agente de rampa','Auxiliar de rampa','Coordinador de pista','Conductor','Carga','Jefe de turno'],
   Operaciones:['Agente administrativo','Auxiliar administrativo','Coordinador de operaciones','Control de carga','Jefe de turno','Supervisor'],
 };
-const TURNOS_DEF = [ {cod:'R',nombre:'Libre',color:'#23864F',libre:true}, {cod:'F',nombre:'Festivo',color:'#C23B30',libre:true}, {cod:'M',nombre:'Mañana',color:'#1F5FBF',libre:false}, {cod:'T',nombre:'Tarde',color:'#B86E00',libre:false}, {cod:'N',nombre:'Noche',color:'#5B3E99',libre:false} ];
+const TURNOS_DEF = [ {cod:'R',nombre:'Libre',color:'#5E6B82',libre:true}, {cod:'F',nombre:'Festivo',color:'#F0A35E',libre:true}, {cod:'M',nombre:'Mañana',color:'#1F5FBF',libre:false}, {cod:'T',nombre:'Tarde',color:'#B86E00',libre:false}, {cod:'N',nombre:'Noche',color:'#5B3E99',libre:false} ];
 const AJUSTES_DEF = { jornadaBase:1700, computo:'naturales', bloquear:true, rondas:3, ptsSS:8, ptsPuente:2, diasDefecto:24,
   ponderar:true, baseDias:24, bloqueoGrupo:true, maxDesprog:3, preaviso:15, pctTurno:10, desprogPuntua:true };
 const depsIniciales = () => ['Pasaje','Rampa','Operaciones'].map(n=>({id:uid(), nombre:n, baseDias:''}));
@@ -714,6 +806,8 @@ function normalizar(d){ // también migra datos de versiones anteriores
   d.turnosTipos.forEach(t=>{ if(t.cod==='F' && t.nombre==='Festivo') t.libre = true; });
   d.trabajadores.forEach(t=>{ if(t.jornadaModo===undefined) t.jornadaModo='horas'; if(t.jornadaValor===undefined) t.jornadaValor=''; });
   if(d.asigAnio !== d.ciclo+1){ d.turnos = {}; d.asigAnio = d.ciclo+1; }   // 9.0: la asignación es del año siguiente al ciclo
+  if(!d.paleta9){ const nuevo = {R:['#23864F','#5E6B82'], F:['#C23B30','#F0A35E']};
+    d.turnosTipos.forEach(t=>{ const n = nuevo[t.cod]; if(n && String(t.color).toUpperCase()===n[0]) t.color = n[1]; }); d.paleta9 = true; }
   delete d.vistaDep;
   d.version = 4;
   return d;
@@ -1116,6 +1210,7 @@ function render(){
     `<button class="step extra" onclick="go('vacaciones')">‹ Vacaciones</button><span class="sep"></span>` +
     PASOS.map(([k,n],i)=>`<button class="step ${UI.vista===k?'on':''} ${pasoHecho(k)?'done':''}" onclick="go('${k}')" ${UI.vista===k?'aria-current="step"':''}><span class="num">${pasoHecho(k)&&UI.vista!==k?'✓':i+1}</span>${n}</button>`).join('');
   const V = {menu:vMenu, personal:vPersonal, gestion:vGestion, vacaciones:vVacaciones, inicio:vInicio, producto:vProducto, ajustes:vAjustes, grupos:vGrupos, eleccion:vEleccion, resumen:vResumen, pdf:vPDF};
+  document.body.classList.toggle('ancho', (UI.vista==='vacaciones' && !!UI.vacModo) || UI.vista==='eleccion' || (UI.vista==='personal' && ['jornada','vacaciones'].includes(UI.perTab)));
   const main = document.getElementById('main'), cambia = UI._vistaPintada !== UI.vista;
   main.innerHTML = intro() + V[UI.vista]() + pie();
   if(cambia){ UI._vistaPintada = UI.vista; main.classList.remove('entrando'); void main.offsetWidth; main.classList.add('entrando'); clearTimeout(render._t); render._t = setTimeout(()=>main.classList.remove('entrando'), 900); }
@@ -1372,9 +1467,9 @@ const PAL_DIA = {H:['#23864F','#FFFFFF'], D:['#C23B30','#FFFFFF'], R:['#5E6B82',
 const COLOR_DIA = e => { const c = COD_DIA(e); if(!c) return ''; const p = PAL_DIA[c] || [e.t?.color||'#5F6775','#FFFFFF']; return `--cc:${p[0]};--ct:${p[1]}`; };
 const claseDia = (e, s) => { const wd = pd(s).getUTCDay(); return [`c-${e.k||'t'}`, COD_DIA(e)?'pinta':'', (wd===0||wd===6)?'fs':'', esSS(s)?'ss':''].filter(Boolean).join(' '); };
 function leyendaDias(){
-  const m = (c,t) => `<span style="--c:${PAL_DIA[c][0]}">${t}</span>`;
-  return `<div class="legend ley-dias">${m('H','H vacaciones')}${m('R','R descanso')}${m('F','F festivo')}${m('X','X festivo de empresa')}${m('AJ','AJ ajuste de jornada')}${m('D','D desprogramado')}<span style="--c:repeating-linear-gradient(135deg,#F3C2BD 0 3px,#FBE7E5 3px 7px)">B baja</span>
-    <span class="ley-fs">Fin de semana</span><span class="ley-ss">Semana Santa</span></div>`;
+  const m = (c,t) => `<span class="li"><b style="background:${PAL_DIA[c][0]};color:${PAL_DIA[c][1]}">${c}</b>${t}</span>`;
+  return `<div class="ley-dias" aria-label="Leyenda">${m('H','Vacaciones')}${m('R','Descanso')}${m('F','Festivo')}${m('X','Festivo de empresa')}${m('AJ','Ajuste de jornada')}${m('D','Desprogramado')}
+    <span class="li"><b class="lb-b">B</b>Baja</span><span class="li"><b class="lb-fs"></b>Fin de semana</span><span class="li"><b class="lb-ss"></b>Semana Santa</span></div>`;
 }
 
 /* ---------- Consultar: todo el año en celdas, nombres fijos ---------- */
@@ -1383,7 +1478,7 @@ function vConsultar(){
   if(C.grupo!=='all' && !gruposVis().some(g=>g.id===C.grupo)) C.grupo='all';
   const dias = [...eachDay(`${y}-01-01`,`${y}-12-31`)], hoyS = hoy();
   let cabM = '<th class="cg-nom cg-esq" rowspan="2">Persona</th>', cabD = '';
-  for(let m=0;m<12;m++){ const dim = new Date(Date.UTC(y,m+1,0)).getUTCDate(); cabM += `<th class="cg-mes" colspan="${dim}" id="cgm${m}">${MESES[m][0].toUpperCase()+MESES[m].slice(1)}</th>`; }
+  for(let m=0;m<12;m++){ const dim = new Date(Date.UTC(y,m+1,0)).getUTCDate(); cabM += `<th class="cg-mes" colspan="${dim}" id="cgm${m}"><span>${MESES[m][0].toUpperCase()+MESES[m].slice(1)}</span></th>`; }
   dias.forEach(s=>{ const wd = pd(s).getUTCDay(); cabD += `<th class="cg-d ${wd===0||wd===6?'fs':''} ${s===hoyS?'hoy':''} ${s.endsWith('-01')?'ini':''} ${esSS(s)?'ss':''}"><small>${DOW[(wd+6)%7]}</small>${Number(s.slice(8))}</th>`; });
   const filas = gruposActivos().filter(k=>C.grupo==='all'||k===C.grupo).map(k=>{
     const ts = trabsVis().filter(t=>gk(t)===k && (!C.buscar || t.nombre.toLowerCase().includes(C.buscar.toLowerCase()))).sort((a,b)=>a.nombre.localeCompare(b.nombre,'es')); if(!ts.length) return '';
@@ -1411,6 +1506,8 @@ function clicCons(ev){
 function irMesCons(m){ const c = document.getElementById('cgScroll'), th = document.getElementById('cgm'+m), nom = c?.querySelector('.cg-esq'); if(c && th) c.scrollTo({left: th.offsetLeft - (nom?nom.offsetWidth:0), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'}); }
 function colocarConsultar(){
   const c = document.getElementById('cgScroll'); if(!c) return;
+  const nom = c.querySelector('.cg-esq')?.offsetWidth || 200, dias = innerWidth < 760 ? 9 : 42;   // unas 6 semanas a la vista
+  c.style.setProperty('--cw', Math.max(32, Math.floor((c.clientWidth - nom - 2) / dias)) + 'px');
   if(UI.cons._x != null && UI.cons._pintado){ c.scrollLeft = UI.cons._x; }
   else { const h = hoy(); const m = delAnio(h,CIC()) ? Number(h.slice(5,7))-1 : 0; const th = document.getElementById('cgm'+m), nom = c.querySelector('.cg-esq'); if(th) c.scrollLeft = th.offsetLeft - (nom?nom.offsetWidth:0); UI.cons._pintado = true; }
   c.onscroll = () => { UI.cons._x = c.scrollLeft; };
@@ -1490,7 +1587,7 @@ function colocarHoja(){
   h.classList.toggle('arriba', arriba);
   if(top + alto > innerHeight) h.scrollIntoView({block:'nearest', behavior:'smooth'});
 }
-window.addEventListener('resize', colocarHoja);
+window.addEventListener('resize', ()=>{ colocarHoja(); if(UI.vista==='vacaciones' && UI.vacModo==='consultar') colocarConsultar(); });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape' && UI.ed && !document.getElementById('bloqueo')){ UI.ed=null; render(); } });
 function hojaAcciones(w, E){
   const s = E.dia, {vac, dps} = diasDe(w, CIC()), e = estadoDia(w, s, vac, dps);
@@ -2212,11 +2309,11 @@ function selectorAnual(w){
       const cls = ['ed', st, (wd===0||wd===6)?'we':'', esSS(s)?'ss':'', esPuente(s)?'pu':'', deOtros.length?'og':'', cupoLleno&&!S.ajustes.bloquear&&st==='libre'?'casi':'', s===hoyS?'hoy':'', (UI.desde&&s>=UI.desde&&s<=UI.hasta)?'sel':''].filter(Boolean).join(' ');
       const tit = `${fmt(s)}: ${ptsDia(s)} pts${esSS(s)?', Semana Santa':''}${esPuente(s)?', puente':''}${motivo?'. '+motivo:''}${deOtros.length?`. También fuera (no bloquea): ${deOtros.map(t=>`${t.nombre} (${t.grupoId===w.grupoId?nombreCat(catDe(t)).toLowerCase():nombreGrupo(gk(t))})`).join(', ')}`:''}`;
       const tt = turnoDia(w,s);
-      html += `<span class="${cls}" ${st==='rst'?`style="--tcr:${tt.color}"`:''} data-d="${s}" data-m="${esc(motivo)}" title="${esc(tit)}${tt&&st!=='rst'?'. Turno '+esc(tt.nombre):''}">${d}${tt?`<i class="tc" style="color:${st==='propio'?'#fff':tt.color}">${esc(tt.cod)}</i>`:''}</span>`;
+      html += `<span class="${cls}" ${st==='rst'?`style="--tcr:${(PAL_DIA[tt.cod]||[tt.color])[0]};--tct:${(PAL_DIA[tt.cod]||[0,'#fff'])[1]}"`:''} data-d="${s}" data-m="${esc(motivo)}" title="${esc(tit)}${tt&&st!=='rst'?'. Turno '+esc(tt.nombre):''}">${d}${tt?`<i class="tc" style="color:${st==='propio'?'#fff':tt.color}">${esc(tt.cod)}</i>`:''}</span>`;
     }
     html += '</div></div>';
   }
-  return html + `</div><div class="legend"><span style="--c:var(--senal)">Seleccionado</span><span style="--c:var(--ctx)">Sus vacaciones</span><span style="--c:repeating-linear-gradient(135deg,#C9CED6 0 2px,#EEF0F3 2px 4px)">No disponible (cupo o cese)</span><span style="--c:#5FA77A">Descanso o festivo de su rotación</span><span class="lg-og">Alguien de otro grupo</span><span style="--c:var(--senal-soft)">Semana Santa</span></div>`;
+  return html + `</div><div class="legend"><span style="--c:var(--senal)">Seleccionado</span><span style="--c:var(--ok)">Sus vacaciones</span><span style="--c:repeating-linear-gradient(135deg,#C9CED6 0 2px,#EEF0F3 2px 4px)">No disponible (cupo o cese)</span><span style="--c:#5E6B82">R descanso</span><span style="--c:#F0A35E">F festivo</span><span class="lg-og">Alguien de otro grupo</span><span style="--c:var(--senal-soft)">Semana Santa</span></div>`;
 }
 function selLimitar(a, b){ // avanza desde a hacia b; cruza descansos, se para en lo no disponible o al acabarse sus días
   const paso = b>=a ? 1 : -1; let fin = a, usados = selCuenta.has(a) ? 1 : 0;
@@ -2324,11 +2421,11 @@ function calendarioJornada(w, y){
       const s=`${y}-${mm}-${String(d).padStart(2,'0')}`, tt=turnoDia(w,s), mk=marcaDe(w.id,s), lib=tt&&tt.libre, v=!lib&&vac.has(s), bj=!lib&&!v&&enBaja(w,s);
       const cls = ['fd', mk?'mk':v?'vac':bj?'bj':lib?'lib':'', UI.joDia===s?'sel':''].filter(Boolean).join(' ');
       const tit = `${fmt(s)}${mk?': '+(tipoTurno(mk.cod)?.nombre||mk.cod):v?': vacaciones':bj?': baja':tt?'. '+tt.nombre:''}`;
-      html += `<span class="${cls}" ${mk?`style="--mc:${tipoTurno(mk.cod)?.color||'#5F6775'}"`:''} title="${esc(tit)}" onclick="UI.joDia='${s}';render()" role="button" tabindex="0">${d}${tt?`<i class="tc" style="color:${(mk||v)?'#fff':tt.color}">${esc(tt.cod)}</i>`:''}</span>`;
+      html += `<span class="${cls}"${tt&&tt.libre?` style="--cc:${(PAL_DIA[tt.cod]||[tt.color])[0]};--ct:${(PAL_DIA[tt.cod]||[0,'#fff'])[1]}"`:''} ${mk?`style="--mc:${tipoTurno(mk.cod)?.color||'#5F6775'}"`:''} title="${esc(tit)}" onclick="UI.joDia='${s}';render()" role="button" tabindex="0">${d}${tt?`<i class="tc" style="color:${(mk||v)?'#fff':tt.color}">${esc(tt.cod)}</i>`:''}</span>`;
     }
     html += '</div></div>';
   }
-  return html + `</div><div class="legend"><span style="--c:var(--ok)">Vacaciones</span><span style="--c:#0E7A8A">AJ</span><span style="--c:#8E2A6B">X</span><span style="--c:repeating-linear-gradient(135deg,#F3C2BD 0 3px,#FBE7E5 3px 7px)">Baja</span><span style="--c:#EBEFF6">Descanso o festivo</span></div>`;
+  return html + `</div><div class="legend"><span style="--c:var(--ok)">Vacaciones</span><span style="--c:#0E7A8A">AJ</span><span style="--c:#8E2A6B">X</span><span style="--c:repeating-linear-gradient(135deg,#F3C2BD 0 3px,#FBE7E5 3px 7px)">Baja</span><span style="--c:#5E6B82">R descanso</span><span style="--c:#F0A35E">F festivo</span></div>`;
 }
 function fijarJornada(id, modo, valor){
   const w = trabDe(id); if(!w) return;
@@ -2385,7 +2482,7 @@ function calendarioFicha(w, y, interactivo){
       const cls = ['fd', dps.has(s)?'dp':vac.has(s)?'vac':enCese(w,s)?'ces':'', (wd===0||wd===6)?'we':'', esSS(s)?'ss':'', tt&&tt.libre&&!vac.has(s)&&!dps.has(s)?'lib':'', interactivo&&UI.dpDia===s?'sel':''].filter(Boolean).join(' ');
       const tit = `${fmt(s)}${dps.has(s)?': desprogramado':vac.has(s)?': vacaciones':enCese(w,s)?': cese':''}${tt?`. Turno ${tt.nombre}`:''}`;
       const click = interactivo && !vac.has(s) && !enCese(w,s) && !esDescanso(w,s) ? ` onclick="UI.dpDia='${s}';render()" role="button" tabindex="0"` : '';
-      html += `<span class="${cls}" title="${esc(tit)}"${click}>${d}${tt?`<i class="tc" style="color:${(vac.has(s)||dps.has(s))?'#fff':tt.color}">${esc(tt.cod)}</i>`:''}</span>`;
+      html += `<span class="${cls}"${tt&&tt.libre?` style="--cc:${(PAL_DIA[tt.cod]||[tt.color])[0]};--ct:${(PAL_DIA[tt.cod]||[0,'#fff'])[1]}"`:''} title="${esc(tit)}"${click}>${d}${tt?`<i class="tc" style="color:${(vac.has(s)||dps.has(s))?'#fff':tt.color}">${esc(tt.cod)}</i>`:''}</span>`;
     }
     html += '</div></div>';
   }
@@ -2745,6 +2842,14 @@ render();
    Para publicar: subir APP_VERSION, añadir sus pasos a NOVEDADES y poner la misma versión en version.json.
    ========================================================= */
 const NOVEDADES = {
+  '9.1.0': [
+    { titulo:'Calendarios más grandes', donde:'Calendario, Editar, Elección y fichas',
+      texto:'Los calendarios ocupan todo el ancho de la pantalla y la hoja del año crece con la altura de tu monitor. Las celdas, las letras y los nombres de los meses son más grandes, y el mes se queda fijo mientras deslizas.' },
+    { titulo:'Leyendas más claras', donde:'Debajo de cada calendario',
+      texto:'La leyenda muestra cada letra dentro de su color (H, R, F, X, AJ, D, B) y cómo se ven los fines de semana y la Semana Santa.' },
+    { titulo:'Mismos colores en todas partes', donde:'Toda la app',
+      texto:'Descanso en gris azulado, festivo en naranja y vacaciones en verde también en la Elección, en las fichas y en Grupos.' },
+  ],
   '9.0.0': [
     { titulo:'La asignación es la del año siguiente', donde:'Vacaciones › botón amarillo',
       texto:'Si trabajas en el ciclo 2027 (barra superior), el botón amarillo es la asignación de 2028. Las vacaciones de 2027 las sigues metiendo a mano desde Consultar calendario.' },
