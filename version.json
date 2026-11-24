@@ -1,9 +1,7 @@
 {
-  "version": "8.2.0",
+  "version": "8.3.0",
   "fecha": "2026-11-24",
   "novedades": [
-    "Vacaciones con dos botones: Consultar calendario y Editar",
-    "Calendario de todo el año en celdas con nombres fijos",
-    "Hoja anual por trabajador para asignar vacaciones, AJ, X, bajas y desprogramaciones"
+    "Rotación, fines de semana y Semana Santa bien marcados en Editar, Consultar y PDF"
   ]
 }

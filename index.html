@@ -209,11 +209,6 @@ table.cg{border-collapse:separate;border-spacing:0;width:max-content;font-size:1
 .cg tbody td{height:30px;text-align:center;font-weight:700;font-size:11px}
 .cg-grp th,.cg-grp td{background:var(--hormigon)!important;height:26px}
 .cg-grp th{font-family:var(--cond);font-size:14px;padding-left:10px!important;color:var(--gris)}
-.cg tbody tr:hover td:not([class*="c-vac"]):not(.c-dp):not(.c-mk){filter:brightness(.97)}
-.c-vac,.c-dp,.c-mk{background:var(--cc)!important;color:#fff}
-.c-lib{background:#E6EAF1;color:#56607A} .c-lib.c-f{background:#F8E1DE;color:#A2362B}
-.c-bj{background:repeating-linear-gradient(135deg,#F3C2BD 0 3px,#FBE7E5 3px 7px);color:#8C2A20}
-.c-ces{background:#E2E4E8;color:#8A919D} .c-ss{background:var(--senal-soft)}
 .ed-cab{display:flex;flex-wrap:wrap;gap:14px 24px;align-items:flex-end}
 .ed-sel{flex:0 1 320px}
 .ed-acc{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap}
@@ -221,11 +216,9 @@ table.cg{border-collapse:separate;border-spacing:0;width:max-content;font-size:1
 table.eg{border-collapse:separate;border-spacing:2px;width:100%;min-width:900px;table-layout:fixed}
 .eg thead th{font-size:11.5px;color:var(--gris);font-weight:600;text-align:center;padding:2px 0}
 .eg-mes{width:88px;text-align:left!important;font-family:var(--cond);font-size:14.5px;color:var(--asfalto)!important;position:sticky;left:0;background:var(--papel);z-index:1;padding-right:6px!important}
-.eg td{height:40px;border:1px solid var(--linea);border-radius:5px;text-align:center;cursor:pointer;background:#fff;position:relative;transition:transform .1s,border-color .12s}
+.eg td{height:42px;border:1px solid #C9CED6;border-radius:5px;text-align:center;cursor:pointer;background:#fff;position:relative;transition:transform .1s,border-color .12s}
 .eg td small{position:absolute;top:2px;left:3px;font-size:8.5px;color:var(--gris);font-weight:600}
 .eg td b{font-size:12.5px}
-.eg td.fs:not([class*="c-vac"]):not(.c-dp):not(.c-mk):not(.c-lib):not(.c-bj){background:#F6F7F9}
-.eg td.c-vac small,.eg td.c-dp small,.eg td.c-mk small{color:rgba(255,255,255,.8)}
 .eg td:hover{border-color:var(--asfalto)} .eg td:active{transform:scale(.94)}
 .eg td.sel{outline:3px solid var(--asfalto);outline-offset:1px;z-index:1}
 .eg td.rsel{box-shadow:inset 0 0 0 3px var(--ctx)}
@@ -236,6 +229,23 @@ table.eg{border-collapse:separate;border-spacing:2px;width:100%;min-width:900px;
 .aviso{margin:8px 0 0;padding:8px 12px;border-radius:8px;font-size:14px}
 .aviso.bad{background:#FBE7E5;color:#8C2A20} .aviso.warn{background:#FFF4D6;color:#7A5600} .aviso.ok{background:#E3F3E9;color:#1E6B3E}
 .acc-dia .btn{flex:0 1 auto}
+
+/* ---- celdas de días (Consultar y Editar) ---- */
+.cg td.pinta,.eg td.pinta{background:var(--cc);color:var(--ct);border-color:var(--cc)}
+.cg td.c-bj,.eg td.c-bj{background:repeating-linear-gradient(135deg,#F3C2BD 0 3px,#FBE7E5 3px 7px);color:#8C2A20}
+.eg td.pinta small{color:var(--ct);opacity:.85}
+/* fin de semana: celda gris y barra oscura arriba, también si tiene algo encima */
+.cg td.fs:not(.pinta),.eg td.fs:not(.pinta){background:#DDE1E8}
+.eg td.fs{box-shadow:inset 0 4px 0 #22262E}
+.eg td.fs small{color:#22262E;font-weight:800}
+.cg td.fs{box-shadow:inset 0 3px 0 #22262E}
+/* Semana Santa: borde amarillo grueso */
+.cg td.ss,.eg td.ss{box-shadow:inset 0 0 0 3px var(--senal)}
+.cg td.ss:not(.pinta),.eg td.ss:not(.pinta){background:var(--senal-soft)}
+.eg td.fs.ss,.cg td.fs.ss{box-shadow:inset 0 4px 0 #22262E,inset 0 0 0 3px var(--senal)}
+.cg-d.ss{box-shadow:inset 0 -4px 0 var(--senal)}
+.ley-dias .ley-fs::before{background:#DDE1E8;box-shadow:inset 0 3px 0 #22262E}
+.ley-dias .ley-ss::before{background:var(--senal-soft);box-shadow:inset 0 0 0 2px var(--senal)}
 
 /* ---- jornada ---- */
 .jo-tabla td.num,.jo-tabla th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
@@ -589,7 +599,7 @@ body.bloqueada{overflow:hidden}
    Reglas base: Convenio Menzies (BOE-A-2023-25956), arts. 32 y 33
    Datos guardados en el navegador (localStorage). Haz copias.
    ========================================================= */
-const APP_VERSION = '8.2.0';   // súbela junto con version.json en cada publicación
+const APP_VERSION = '8.3.0';   // súbela junto con version.json en cada publicación
 const LS_KEY = 'vacaciones-agp-v1';
 const SIN = '_'; // clave interna para «sin grupo»
 
@@ -1339,9 +1349,14 @@ function barraVac(modo){
 }
 /* código y estilo de un día para una persona (consultar, editar y PDF usan lo mismo) */
 const COD_DIA = e => e.k==='vac' ? 'H' : e.k==='dp' ? 'D' : e.k==='mk' ? e.cod : e.k==='lib' ? e.t.cod : e.k==='bj' ? 'B' : e.k==='ces' ? 'C' : '';
-const COLOR_DIA = e => e.k==='vac' ? 'var(--ok)' : e.k==='dp' ? 'var(--bad)' : e.k==='mk' ? (tipoTurno(e.cod)?.color||'#5F6775') : '';
+/* colores fijos por letra (fondo, texto): R y F de la rotación muy visibles, sin chocar con las vacaciones */
+const PAL_DIA = {H:['#23864F','#FFFFFF'], D:['#C23B30','#FFFFFF'], R:['#5E6B82','#FFFFFF'], F:['#F0A35E','#22262E'], X:['#8E2A6B','#FFFFFF'], AJ:['#0E7A8A','#FFFFFF'], B:['#F6D3CF','#8C2A20'], C:['#D5D8DE','#5F6775']};
+const COLOR_DIA = e => { const c = COD_DIA(e); if(!c) return ''; const p = PAL_DIA[c] || [e.t?.color||'#5F6775','#FFFFFF']; return `--cc:${p[0]};--ct:${p[1]}`; };
+const claseDia = (e, s) => { const wd = pd(s).getUTCDay(); return [`c-${e.k||'t'}`, COD_DIA(e)?'pinta':'', (wd===0||wd===6)?'fs':'', esSS(s)?'ss':''].filter(Boolean).join(' '); };
 function leyendaDias(){
-  return `<div class="legend"><span style="--c:var(--ok)">H vacaciones</span><span style="--c:var(--bad)">D desprogramado</span><span style="--c:#0E7A8A">AJ ajuste de jornada</span><span style="--c:#8E2A6B">X festivo de empresa</span><span style="--c:#E6EAF1">R descanso</span><span style="--c:#F8E1DE">F festivo</span><span style="--c:repeating-linear-gradient(135deg,#F3C2BD 0 3px,#FBE7E5 3px 7px)">B baja</span><span style="--c:var(--senal-soft)">Semana Santa</span></div>`;
+  const m = (c,t) => `<span style="--c:${PAL_DIA[c][0]}">${t}</span>`;
+  return `<div class="legend ley-dias">${m('H','H vacaciones')}${m('R','R descanso')}${m('F','F festivo')}${m('X','X festivo de empresa')}${m('AJ','AJ ajuste de jornada')}${m('D','D desprogramado')}<span style="--c:repeating-linear-gradient(135deg,#F3C2BD 0 3px,#FBE7E5 3px 7px)">B baja</span>
+    <span class="ley-fs">Fin de semana</span><span class="ley-ss">Semana Santa</span></div>`;
 }
 
 /* ---------- Consultar: todo el año en celdas, nombres fijos ---------- */
@@ -1357,7 +1372,7 @@ function vConsultar(){
     return `<tr class="cg-grp"><th class="cg-nom">${esc(nombreGrupo(k))}</th><td colspan="${dias.length}"></td></tr>` + ts.map(w=>{
       const {vac, dps} = diasDe(w, y);
       return `<tr><th class="cg-nom" title="${esc(w.nombre)}"><button onclick="UI.vacModo='editar';UI.edTrab='${w.id}';UI.ed=null;render()">${esc(w.nombre)}</button></th>${dias.map(s=>{ const e = estadoDia(w,s,vac,dps), c = COD_DIA(e), col = COLOR_DIA(e);
-        return `<td class="c-${e.k||'t'} ${e.k==='lib'&&c==='F'?'c-f':''} ${s.endsWith('-01')?'ini':''}"${col?` style="--cc:${col}"`:''}>${c}</td>`; }).join('')}</tr>`; }).join('');
+        return `<td class="${claseDia(e,s)} ${s.endsWith('-01')?'ini':''}"${col?` style="${col}"`:''}>${c}</td>`; }).join('')}</tr>`; }).join('');
   }).join('');
   return `<div class="card cons-barra">
       <label style="flex:0 1 220px">Grupo<select onchange="UI.cons.grupo=this.value;render()">${opts(gruposVis(), C.grupo, ['all','Todos los grupos'])}</select></label>
@@ -1393,7 +1408,7 @@ function vEditar(){
     for(let d=1; d<=31; d++){
       if(d>dim){ celdas += '<td class="eg-x"></td>'; continue; }
       const s = `${y}-${mm}-${String(d).padStart(2,'0')}`, wd = pd(s).getUTCDay(), e = estadoDia(w,s,vac,dps), c = COD_DIA(e), col = COLOR_DIA(e);
-      celdas += `<td class="c-${e.k||'t'} ${e.k==='lib'&&c==='F'?'c-f':''} ${wd===0||wd===6?'fs':''} ${esSS(s)&&!e.k?'c-ss':''} ${E&&E.dia===s?'sel':''} ${enRangoSel(s)?'rsel':''}"${col?` style="--cc:${col}"`:''} onclick="tocarDia('${s}')" role="button" tabindex="0" title="${esc(fmtL(s))}"><small>${DOW[(wd+6)%7]}</small><b>${c}</b></td>`;
+      celdas += `<td class="${claseDia(e,s)} ${E&&E.dia===s?'sel':''} ${enRangoSel(s)?'rsel':''}"${col?` style="${col}"`:''} onclick="tocarDia('${s}')" role="button" tabindex="0" title="${esc(fmtL(s))}${esSS(s)?', Semana Santa':''}"><small>${DOW[(wd+6)%7]}</small><b>${c}</b></td>`;
     }
     filas += `<tr><th class="eg-mes">${MESES[m][0].toUpperCase()+MESES[m].slice(1)}</th>${celdas}</tr>`;
   }
@@ -1583,11 +1598,14 @@ function pdfPersona(w, y=S.ciclo){
     for(let d=1; d<=dim; d++){
       const s = `${y}-${mm}-${String(d).padStart(2,'0')}`, k = off+d-1, x = cx+(k%7)*cw, yy = top-24-(Math.floor(k/7)+1)*ch;
       const e = estadoDia(w,s,vac,dps);
-      const fondo = {dp:C.bad, mk:tipoTurno(e.cod)?.color||C.gris, vac:C.ok, bj:C.baja, lib:C.lib, ces:C.ces}[e.k] || (esSS(s)?C.ss:'#FFFFFF');
-      pdf.rect(x+.6, yy+.6, cw-1.2, ch-1.2, fondo, e.k?null:C.linea);
-      const claro = ['dp','mk','vac'].includes(e.k);
-      pdf.texto(x+cw/2, yy+ch/2-1.2, String(d), 6.5, {bold:claro, color:claro?'#FFFFFF':C.asf, align:'center'});
-      if(e.t && (e.k==='lib'||e.k==='mk')) pdf.texto(x+cw-1.8, yy+1.8, e.t.cod, 3.8, {bold:true, color:claro?'#FFFFFF':(e.t.color||C.gris), align:'right'});
+      const cod = COD_DIA(e), pal = PAL_DIA[cod] || (cod ? [e.t?.color||C.gris,'#FFFFFF'] : null), wd = pd(s).getUTCDay(), fs = wd===0||wd===6;
+      const fondo = pal ? pal[0] : esSS(s) ? C.ss : fs ? '#DDE1E8' : '#FFFFFF';
+      pdf.rect(x+.6, yy+.6, cw-1.2, ch-1.2, fondo, pal?null:C.linea);
+      if(esSS(s)){ pdf.rect(x+.6, yy+.6, cw-1.2, 1.4, C.senal); pdf.rect(x+.6, yy+ch-2, cw-1.2, 1.4, C.senal); pdf.rect(x+.6, yy+.6, 1.4, ch-1.2, C.senal); pdf.rect(x+cw-2, yy+.6, 1.4, ch-1.2, C.senal); }
+      if(fs) pdf.rect(x+.6, yy+ch-2.2, cw-1.2, 1.6, C.asf);
+      const tx = pal ? pal[1] : C.asf;
+      pdf.texto(x+cw/2, yy+ch/2-1.2, String(d), 6.5, {bold:!!pal, color:tx, align:'center'});
+      if(cod && !['H','D'].includes(cod)) pdf.texto(x+cw-1.8, yy+1.8, cod, 3.8, {bold:true, color:tx, align:'right'});
     }
   }
   // periodos, desprogramaciones y bajas
@@ -1603,7 +1621,7 @@ function pdfPersona(w, y=S.ciclo){
   const bs = bajasDe(w.id, y);
   pdf.texto(xd, yy-57, bs.length ? bs.map(b=>`${fmt(b.desde)} – ${fmt(b.hasta)}`).join(', ') : 'Ninguna', 8);
   // leyenda y pie
-  const ley = [[C.ok,'Vacaciones'],[C.bad,'Desprogramado'],['#0E7A8A','AJ ajuste de jornada'],['#8E2A6B','X festivo de empresa'],[C.baja,'Baja'],[C.lib,'R descanso, F festivo'],[C.ss,'Semana Santa']];
+  const ley = [[PAL_DIA.H[0],'H vacaciones'],[PAL_DIA.R[0],'R descanso'],[PAL_DIA.F[0],'F festivo'],[PAL_DIA.X[0],'X festivo de empresa'],[PAL_DIA.AJ[0],'AJ ajuste'],[PAL_DIA.D[0],'Desprogramado'],[PAL_DIA.B[0],'Baja'],['#DDE1E8','Fin de semana'],[C.senal,'Semana Santa']];
   let lx = M; ley.forEach(([c,t])=>{ pdf.rect(lx, 26, 9, 9, c); pdf.texto(lx+13, 28, t, 7.5, {color:C.gris}); lx += 22 + pdfAncho(t,7.5); });
   pdf.texto(W-M, 28, `Control Planning, ${fmt(hoy())} ${hoy().slice(0,4)}`, 7, {color:C.gris, align:'right'});
   return pdf.bytes(W, H);
@@ -2706,6 +2724,12 @@ render();
    Para publicar: subir APP_VERSION, añadir sus pasos a NOVEDADES y poner la misma versión en version.json.
    ========================================================= */
 const NOVEDADES = {
+  '8.3.0': [
+    { titulo:'Rotación, fines de semana y Semana Santa más claros', donde:'Vacaciones › Editar y Consultar calendario',
+      texto:'Cada letra tiene ahora su color fijo y bien visible: R descanso en gris azulado, F festivo en naranja, X en morado, AJ en verde azulado y H vacaciones en verde. Los fines de semana llevan una barra oscura arriba y fondo gris. La Semana Santa va enmarcada en amarillo.' },
+    { titulo:'También en el PDF', donde:'Descargar PDF y ZIP',
+      texto:'Las fichas en PDF usan los mismos colores y marcas.' },
+  ],
   '8.2.0': [
     { titulo:'Vacaciones, más sencillo', donde:'Globo Vacaciones',
       texto:'Al entrar solo hay dos botones: «Consultar calendario» y «Editar». La asignación del año queda en una línea amarilla debajo.' },
