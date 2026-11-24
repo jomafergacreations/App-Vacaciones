@@ -226,12 +226,15 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
 <script>
 /* =========================================================
    Control Planning 10 — rehecha desde cero
-   Datos en localStorage, con una clave nueva: los de la versión
-   anterior siguen en el navegador y se consultan en /antigua/.
+   Datos en localStorage, con una clave nueva.
    ========================================================= */
-const APP_VERSION = '10.0.0';
+const APP_VERSION = '10.0.1';
 const CLAVE = 'control-planning-v10';
 const NOVEDADES = {
+  '10.0.1': [
+    { titulo:'Solo Personal', donde:'Toda la app',
+      texto:'Se ha quitado todo lo de la versión anterior. Por ahora la app tiene solo Personal; las demás partes se irán añadiendo cuando esta funcione bien.' },
+  ],
   '10.0.0': [
     { titulo:'Control Planning, desde cero', donde:'Toda la app',
       texto:'Empezamos una app nueva y más sencilla, por partes. La primera es Personal: los trabajadores, su contrato y su jornada anual. Los datos empiezan en blanco.' },
@@ -241,8 +244,6 @@ const NOVEDADES = {
       texto:'Escribe la jornada en horas semanales, en porcentaje o en horas anuales: la app calcula las otras dos. Un tiempo completo son 40 h a la semana y 1.700 h al año (se cambia en Ajustes).' },
     { titulo:'Fijos discontinuos', donde:'Ficha de cada trabajador',
       texto:'Apunta sus periodos de actividad y la jornada anual se calcula en proporción a los días que trabaja en el año.' },
-    { titulo:'¿Y lo de antes?', donde:'Ajustes',
-      texto:'La versión anterior sigue disponible, con sus datos, desde Ajustes › «Abrir la versión anterior».' },
   ],
 };
 
@@ -528,8 +529,6 @@ function abrirAjustes(){
         <div class="fila"><label>Horas a la semana<input id="aSem" inputmode="decimal" value="${nh(A.hSemana)}"></label><label>Horas al año<input id="aAnio" inputmode="decimal" value="${String(A.hAnio)}"></label></div></div>
       <div class="bloque"><h3>Copia de seguridad</h3><p class="muted" style="margin:0 0 10px;font-size:14px">Los datos viven solo en este navegador. Descarga una copia de vez en cuando.</p>
         <div class="fila"><button class="btn" onclick="descargarCopia()">Descargar copia</button><label class="btn" style="flex:0 0 auto;color:inherit;font-size:inherit">Restaurar una copia<input type="file" accept=".json,application/json" style="display:none" onchange="restaurarCopia(this.files[0])"></label></div></div>
-      <div class="bloque"><h3>Versión anterior</h3><p class="muted" style="margin:0 0 10px;font-size:14px">La app de antes sigue disponible con todos sus datos, por si necesitas consultar algo.</p>
-        <a class="btn" href="antigua/" target="_blank" rel="noopener">Abrir la versión anterior</a></div>
       <p class="muted" style="margin:0;font-size:13px">Versión ${APP_VERSION}</p>
     </div>
     <div class="dlg-pie"><button class="btn" onclick="$('#capa').innerHTML=''">Cancelar</button><button class="btn primario" onclick="guardarAjustes()">Guardar</button></div></div></div>`;

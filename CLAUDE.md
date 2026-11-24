@@ -2,7 +2,7 @@
 
 App personal para Menzies AGP en un único `index.html` (HTML + CSS + JS, sin dependencias). Se publica con GitHub Pages desde `main`. Es instalable como app de escritorio (`manifest.webmanifest`, iconos del avión, `sw.js` mínimo sin caché).
 
-Desde la versión 10 la app se rehace desde cero, por partes. La versión anterior (Vacaciones AGP / PlanningApp, hasta la 9.1.4) está congelada en `antigua/`, con su propio `version.json`, para consultar sus datos; no se toca.
+Desde la versión 10 la app se rehace desde cero, por partes: por ahora solo existe Personal, y se añaden módulos cuando el anterior funciona. La versión anterior (Vacaciones AGP / PlanningApp, hasta la 9.1.4) se quitó del repositorio a petición del usuario; está en el historial de git (commit f53b66a) por si hiciera falta.
 
 Los datos viven en el `localStorage` del navegador (clave `control-planning-v10`; la versión anterior usa `vacaciones-agp-v1`). Nunca subir copias `.json` de datos al repositorio.
 
@@ -23,7 +23,7 @@ Si `version.json` lleva una versión mayor que la de `index.html`, la app entra 
 - Personal (vista `personal`): resumen por contrato, tabla de trabajadores (tarjetas en móvil), búsqueda, filtro por contrato, ficha en diálogo (`abrirFicha`, `pintarFicha`, `guardarFicha`) y «Pegar lista» desde Excel (nombre, contrato, horas semanales).
 - Contratos (`CONTRATOS`): `completo`, `parcial` y `discontinuo`.
 - Jornada: cada trabajador guarda la jornada tal como se escribió (`modo`: `semana` | `pct` | `anio`, y `valor`). `pctDe`, `semanaDe` y `anualBase` convierten con `S.ajustes.hSemana` (40) y `S.ajustes.hAnio` (1.700). Un tiempo completo es siempre el 100 %. Los fijos discontinuos tienen periodos de actividad (`actividad: [{desde, hasta}]`), y su jornada anual es la base × días de actividad del año / días del año (`anualDe`, `diasActividad`).
-- Ajustes (⚙): horas de un tiempo completo, copia de seguridad (descargar y restaurar) y enlace a la versión anterior.
+- Ajustes (⚙): horas de un tiempo completo y copia de seguridad (descargar y restaurar).
 - Cualquier cambio de formato de datos se migra en `normalizar()`.
 
 ## Convenciones

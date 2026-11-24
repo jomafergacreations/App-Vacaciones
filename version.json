@@ -1,9 +1,5 @@
 {
-  "version": "10.0.0",
+  "version": "10.0.1",
   "fecha": "2026-11-24",
-  "novedades": [
-    "Control Planning empieza de cero, más sencilla y por partes",
-    "Primera parte: Personal, con el contrato y la jornada anual de cada trabajador",
-    "Los datos empiezan en blanco; la versión anterior sigue en Ajustes"
-  ]
+  "novedades": ["Solo queda Personal: se ha quitado todo lo de la versión anterior"]
 }
