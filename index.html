@@ -223,7 +223,14 @@ table.eg{border-collapse:separate;border-spacing:2px;width:100%;min-width:900px;
 .eg td.sel{outline:3px solid var(--asfalto);outline-offset:1px;z-index:1}
 .eg td.rsel{box-shadow:inset 0 0 0 3px var(--ctx)}
 .eg td.eg-x{border:0;background:none;cursor:default}
-.hoja-acc{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);width:min(680px,calc(100vw - 24px));max-height:70vh;overflow:auto;background:var(--papel);border-radius:18px;box-shadow:0 24px 60px -20px rgba(0,0,0,.45),0 0 0 1px var(--linea);padding:18px 20px;z-index:30;animation:subir .22s cubic-bezier(.2,.7,.2,1)}
+.hoja-acc{position:absolute;z-index:30;max-height:min(70vh,520px);overflow:auto;background:var(--papel);border-radius:16px;box-shadow:0 22px 50px -18px rgba(0,0,0,.5),0 0 0 1px var(--linea);padding:16px 18px;transform-origin:var(--fx,50%) 0}
+.hoja-acc.arriba{transform-origin:var(--fx,50%) 100%}
+.hoja-acc.nueva{animation:pop .18s cubic-bezier(.2,.7,.2,1)}
+@keyframes pop{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+.hoja-acc.fija{position:fixed;left:50%!important;top:auto!important;bottom:16px;transform:translateX(-50%);width:min(680px,calc(100vw - 24px))!important}
+.eg td.arr{box-shadow:inset 0 0 0 3px var(--ctx);background:color-mix(in srgb,var(--ctx) 14%,#fff)}
+.eg td.arr.pinta{filter:brightness(1.15)}
+.eg{user-select:none}
 .hoja-acc h3{margin:0;font-family:var(--cond);font-size:24px}
 .hoja-acc label{flex:1 1 150px}
 .aviso{margin:8px 0 0;padding:8px 12px;border-radius:8px;font-size:14px}
@@ -601,7 +608,7 @@ body.bloqueada{overflow:hidden}
    Reglas base: Convenio Menzies (BOE-A-2023-25956), arts. 32 y 33
    Datos guardados en el navegador (localStorage). Haz copias.
    ========================================================= */
-const APP_VERSION = '8.5.0';   // súbela junto con version.json en cada publicación
+const APP_VERSION = '8.6.0';   // súbela junto con version.json en cada publicación
 const LS_KEY = 'vacaciones-agp-v1';
 const SIN = '_'; // clave interna para «sin grupo»
 
@@ -1110,6 +1117,7 @@ function render(){
   if(UI.vista==='pdf') ajustarHoja();
   if(UI.vista==='gestion' && UI.gTab==='rotaciones' && UI.rotEdit) document.querySelector('.dlg-op.on, .dlg-op')?.focus();
   if(UI.vista==='vacaciones' && UI.vacModo==='consultar') colocarConsultar();
+  if(UI.ed && document.querySelector('.hoja-acc')) colocarHoja(); else UI._hojaClave = '';
 }
 const grupoChip = k => { const g=grupoDe(k); return g ? `<span class="chip grey"><span class="dot" style="background:${g.color};margin-right:5px;width:8px;height:8px"></span>${esc(g.nombre)}</span>` : '<span class="chip warn">Sin grupo</span>'; };
 const opts = (lista, sel, todos) => (todos?`<option value="${todos[0]}" ${sel===todos[0]?'selected':''}>${todos[1]}</option>`:'') + lista.map(x=>`<option value="${x.id}" ${x.id===sel?'selected':''}>${esc(x.nombre)}</option>`).join('');
@@ -1413,7 +1421,7 @@ function vEditar(){
   const w = trabDe(UI.edTrab), st = statsTrab(w), j = jornadaInfo(w), {vac, dps} = diasDe(w, y), E = UI.ed;
   const sel = `<select onchange="UI.edTrab=this.value;UI.ed=null;render()" aria-label="Trabajador">${gruposActivos().map(k=>{ const xs=ts.filter(t=>gk(t)===k).sort((a,b)=>a.nombre.localeCompare(b.nombre,'es')); return xs.length?`<optgroup label="${esc(nombreGrupo(k))}">${xs.map(t=>`<option value="${t.id}" ${t.id===w.id?'selected':''}>${esc(t.nombre)}</option>`).join('')}</optgroup>`:''; }).join('')}</select>`;
   // rango que se está eligiendo (vacaciones o baja)
-  const enRangoSel = s => E && (E.accion==='vac'||E.accion==='baja') && E.desde && s>=E.desde && s<=(E.hasta||E.desde);
+  const enRangoSel = s => E && ['vac','baja','rango'].includes(E.accion) && E.desde && s>=E.desde && s<=(E.hasta||E.desde);
   let filas = '';
   for(let m=0;m<12;m++){
     const mm = String(m+1).padStart(2,'0'), dim = new Date(Date.UTC(y,m+1,0)).getUTCDate();
@@ -1421,7 +1429,7 @@ function vEditar(){
     for(let d=1; d<=31; d++){
       if(d>dim){ celdas += '<td class="eg-x"></td>'; continue; }
       const s = `${y}-${mm}-${String(d).padStart(2,'0')}`, wd = pd(s).getUTCDay(), e = estadoDia(w,s,vac,dps), c = COD_DIA(e), col = COLOR_DIA(e);
-      celdas += `<td class="${claseDia(e,s)} ${E&&E.dia===s?'sel':''} ${enRangoSel(s)?'rsel':''}"${col?` style="${col}"`:''} onclick="tocarDia('${s}')" role="button" tabindex="0" title="${esc(fmtL(s))}${esSS(s)?', Semana Santa':''}"><small>${DOW[(wd+6)%7]}</small><b>${c}</b></td>`;
+      celdas += `<td class="${claseDia(e,s)} ${E&&E.dia===s?'sel':''} ${enRangoSel(s)?'rsel':''}"${col?` style="${col}"`:''} data-d="${s}" onclick="tocarDia('${s}')" role="button" tabindex="0" title="${esc(fmtL(s))}${esSS(s)?', Semana Santa':''}"><small>${DOW[(wd+6)%7]}</small><b>${c}</b></td>`;
     }
     filas += `<tr><th class="eg-mes">${MESES[m][0].toUpperCase()+MESES[m].slice(1)}</th>${celdas}</tr>`;
   }
@@ -1433,8 +1441,8 @@ function vEditar(){
       </div>
       <div class="ed-acc"><button class="btn" onclick="descargarPDFPersona('${w.id}')">${ico('descarga')} Descargar PDF</button><button class="btn" onclick="UI.perTrab='${w.id}';UI.perModo='ficha';UI.perTab='datos';UI.perNuevo=false;go('personal')">Su ficha</button></div>
     </div>
-    <div class="card"><div class="row" style="justify-content:space-between;align-items:center;margin-bottom:10px"><h2 style="margin:0">${esc(w.nombre)}, ${y}</h2><span class="muted">${E&&E.paso==='fin'?'Ahora toca el último día.':'Toca un día para ver qué puedes hacer.'}</span></div>
-      <div class="eg-scroll"><table class="eg"><thead><tr><th class="eg-mes"></th>${Array.from({length:31},(_,i)=>`<th>${i+1}</th>`).join('')}</tr></thead><tbody>${filas}</tbody></table></div>
+    <div class="card"><div class="row" style="justify-content:space-between;align-items:center;margin-bottom:10px"><h2 style="margin:0">${esc(w.nombre)}, ${y}</h2><span class="muted">${E&&E.paso==='fin'?'Ahora toca el último día.':'Toca un día para ver qué puedes hacer, o pincha y arrastra para elegir varios.'}</span></div>
+      <div class="eg-scroll" onscroll="colocarHoja()"><table class="eg" onpointerdown="arrIni(event)"><thead><tr><th class="eg-mes"></th>${Array.from({length:31},(_,i)=>`<th>${i+1}</th>`).join('')}</tr></thead><tbody>${filas}</tbody></table></div>
       ${leyendaDias()}</div>
     ${E ? hojaAcciones(w, E) : ''}`;
 }
@@ -1442,15 +1450,55 @@ function tocarDia(s){
   const E = UI.ed;
   if(E && E.paso==='fin'){ // eligiendo el final de un rango
     if(s<E.desde){ E.desde = s; } else E.hasta = s;
-    E.paso = 'form'; render(); return;
+    E.paso = 'form'; E.ancla = s; render(); return;
   }
-  UI.ed = {dia:s, accion:''}; render();
+  if(UI._arrastrado){ UI._arrastrado = false; return; }   // el clic que llega al soltar un arrastre
+  UI.ed = {dia:s, accion:'', ancla:s}; render();
 }
+/* pinchar y arrastrar con el ratón para elegir varios días seguidos (en táctil se usa «Elegir el final en la hoja») */
+function arrIni(ev){
+  if(ev.pointerType!=='mouse' || ev.button!==0) return;
+  const td = ev.target.closest('td[data-d]'); if(!td) return;
+  ev.preventDefault();
+  const A = {ini:td.dataset.d, fin:td.dataset.d}, celdas = [...document.querySelectorAll('.eg td[data-d]')];
+  const pinta = () => { const a = A.ini<A.fin?A.ini:A.fin, b = A.ini<A.fin?A.fin:A.ini; celdas.forEach(c=>c.classList.toggle('arr', A.ini!==A.fin && c.dataset.d>=a && c.dataset.d<=b)); };
+  const mover = e => { const c = document.elementFromPoint(e.clientX, e.clientY)?.closest('.eg td[data-d]'); if(c && c.dataset.d!==A.fin){ A.fin = c.dataset.d; pinta(); } };
+  const soltar = () => {
+    document.removeEventListener('pointermove', mover); document.removeEventListener('pointerup', soltar);
+    if(A.ini===A.fin) return;   // un solo día: lo resuelve el clic normal
+    UI._arrastrado = true; setTimeout(()=>{ UI._arrastrado = false; }, 0);
+    const d = A.ini<A.fin?A.ini:A.fin, h = A.ini<A.fin?A.fin:A.ini;
+    UI.ed = {dia:A.fin, accion:'rango', desde:d, hasta:h, ancla:A.fin}; render();
+  };
+  document.addEventListener('pointermove', mover); document.addEventListener('pointerup', soltar);
+}
+/* el menú del día sale flotando junto al último día tocado */
+function colocarHoja(){
+  const h = document.querySelector('.hoja-acc'), E = UI.ed; if(!h || !E) return;
+  const td = document.querySelector(`.eg td[data-d="${E.ancla||E.hasta||E.dia}"]`);
+  if(!td){ h.classList.add('fija'); return; }
+  h.classList.remove('fija');
+  const r = td.getBoundingClientRect(), W = Math.min(560, innerWidth-24); h.style.width = W+'px';
+  const alto = h.offsetHeight, op = h.offsetParent.getBoundingClientRect();
+  let left = Math.max(12, Math.min(r.left + r.width/2 - W/2, innerWidth - W - 12));
+  let top = r.bottom + 12, arriba = false;
+  if(top + alto > innerHeight - 8 && r.top - alto - 12 > 8){ top = r.top - alto - 12; arriba = true; }
+  h.style.left = (left - op.left)+'px'; h.style.top = (top - op.top)+'px';
+  h.style.setProperty('--fx', Math.max(18, Math.min(W-18, r.left + r.width/2 - left))+'px');
+  h.classList.toggle('arriba', arriba);
+  if(top + alto > innerHeight) h.scrollIntoView({block:'nearest', behavior:'smooth'});
+}
+window.addEventListener('resize', colocarHoja);
+document.addEventListener('keydown', e=>{ if(e.key==='Escape' && UI.ed && !document.getElementById('bloqueo')){ UI.ed=null; render(); } });
 function hojaAcciones(w, E){
   const s = E.dia, {vac, dps} = diasDe(w, S.ciclo), e = estadoDia(w, s, vac, dps);
   const cerrar = `<button class="btn" onclick="UI.ed=null;render()">Cerrar</button>`;
   let cuerpo = '';
-  if(E.accion==='vac'){
+  if(E.accion==='rango'){
+    const st = statsRango(E.desde, E.hasta, w);
+    cuerpo = `<h3>Del ${fmt(E.desde)} al ${fmt(E.hasta)}</h3><p style="margin:4px 0 12px">${[...eachDay(E.desde,E.hasta)].length} días naturales: ${st.computables} de trabajo y ${st.descansos} de descanso o festivo.</p>
+      <div class="row acc-dia"><button class="btn primary" onclick="Object.assign(UI.ed,{accion:'vac',paso:'form'});render()">Asignar vacaciones</button><button class="btn" onclick="Object.assign(UI.ed,{accion:'baja',paso:'form'});render()">Apuntar baja</button>${cerrar}</div>`;
+  } else if(E.accion==='vac'){
     const d = E.desde, h = E.hasta || E.desde, st = statsRango(d,h,w);
     const prob = [];
     if(solapePropio(w,d,h,E.edit)) prob.push(['bad','Se solapa con otro periodo suyo.']);
@@ -1509,7 +1557,8 @@ function hojaAcciones(w, E){
       if(quedan<=0) info += ' Ya tiene todos sus días de vacaciones.'; }
     cuerpo = `<h3>${fmtL(s)}</h3><p style="margin:4px 0 12px">${info}</p><div class="row acc-dia">${acc}${cerrar}</div>`;
   }
-  return `<div class="hoja-acc" role="dialog" aria-label="Acciones del día">${cuerpo}</div>`;
+  const clave = E.dia+'|'+E.accion+'|'+(E.ancla||''), nueva = UI._hojaClave!==clave; UI._hojaClave = clave;
+  return `<div class="hoja-acc ${nueva?'nueva':''}" role="dialog" aria-label="Acciones del día">${cuerpo}</div>`;
 }
 function guardarVacEd(){
   const E = UI.ed, w = trabDe(UI.edTrab); if(!E||!w) return;
@@ -2693,6 +2742,12 @@ render();
    Para publicar: subir APP_VERSION, añadir sus pasos a NOVEDADES y poner la misma versión en version.json.
    ========================================================= */
 const NOVEDADES = {
+  '8.6.0': [
+    { titulo:'Pincha y arrastra', donde:'Hoja del año (Editar y «A mano»)',
+      texto:'Con el ratón, pincha en un día y arrastra hasta el último: se marcan todos y eliges si son vacaciones o una baja. En el móvil, sigue usando «Elegir el final en la hoja».' },
+    { titulo:'El menú sale junto al día', donde:'Hoja del año',
+      texto:'Las opciones de cada día aparecen flotando al lado del último día que tocas, en lugar de abajo del todo. Se cierran con «Cerrar» o con la tecla Esc.' },
+  ],
   '8.5.0': [
     { titulo:'«A mano» con el calendario', donde:'Asignación de vacaciones › Elección › A mano',
       texto:'Ya no hay que escribir los periodos con fechas: elige al trabajador en el desplegable y toca los días en su hoja del año, igual que al editar desde el calendario.' },

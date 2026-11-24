@@ -1,8 +1,8 @@
 {
-  "version": "8.5.0",
+  "version": "8.6.0",
   "fecha": "2026-11-24",
   "novedades": [
-    "«A mano» usa la hoja del año con desplegable de trabajador",
-    "Avisos de cupo que dicen con quién coincide"
+    "Pincha y arrastra para elegir varios días en la hoja del año",
+    "El menú de cada día sale junto al día tocado"
   ]
 }
