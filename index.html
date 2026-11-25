@@ -117,6 +117,16 @@ table.plantilla{width:100%;border-collapse:collapse;font-variant-numeric:tabular
 .check{flex-direction:row;align-items:center;gap:8px;color:var(--asfalto);font-size:14.5px;cursor:pointer}
 .check input{width:18px;height:18px;margin:0}
 .tm .l0{margin-top:6px;font-size:13px;color:var(--gris);font-weight:600}
+.filtros2{display:flex;align-items:center;gap:8px 10px;flex-wrap:wrap;margin:-4px 0 14px}
+.flab{font-family:var(--cond);font-weight:700;color:var(--gris);font-size:15px}
+.flab+.seg{margin-right:10px}
+.segj td.plan{color:#7A818D;font-style:italic;background:#F7F8FA}
+.segj td.plan small{font-size:12px}
+.leyj i.plan{background:#F7F8FA;border:1px solid #C9CED6}
+.enlace{border:0;background:none;color:var(--pista);font-weight:700;cursor:pointer;padding:0 0 0 6px;font:inherit;text-decoration:underline}
+.rot-cods{display:flex;flex-wrap:wrap;gap:6px;font-size:13px}
+.rot-cods span{border-radius:999px;padding:3px 10px;background:#F1F3F6;font-weight:600}
+.rot-cods span.t{background:#DDF1E4;color:var(--ok)}
 .chip.singar{background:#F1F3F6;color:var(--gris)}
 .banda-j{border:2px dashed var(--linea);border-radius:12px;padding:12px 14px;background:#FAFBFC}
 .banda-j b{font-family:var(--cond);font-size:28px}
@@ -206,6 +216,8 @@ table.plantilla{width:100%;border-collapse:collapse;font-variant-numeric:tabular
 .dif{font-family:var(--cond);font-size:20px}
 .dif.mas{color:var(--mal)} .dif.menos{color:#8A5A00}
 .jtab td,.jtab th{padding-left:9px;padding-right:9px}
+.jtab td:first-child{min-width:190px}
+.tabla-escritorio{overflow-x:auto}
 .jtab .aviso{margin-top:5px}
 .nota{font-size:13.5px;margin:14px 0 0;max-width:90ch}
 .seg-scroll{overflow-x:auto;border:1px solid var(--linea);border-radius:12px}
@@ -318,9 +330,23 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
    Control Planning 10 — rehecha desde cero
    Datos en localStorage, con una clave nueva.
    ========================================================= */
-const APP_VERSION = '10.10.0';
+const APP_VERSION = '10.11.0';
 const CLAVE = 'control-planning-v10';
 const NOVEDADES = {
+  '10.11.0': [
+    { titulo:'Fijos discontinuos por banda', donde:'Personal › ficha del trabajador',
+      texto:'Los fijos discontinuos ya no llevan una jornada fija: van como los parciales sin garantía, del 50 % al 90 % de un tiempo completo, pero por 10 meses en lugar de 12 (entre 708 h y 1.275 h). Si alguno es un caso excepcional, cambia en su ficha los meses que trabaja.' },
+    { titulo:'Producto y departamento', donde:'Personal y Control de jornada',
+      texto:'Debajo de la barra hay dos filtros nuevos: Producto (GroundHandling o RedBull) y Departamento (Pasaje u Ops). En la ficha, el departamento se elige con un botón.' },
+    { titulo:'Días de vacaciones', donde:'Personal › ficha del trabajador',
+      texto:'Cada ficha tiene sus días de vacaciones al año: 24 en tiempo completo y parcial, 20 en fijo discontinuo. Puedes cambiarlos a mano a quien lo necesite.' },
+    { titulo:'Importar rotaciones', donde:'Control de jornada › Importar rotaciones',
+      texto:'Sube el Excel con la rotación anual (una fila por trabajador y una columna por día, con R, H, F, X, AJ…). Las casillas vacías cuentan como días de trabajo. Lo revisas antes de apuntar, como con los turnos.' },
+    { titulo:'Días de trabajo y plan semana a semana', donde:'Control de jornada',
+      texto:'Con la rotación verás los días de trabajo del año y los que le quedan hasta el 31 de diciembre, y cuántas horas tiene que hacer cada día y cada semana para llegar. Con jornada garantizada, el plan apunta a sus horas menos 20. En el seguimiento por semanas, las que faltan llevan el plan en gris.' },
+    { titulo:'Cuidado con los parciales sin garantía', donde:'Control de jornada',
+      texto:'Si un parcial sin jornada garantizada va 4 semanas seguidas por encima de lo que le toca a su máximo, sale un aviso en rojo.' },
+  ],
   '10.10.0': [
     { titulo:'Horario/rotación propia', donde:'Personal › ficha del trabajador',
       texto:'En «¿Tiene horario concretado?» hay una opción nueva además de mañanas, tardes y noches: «Horario/rotación propia». Si la eliges, puedes escribir cómo es (por ejemplo, 5×2 de mañanas) y, si quieres, el horario.' },
@@ -416,6 +442,7 @@ const ICO = {
   personal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="17" cy="9" r="2.4"/><path d="M16 14.2c2.3.2 3.9 1.8 4.5 4.8"/></svg>',
   mas:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
   subir:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M7.5 8.5 12 4l4.5 4.5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>',
+  calendario:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
   jornada:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 13l3.5-3.5M9.5 2.5h5M12 2.5v2.5"/></svg>',
   pegar:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4.5h6M9 10h6M9 14h6M9 18h3"/></svg>',
 };
@@ -423,6 +450,20 @@ const ICO = {
 /* ---------- catálogos fijos ---------- */
 const NEGOCIOS = { gh:{nombre:'GroundHandling', color:'#1F5FBF'}, rb:{nombre:'RedBull', color:'#E8650F'} };
 const negocioChip = t => NEGOCIOS[t.negocio] ? `<span class="neg ${t.negocio}">${NEGOCIOS[t.negocio].nombre}</span>` : '';
+const DEPTOS = ['Pasaje', 'Ops'];
+const normDepto = v => { const s = String(v||'').trim().replace(/\s+/g,' '); return /^pasaje$/i.test(s) ? 'Pasaje' : /^(ops|operaciones)$/i.test(s) ? 'Ops' : s; };
+/* filtro de producto y departamento, común a Personal y Control de jornada */
+const enOrg = t => (UI.fProd==='todos' || t.negocio===UI.fProd) && (UI.fDep==='todos' || t.depto===UI.fDep);
+function filtrosOrg(){
+  const b = (campo, k, txt) => `<button class="${UI[campo]===k?'on':''}" onclick="UI.${campo}='${k}';pintar()">${txt}</button>`;
+  return `<div class="filtros2"><span class="flab">Producto</span><div class="seg" role="group" aria-label="Producto">${b('fProd','todos','Todos')}${Object.entries(NEGOCIOS).map(([k,n])=>b('fProd',k,n.nombre)).join('')}</div>
+    <span class="flab">Departamento</span><div class="seg" role="group" aria-label="Departamento">${b('fDep','todos','Todos')}${DEPTOS.map(d=>b('fDep',d,d)).join('')}</div></div>`;
+}
+/* botones de departamento (ficha y Añadir desde Excel) */
+const deptoBtns = (valor, asigna, repinta) => `<div class="seg" role="group" aria-label="Departamento">${DEPTOS.map(d=>`<button type="button" class="${valor===d?'on':''}" onclick="${asigna}=${asigna}==='${d}'?'':'${d}';${repinta}()">${d}</button>`).join('')}${valor && !DEPTOS.includes(valor) ? `<button type="button" class="on" title="Quitar" onclick="${asigna}='';${repinta}()">${esc(valor)} ×</button>` : ''}</div>`;
+/* días de vacaciones al año: los que tenga puestos o, si no, 20 los fijos discontinuos y 24 los demás */
+const vacDefecto = t => t.contrato==='discontinuo' ? 20 : 24;
+const vacDe = t => t.vac ?? vacDefecto(t);
 const departamentos = () => [...new Set(['Pasaje', ...S.trabajadores.map(t=>t.depto).filter(Boolean)])].sort((a,b)=>a.localeCompare(b,'es'));
 const TURNOS = { manana:'Mañanas', tarde:'Tardes', noche:'Noches', propia:'Horario/rotación propia' };
 const horarioTxt = t => !t.concretado ? '' : `${TURNOS[t.horario?.turno]||'Horario concretado'}${t.horario?.desde&&t.horario?.hasta?` ${t.horario.desde}–${t.horario.hasta}`:''}${t.horario?.turno==='propia'&&t.horario?.nota?` · ${t.horario.nota}`:''}`;
@@ -450,7 +491,8 @@ function separarNombre(s){
   if(w.length>=4 && NOMBRES_DOBLES.has(sinAcentos(w[k-1]).toUpperCase())) k--;
   return { ape:w.slice(0,k).join(' '), nom:w.slice(k).join(' ') };
 }
-const nuevoTrabajador = (o={}) => ({ id:null, nombre:'', nom:'', ape:'', num:'', negocio:'', depto:'', contrato:'completo', garantizada:true, modo:'semana', valor:null, actividad:[], cese:[], reducido:false, red:{modo:'semana', valor:null}, concretado:false, horario:{turno:'', desde:'', hasta:''}, bajas:[], horas:{}, ...o });
+const numPos = v => { const n = typeof v==='number' ? v : num(v); return n!=null && n>=0 ? n : null; };
+const nuevoTrabajador = (o={}) => ({ id:null, nombre:'', nom:'', ape:'', num:'', vac:null, meses:null, rot:{}, negocio:'', depto:'', contrato:'completo', garantizada:true, modo:'semana', valor:null, actividad:[], cese:[], reducido:false, red:{modo:'semana', valor:null}, concretado:false, horario:{turno:'', desde:'', hasta:''}, bajas:[], horas:{}, ...o });
 function normalizar(d){
   const b = estadoInicial();
   d = Object.assign(b, d || {});
@@ -461,8 +503,10 @@ function normalizar(d){
     reducido: t.reducido, red: t.red, concretado: t.concretado, horario: t.horario, conc: t.conc, bajas: t.bajas, horas: t.horas,
     ...(t.red===undefined && t.conc ? { reducido: !!t.concretado, red: t.conc, concretado: false } : {}),
     nom: t.nom, ape: t.ape, garantizada: t.garantizada !== false,
-    negocio: NEGOCIOS[t.negocio] ? t.negocio : '', depto: String(t.depto||'').trim(),
+    negocio: NEGOCIOS[t.negocio] ? t.negocio : '', depto: normDepto(t.depto),
     cese: Array.isArray(t.cese) && t.cese.length ? t.cese : inactividadDe(t.actividad),
+    vac: numPos(t.vac), meses: numPos(t.meses),
+    rot: Object.fromEntries(Object.entries(t.rot && typeof t.rot==='object' ? t.rot : {}).filter(([y,v])=>/^\d{4}$/.test(y) && typeof v==='string')),
   })).map(t=>({ ...t,
     ...(()=>{ let nom = String(t.nom||'').trim(), ape = String(t.ape||'').trim();
       if(!nom && !ape && t.nombre.includes(',')) ({nom, ape} = separarNombre(t.nombre));
@@ -478,7 +522,7 @@ function normalizar(d){
 let S;
 try { S = normalizar(JSON.parse(localStorage.getItem(CLAVE))); } catch(e){ S = estadoInicial(); }
 const guardar = () => { try { localStorage.setItem(CLAVE, JSON.stringify(S)); } catch(e){ toast('No se ha podido guardar en este navegador'); } };
-let UI = { vista:'inicio', buscar:'', filtro:'todos', filtroJ:'todos', segJ:'semana', edit:null };
+let UI = { vista:'inicio', buscar:'', filtro:'todos', filtroJ:'todos', segJ:'semana', fProd:'todos', fDep:'todos', edit:null };
 try { const u = JSON.parse(sessionStorage.getItem('cp-ui')||'{}'); if(u.vista) UI.vista=u.vista; } catch(e){}
 
 /* =========================================================
@@ -491,9 +535,16 @@ try { const u = JSON.parse(sessionStorage.getItem('cp-ui')||'{}'); if(u.vista) U
 /* tiempo parcial sin jornada garantizada: no tiene una jornada fija, sino una banda
    entre el pMin y el pMax % de un tiempo completo (850 h y 1.530 h al año) */
 const sinGarantia = t => t.contrato==='parcial' && t.garantizada===false;
+/* los fijos discontinuos van como los parciales sin garantía, pero por los meses que trabajan (normalmente 10 de 12) */
+const MESES_FD = 10;
+const mesesFD = t => t.meses ?? MESES_FD;
+const conBanda = t => sinGarantia(t) || t.contrato==='discontinuo';
+/* banda del año sin bajas */
+function bandaBase(t){ const A = S.ajustes, f = t.contrato==='discontinuo' ? Math.min(12, mesesFD(t)) / 12 : 1;
+  return { min: A.pMin/100*A.hAnio*f, max: A.pMax/100*A.hAnio*f }; }
 function pctDe(t){
   if(t.contrato==='completo') return 100;
-  if(sinGarantia(t)) return null;
+  if(conBanda(t)) return null;
   const v = num(t.valor); if(v==null) return null;
   const A = S.ajustes;
   return t.modo==='pct' ? v : t.modo==='semana' ? v / A.hSemana * 100 : v / A.hAnio * 100;
@@ -543,6 +594,23 @@ function diasBaja(t, y=S.anio){
   const b = diasDe(t.bajas, y); if(t.contrato!=='discontinuo') return b.size;
   const a = diasActivos(t, y); let n = 0; b.forEach(d=>{ if(a.has(d)) n++; }); return n;
 }
+/* ---------- rotación anual: un código por día; vacío = día de trabajo ---------- */
+const NO_TRABAJO = new Set(['R','H','F','X','AJ','PR','PNR','V','VAC','B','IT','BAJA','L','LIBRE','D','DESC','?']);
+const COD_VAC = new Set(['H','V','VAC']);
+const COD_NOMBRE = { '':'casillas vacías', R:'descanso', H:'vacaciones', F:'festivo', X:'festivo de empresa', AJ:'ajuste de jornada', PR:'permiso retribuido', PNR:'permiso no retribuido', V:'vacaciones', VAC:'vacaciones', B:'baja', IT:'baja', '?':'sin dato' };
+const _rot = new Map();
+function rotDe(t, y){ const s = t.rot?.[y]; if(!s) return null; let a = _rot.get(s); if(!a){ a = s.split(','); _rot.set(s, a); } return a; }
+const tieneRot = (t, y=S.anio) => !!t.rot?.[y];
+const idxDia = d => Math.round((pd(d) - pd(d.slice(0,4)+'-01-01')) / 864e5);
+const codigoDia = (t, d) => { const a = rotDe(t, Number(d.slice(0,4))); return a ? (a[idxDia(d)] ?? '?') : null; };
+/* días de trabajo según la rotación, sin bajas y, en los fijos discontinuos, sin la inactividad (null si no hay rotación) */
+function diasTrabajo(t, y=S.anio, ini=`${y}-01-01`, fin=`${y}-12-31`){
+  if(!tieneRot(t, y)) return null;
+  const baja = diasDe(t.bajas, y, ini, fin), act = t.contrato==='discontinuo' ? diasActivos(t, y, ini, fin) : null, out = [];
+  for(let d=ini; d<=fin; d=sumaDias(d,1)){ const c = codigoDia(t, d); if(c==null || NO_TRABAJO.has(c) || baja.has(d) || (act && !act.has(d))) continue; out.push(d); }
+  return out;
+}
+const vacEnRot = (t, y=S.anio) => { const a = rotDe(t, y); return a ? a.filter(c=>COD_VAC.has(c)).length : null; };
 /* jornada anual del año elegido */
 function anualDe(t, y=S.anio){
   const base = anualBase(t); if(base==null) return null;
@@ -558,9 +626,9 @@ function computoDe(t, y=S.anio){
 }
 /* lo que tiene que hacer en el año: una cifra (min = max) o la banda de los parciales sin garantía; con bajas */
 function rangoDe(t, y=S.anio){
-  if(!sinGarantia(t)){ const c = computoDe(t, y); return c==null ? null : {min:c, max:c}; }
-  const A = S.ajustes, x = diasJornada(t, y), f = x ? (x - Math.min(x, diasBaja(t, y))) / x : 0;
-  return { min: A.pMin/100*A.hAnio*f, max: A.pMax/100*A.hAnio*f };
+  if(!conBanda(t)){ const c = computoDe(t, y); return c==null ? null : {min:c, max:c}; }
+  const b = bandaBase(t), x = diasJornada(t, y), f = x ? (x - Math.min(x, diasBaja(t, y))) / x : 0;
+  return { min: b.min*f, max: b.max*f };
 }
 const entre = (a, b, ud=' h') => Math.abs(a-b)<0.005 ? nh(a)+ud : `${nh(a)}–${nh(b)}${ud}`;
 const bandaSemana = () => entre(S.ajustes.pMin/100*S.ajustes.hSemana, S.ajustes.pMax/100*S.ajustes.hSemana);
@@ -568,7 +636,7 @@ const bandaPct = () => entre(S.ajustes.pMin, S.ajustes.pMax, ' %');
 const semanasDe = (t, y=S.anio) => Object.keys(t.horas||{}).filter(l=>anioSemana(l)===y).sort();
 const hechasDe = (t, y=S.anio) => semanasDe(t, y).reduce((a,l)=>a+(num(t.horas[l])||0), 0);
 const quedanDe = (t, y=S.anio) => { const c = computoDe(t, y); return c==null ? null : c - hechasDe(t, y); };
-const faltaJornada = t => !sinGarantia(t) && (t.contrato!=='completo' && pctDe(t)==null) || (t.reducido && pctEf(t)==null);
+const faltaJornada = t => !conBanda(t) && ((t.contrato!=='completo' && pctDe(t)==null) || (t.reducido && pctEf(t)==null));
 const faltaActividad = t => t.contrato==='discontinuo' && diasActividad(t)===0;
 
 /* =========================================================
@@ -600,13 +668,13 @@ function vInicio(){
 }
 
 function vPersonal(){
-  const todos = plantilla();
+  const todosT = plantilla(), todos = todosT.filter(enOrg);
   const cab = `<div class="portada anim"><button class="volver" onclick="ir('inicio')">‹ Inicio</button><h2>Personal</h2>
     <p>Los trabajadores con su contrato, su jornada y las horas que llevan.</p></div>`;
-  if(!todos.length) return cab + `<div class="tarjeta vacio anim" style="--i:1"><h3>Todavía no hay nadie</h3><p>Añade a los trabajadores uno a uno o pega la lista desde tu Excel.</p>
+  if(!todosT.length) return cab + `<div class="tarjeta vacio anim" style="--i:1"><h3>Todavía no hay nadie</h3><p>Añade a los trabajadores uno a uno o pega la lista desde tu Excel.</p>
     <div class="fila" style="justify-content:center"><button class="btn primario" onclick="abrirFicha()">${ICO.mas} Añadir trabajador</button><button class="btn" onclick="abrirPegar()">${ICO.pegar} Añadir desde Excel</button></div></div>`;
   const cuenta = c => todos.filter(t=>t.contrato===c).length;
-  const total = todos.reduce((a,t)=>a+(computoDe(t)||0),0), nSinG = todos.filter(sinGarantia).length;
+  const total = todos.reduce((a,t)=>a+(computoDe(t)||0),0), nSinG = todos.filter(conBanda).length;
   const totalHechas = todos.reduce((a,t)=>a+hechasDe(t),0);
   const q = UI.buscar.trim().toLowerCase();
   const ts = todos.filter(t=>(UI.filtro==='todos'||t.contrato===UI.filtro) && (!q || t.nombre.toLowerCase().includes(q) || String(t.num).includes(q)))
@@ -617,15 +685,15 @@ function vPersonal(){
     return `<tr onclick="abrirFicha('${t.id}')">
       <td><div class="nombre">${esc(t.nombre)}</div>${t.num||t.negocio||t.depto?`<div class="sub">${negocioChip(t)}${t.depto?` ${esc(t.depto)}`:''}${t.num?`${t.negocio||t.depto?' · ':''}Nº ${esc(t.num)}`:''}</div>`:''}</td>
       <td><span class="chip ${t.contrato}">${c.nombre}</span>${sinGarantia(t)?' <span class="chip singar">Sin garantía</span>':''}${t.reducido?' <span class="chip reducida">Reducida</span>':''}${t.concretado?` <span class="chip concretada">${esc(horarioTxt(t))}</span>`:''}</td>
-      <td class="num">${sinGarantia(t)?bandaSemana():semanaEf(t)==null?'—':nh(semanaEf(t))+' h'}${t.reducido&&semanaDe(t)!=null?`<div class="sub">de ${nh(semanaDe(t))} h</div>`:''}</td>
-      <td class="num">${sinGarantia(t)?bandaPct():pctEf(t)==null?'—':nh(pctEf(t))+' %'}</td>
+      <td class="num">${conBanda(t)?bandaSemana():semanaEf(t)==null?'—':nh(semanaEf(t))+' h'}${t.reducido&&semanaDe(t)!=null?`<div class="sub">de ${nh(semanaDe(t))} h</div>`:''}</td>
+      <td class="num">${conBanda(t)?bandaPct():pctEf(t)==null?'—':nh(pctEf(t))+' %'}</td>
       <td class="num">${t.contrato==='discontinuo'?`${diasActividad(t)} días${ceseTxt(t)?`<div class="sub">${ceseTxt(t)}</div>`:''}${avisoFD(t)}`:'<span class="muted">Todo el año</span>'}</td>
-      <td class="num">${avisos(t) || (sinGarantia(t) ? `<span class="anual">${entre(rangoDe(t).min, rangoDe(t).max)}</span><div class="sub">sin jornada garantizada${diasBaja(t)?` · ${diasBaja(t)} días de baja`:''}</div>`
+      <td class="num">${avisos(t) || (conBanda(t) ? `<span class="anual">${entre(rangoDe(t).min, rangoDe(t).max)}</span><div class="sub">${sinGarantia(t)?'sin jornada garantizada':`${nh(mesesFD(t))} meses`}${diasBaja(t)?` · ${diasBaja(t)} días de baja`:''}</div>`
         : `<span class="anual">${nh(computoDe(t))} h</span>${diasBaja(t)?`<div class="sub">de ${nh(anualDe(t))} h · ${diasBaja(t)} días de baja</div>`:''}`)}</td>
       <td class="num">${horasCelda(t)}</td>
       <td class="num">${quedanCelda(t)}</td></tr>`; }).join('');
   const tarjetas = ts.map(t=>`<button class="tm" onclick="abrirFicha('${t.id}')"><div class="l1"><b>${esc(t.nombre)}</b><span class="chip ${t.contrato}">${CONTRATOS[t.contrato].corto}</span></div>${t.negocio||t.depto?`<div class="l0">${negocioChip(t)}${t.depto?` ${esc(t.depto)}`:''}</div>`:''}
-      <div class="l2"><span>${sinGarantia(t)?'Sin garantía · '+bandaPct():`${semanaEf(t)==null?'—':nh(semanaEf(t))+' h/sem'} · ${pctEf(t)==null?'—':nh(pctEf(t))+' %'}`}${t.reducido?' · reducida':''}${t.concretado?' · '+esc(horarioTxt(t)):''}</span>${avisos(t) || `<b>${sinGarantia(t)?entre(rangoDe(t).min, rangoDe(t).max):nh(computoDe(t))+' h'}</b>`}</div>
+      <div class="l2"><span>${conBanda(t)?(sinGarantia(t)?'Sin garantía · ':`${nh(mesesFD(t))} meses · `)+bandaPct():`${semanaEf(t)==null?'—':nh(semanaEf(t))+' h/sem'} · ${pctEf(t)==null?'—':nh(pctEf(t))+' %'}`}${t.reducido?' · reducida':''}${t.concretado?' · '+esc(horarioTxt(t)):''}</span>${avisos(t) || `<b>${conBanda(t)?entre(rangoDe(t).min, rangoDe(t).max):nh(computoDe(t))+' h'}</b>`}</div>
       ${faltaJornada(t)||faltaActividad(t) ? '' : `<div class="l3"><span>Hechas <b>${nh(hechasDe(t))} h</b></span><span>${quedanCelda(t, true)}</span></div>${barra(t)}`}</button>`).join('');
   const fb = (k,t) => `<button class="${UI.filtro===k?'on':''}" onclick="UI.filtro='${k}';pintar()">${t}</button>`;
   return cab + `<div class="resumen anim" style="--i:1">
@@ -633,7 +701,7 @@ function vPersonal(){
       <div class="cifra" style="--cc:var(--c-completo)"><b>${cuenta('completo')}</b><span>tiempo completo</span></div>
       <div class="cifra" style="--cc:var(--c-parcial)"><b>${cuenta('parcial')}</b><span>tiempo parcial</span></div>
       <div class="cifra" style="--cc:var(--c-disc)"><b>${cuenta('discontinuo')}</b><span>fijos discontinuos</span></div>
-      <div class="cifra" style="--cc:var(--senal)"><b>${nh(total)} h</b><span>jornada anual en ${S.anio}${nSinG?` (sin ${nSinG===1?'el parcial':`los ${nSinG} parciales`} sin garantía)`:''}${totalHechas?`, ${nh(totalHechas)} h hechas`:''}</span></div>
+      <div class="cifra" style="--cc:var(--senal)"><b>${nh(total)} h</b><span>jornada anual en ${S.anio}${nSinG?`, sin contar ${nSinG===1?'1 que va':`${nSinG} que van`} por banda`:''}${totalHechas?`, ${nh(totalHechas)} h hechas`:''}</span></div>
     </div>
     ${todos.filter(sinSeparar).length ? `<div class="banda anim" style="--i:2"><span><b>${todos.filter(sinSeparar).length} trabajador${todos.filter(sinSeparar).length===1?'':'es'}</b> tienen el nombre y los apellidos juntos.</span><button class="btn" onclick="abrirSeparar()">Separarlos</button></div>` : ''}
     <div class="tarjeta anim" style="--i:2">
@@ -646,8 +714,9 @@ function vPersonal(){
         <button class="btn" onclick="abrirPegar()">${ICO.pegar} Añadir desde Excel</button>
         <button class="btn primario" onclick="abrirFicha()">${ICO.mas} Añadir trabajador</button>
       </div>
+      ${filtrosOrg()}
       ${ts.length ? `<div class="tabla-escritorio"><table class="plantilla"><thead><tr><th>Trabajador</th><th>Contrato</th><th class="num">Horas a la semana</th><th class="num">Porcentaje</th><th class="num">Actividad</th><th class="num">Jornada anual ${S.anio}</th><th class="num">Hechas</th><th class="num">Quedan</th></tr></thead><tbody>${filas}</tbody></table></div>
-        <div class="tarjetas-movil">${tarjetas}</div>` : '<p class="muted" style="margin:10px 0">Nadie coincide con la búsqueda.</p>'}
+        <div class="tarjetas-movil">${tarjetas}</div>` : '<p class="muted" style="margin:10px 0">Nadie coincide con la búsqueda o los filtros.</p>'}
     </div>`;
 }
 
@@ -661,7 +730,7 @@ function ceseTxt(t){
 function barra(t){
   const r = rangoDe(t), h = hechasDe(t); if(!r || faltaJornada(t) || faltaActividad(t)) return '';
   const c = r.min, p = c>0 ? Math.min(100, h/c*100) : (h>0?100:0);
-  return `<div class="prog ${h>r.max+0.005?'pasa':''}" title="${nh(c>0?h/c*100:0)} % ${sinGarantia(t)?'del mínimo':'hecho'}"><i style="width:${p}%"></i></div>`;
+  return `<div class="prog ${h>r.max+0.005?'pasa':''}" title="${nh(c>0?h/c*100:0)} % ${conBanda(t)?'del mínimo':'hecho'}"><i style="width:${p}%"></i></div>`;
 }
 function horasCelda(t){
   const n = semanasDe(t).length;
@@ -669,7 +738,7 @@ function horasCelda(t){
   return `<span class="hecha">${nh(hechasDe(t))} h</span>${barra(t)}<div class="sub">${n ? `${n} semana${n===1?'':'s'}` : 'Sin semanas'}</div>`;
 }
 function quedanCelda(t, corto){
-  if(sinGarantia(t)){ const r = rangoDe(t), h = hechasDe(t); if(!r || faltaActividad(t)) return corto ? '' : '<span class="muted">—</span>';
+  if(conBanda(t)){ const r = rangoDe(t), h = hechasDe(t); if(!r || faltaActividad(t)) return corto ? '' : '<span class="muted">—</span>';
     if(h > r.max + 0.005) return `<span class="de-mas">${nh(h-r.max)} h de más</span>`;
     if(h >= r.min - 0.005) return corto ? `Mínimo hecho · <b>${nh(r.max-h)} h</b> al máximo` : `<span class="hecha">Mínimo hecho</span><div class="sub">${nh(r.max-h)} h hasta el máximo</div>`;
     return corto ? `Al mínimo <b>${nh(r.min-h)} h</b>` : `<span class="hecha">${nh(r.min-h)} h</span><div class="sub">al mínimo · ${nh(r.max-h)} h al máximo</div>`; }
@@ -734,21 +803,23 @@ function pintarFicha(primera){
         <label style="flex:3 1 240px">Apellidos<input id="fApe" value="${esc(e.ape)}" oninput="UI.edit.ape=this.value" autocomplete="off"></label>
         <label style="flex:1 1 120px">Nº de empleado<input value="${esc(e.num)}" oninput="UI.edit.num=this.value" autocomplete="off"></label></div>
       ${e._junto ? `<p class="aviso-suave">Venía junto como «${esc(e._junto)}» y lo he separado yo. Revisa que el nombre y los apellidos estén bien antes de guardar.</p>` : ''}
-      <div class="bloque"><h3>Negocio y departamento</h3>
-        <div class="fila" style="align-items:flex-end">
-          <div class="negocios" role="group" aria-label="Negocio">${Object.entries(NEGOCIOS).map(([k,n])=>`<button type="button" class="${e.negocio===k?'on':''}" style="--nc:${n.color}" onclick="UI.edit.negocio=UI.edit.negocio==='${k}'?'':'${k}';pintarFicha()">${n.nombre}</button>`).join('')}</div>
-          <label style="flex:1 1 200px">Departamento<input value="${esc(e.depto)}" list="dlDeptos" placeholder="Por ejemplo, Pasaje" oninput="UI.edit.depto=this.value" autocomplete="off"></label>
-          <datalist id="dlDeptos">${departamentos().map(d=>`<option value="${esc(d)}">`).join('')}</datalist></div></div>
+      <div class="bloque"><h3>Producto y departamento</h3>
+        <div class="fila" style="align-items:center;gap:14px 22px">
+          <div class="negocios" role="group" aria-label="Producto">${Object.entries(NEGOCIOS).map(([k,n])=>`<button type="button" class="${e.negocio===k?'on':''}" style="--nc:${n.color}" onclick="UI.edit.negocio=UI.edit.negocio==='${k}'?'':'${k}';pintarFicha()">${n.nombre}</button>`).join('')}</div>
+          ${deptoBtns(e.depto, 'UI.edit.depto', 'pintarFicha')}</div></div>
       <div class="bloque"><h3>Contrato</h3><div class="contratos">${Object.keys(CONTRATOS).map(contratoBtn).join('')}</div></div>
       ${e.contrato==='parcial' ? `<div class="bloque"><h3>¿Tiene jornada garantizada?</h3>${siNo('garantizada', '')}</div>` : ''}
-      ${sinGarantia(e) ? `<div class="bloque"><h3>Jornada</h3><div class="banda-j">Entre <b>${nh(A.pMin/100*A.hAnio)} h</b> y <b>${nh(A.pMax/100*A.hAnio)} h</b> al año
-          <small>Sin jornada garantizada: del ${nh(A.pMin)} % al ${nh(A.pMax)} % de un tiempo completo (${bandaSemana()} a la semana).</small></div></div>`
+      ${conBanda(e) ? `<div class="bloque"><h3>Jornada</h3><div class="banda-j">Entre <b id="bjMin">${nh(bandaBase(e).min)} h</b> y <b id="bjMax">${nh(bandaBase(e).max)} h</b> al año
+          <small>${e.contrato==='discontinuo' ? `Fijo discontinuo: del ${nh(A.pMin)} % al ${nh(A.pMax)} % de un tiempo completo, por <span id="bjMeses">${nh(mesesFD(e))}</span> de 12 meses.` : `Sin jornada garantizada: del ${nh(A.pMin)} % al ${nh(A.pMax)} % de un tiempo completo (${bandaSemana()} a la semana).`}</small></div>
+        ${e.contrato==='discontinuo' ? `<div class="fila" style="margin-top:10px;align-items:flex-end"><label style="flex:0 1 200px">Meses que trabaja al año<input inputmode="decimal" value="${e.meses==null?'':nh(e.meses)}" placeholder="${MESES_FD}" oninput="UI.edit.meses=numPos(this.value);recalcular()"></label>
+          <span class="muted" style="font-size:13.5px;padding-bottom:12px">Normalmente ${MESES_FD}. Cámbialo solo en los casos excepcionales.</span></div>` : ''}</div>`
       : `<div class="bloque"><h3>${e.contrato==='parcial'?'Jornada garantizada':'Jornada'}</h3>
         <div class="jornada">${campo('semana','Horas a la semana', sem, 'h')}${campo('pct', e.contrato==='completo'?'Porcentaje':'% de un tiempo completo', pct, '%')}${campo('anio','Horas al año', pct==null?null:pct/100*A.hAnio, 'h')}</div>
         ${e.contrato!=='completo'?`<p class="muted" style="margin:8px 0 0;font-size:13.5px">Escribe en la casilla que tengas; las otras dos se calculan solas. El porcentaje es siempre sobre un tiempo completo (${nh(A.hSemana)} h a la semana, ${nh(A.hAnio)} h al año).</p>`:''}</div>`}
       ${bConcretado}
-      ${sinGarantia(e) ? '' : bReducido}
+      ${conBanda(e) ? '' : bReducido}
       ${periodos}
+      ${bloqueVacaciones(e)}
       ${bloqueBajas(e)}
       ${bloqueHoras(e)}
       <div class="calculo" id="calc">${calculoHTML(e)}</div>
@@ -777,10 +848,12 @@ function recalcular(){
     const tc = $('#r_tc'); if(tc) tc.textContent = pctEf(e)==null ? '—' : nh(pctEf(e));
   }
   const c = $('#calc'); if(c) c.innerHTML = calculoHTML(e);
+  if(conBanda(e)){ const bb = bandaBase(e), t = (id, v) => { const x = $('#'+id); if(x) x.textContent = v; };
+    t('bjMin', nh(bb.min)+' h'); t('bjMax', nh(bb.max)+' h'); t('bjMeses', nh(mesesFD(e))); }
 }
 /* caja oscura del final de la ficha: jornada con bajas, hechas y quedan */
 function calculoHTML(e){
-  if(sinGarantia(e)){ const r = rangoDe(e), h = hechasDe(e), ok = r && !faltaActividad(e);
+  if(conBanda(e)){ const r = rangoDe(e), h = hechasDe(e), ok = r && !faltaActividad(e);
     return `<span>Jornada anual ${S.anio}</span><b>${r?entre(r.min, r.max):'—'}</b>
       ${ok ? `<span class="hq"><span>Hechas<em>${nh(h)} h</em></span>${h>r.max+0.005?`<span>De más<em>${nh(h-r.max)} h</em></span>`:`<span>Al mínimo<em>${nh(Math.max(0,r.min-h))} h</em></span><span>Al máximo<em>${nh(r.max-h)} h</em></span>`}</span>` : ''}
       <span class="f">${esc(formulaDe(e))}</span>`; }
@@ -789,6 +862,16 @@ function calculoHTML(e){
   return `<span>Jornada anual ${S.anio}</span><b>${c==null?'—':nh(c)+' h'}</b>
     ${ok ? `<span class="hq"><span>Hechas<em>${nh(hechasDe(e))} h</em></span><span>${q < -0.005 ? `De más<em>${nh(-q)} h</em>` : `Quedan<em>${nh(q)} h</em>`}</span></span>` : ''}
     <span class="f">${esc(formulaDe(e))}</span>`;
+}
+/* vacaciones: días al año (por defecto según el contrato) y lo que marca su rotación */
+function bloqueVacaciones(e){
+  const enRot = vacEnRot(e), dt = diasTrabajo(e);
+  return `<div class="bloque"><h3>Vacaciones</h3>
+    <div class="fila" style="align-items:flex-end"><label style="flex:0 1 200px">Días al año<input inputmode="numeric" value="${e.vac==null?'':nh(e.vac)}" placeholder="${vacDefecto(e)}" oninput="UI.edit.vac=numPos(this.value)"></label>
+      <span class="muted" style="font-size:13.5px;padding-bottom:12px">Si lo dejas vacío, ${vacDefecto(e)}: 24 en tiempo completo y parcial, 20 en fijo discontinuo.</span></div>
+    ${dt ? `<p class="${enRot!==vacDe(e)?'aviso-suave':'muted'}" style="margin:8px 0 0;font-size:13.5px">Rotación de ${S.anio}: <b>${dt.length} días de trabajo</b> y <b>${enRot} de vacaciones</b>${enRot!==vacDe(e)?` (le corresponden ${vacDe(e)})`:''}.
+      <button type="button" class="enlace" onclick="if(confirm('¿Quitar la rotación de ${S.anio}?')){delete UI.edit.rot['${S.anio}'];pintarFicha()}">Quitar rotación</button></p>` : ''}
+  </div>`;
 }
 /* bajas: periodos a mano que descuentan su parte de la jornada */
 function bloqueBajas(e){
@@ -823,8 +906,9 @@ function anadirSemana(v){
 /* explicación del cálculo de la jornada anual */
 function formulaDe(e){
   const A = S.ajustes, pc = pctDe(e), pe = pctEf(e);
-  if(sinGarantia(e)){ const b = diasBaja(e), x = diasJornada(e), r = rangoDe(e);
-    return `Sin jornada garantizada: del ${nh(A.pMin)} % (${nh(A.pMin/100*A.hAnio)} h) al ${nh(A.pMax)} % (${nh(A.pMax/100*A.hAnio)} h) de ${nh(A.hAnio)} h` + (b && x ? `. Con ${b} día${b===1?'':'s'} de baja, × ${x-Math.min(b,x)} / ${x} días: ${entre(r.min, r.max)}` : '') + '.'; }
+  if(conBanda(e)){ const b = diasBaja(e), x = diasJornada(e), r = rangoDe(e), bb = bandaBase(e);
+    return (e.contrato==='discontinuo' ? `Fijo discontinuo: del ${nh(A.pMin)} % al ${nh(A.pMax)} % de ${nh(A.hAnio)} h, por ${nh(mesesFD(e))} de 12 meses: ${entre(bb.min, bb.max)}`
+      : `Sin jornada garantizada: del ${nh(A.pMin)} % (${nh(A.pMin/100*A.hAnio)} h) al ${nh(A.pMax)} % (${nh(A.pMax/100*A.hAnio)} h) de ${nh(A.hAnio)} h`) + (b && x ? `. Con ${b} día${b===1?'':'s'} de baja, × ${x-Math.min(b,x)} / ${x} días: ${entre(r.min, r.max)}` : '') + '.'; }
   if(pc==null) return 'Escribe su jornada en cualquiera de las tres casillas.';
   if(e.reducido && pe==null) return 'Escribe su jornada reducida.';
   const base = pe/100*A.hAnio;
@@ -856,6 +940,8 @@ function guardarFicha(){
   if(e.contrato==='discontinuo' && e.cese.some(x=>x.desde&&x.hasta&&x.hasta<x.desde)){ toast('Hay un periodo de inactividad que acaba antes de empezar'); return; }
   if(e.contrato==='discontinuo' && diasInactivo(e) < MIN_INACTIVO){ toast(`Un fijo discontinuo tiene que parar al menos ${MIN_INACTIVO} días en ${S.anio}: lleva ${diasInactivo(e)}`); return; }
   if(e.bajas.some(x=>x.desde&&x.hasta&&x.hasta<x.desde)){ toast('Hay una baja que acaba antes de empezar'); return; }
+  if(e.contrato==='discontinuo' && e.meses!=null && (e.meses<=0 || e.meses>12)){ toast('Los meses que trabaja tienen que estar entre 1 y 12'); return; }
+  if(e.vac!=null && e.vac>60){ toast('Revisa los días de vacaciones: son más de 60'); return; }
   if(Object.values(e.horas).some(v=>v!=null && v<0)){ toast('Las horas de una semana no pueden ser negativas'); return; }
   e.actividad = []; e.cese = e.contrato==='discontinuo' ? e.cese.filter(x=>x.desde && x.hasta).sort((a,b)=>a.desde<b.desde?-1:1) : [];
   e.depto = (e.depto||'').trim().replace(/\s+/g,' ');
@@ -863,7 +949,8 @@ function guardarFicha(){
   e.horas = Object.fromEntries(Object.entries(e.horas).filter(([,v])=>v!=null).map(([k,v])=>[k, r2(v)]));
   if(e.contrato==='completo'){ e.valor = null; e.modo = 'semana'; }
   if(e.contrato!=='parcial') e.garantizada = true;
-  if(sinGarantia(e)){ e.valor = null; e.reducido = false; }
+  if(conBanda(e)){ e.valor = null; e.reducido = false; }
+  if(e.contrato!=='discontinuo') e.meses = null; else if(e.meses===MESES_FD) e.meses = null;
   if(!e.concretado) e.horario = {turno:'', desde:'', hasta:'', nota:''};
   else { e.horario.nota = e.horario.turno==='propia' ? (e.horario.nota||'').trim() : ''; }
   delete e.conc;
@@ -952,8 +1039,8 @@ function pintarPlantilla(primera){
       <div class="imp-res"><span class="est ok">${nSi} se añaden</span>${nYa?`<span class="est duda">${nYa} ya estaban</span>`:''}${nFic?`<span class="est no">${nFic} ficticios fuera</span>`:''}
         <button type="button" class="btn" style="padding:5px 12px;margin-left:auto" onclick="PLA.filas.forEach(f=>f.si=!f.ya&&!f.ficticio&&!f.repe);pintarPlantilla()">Marcar todos</button></div>
       <div class="imp-ajustes">
-        <div><label style="margin-bottom:6px">Negocio de todos</label><div class="negocios">${Object.entries(NEGOCIOS).map(([k,n])=>`<button type="button" class="${PLA.negocio===k?'on':''}" style="--nc:${n.color}" onclick="PLA.negocio=PLA.negocio==='${k}'?'':'${k}';pintarPlantilla()">${n.nombre}</button>`).join('')}</div></div>
-        <label>Departamento de todos<input value="${esc(PLA.depto)}" list="dlDeptosP" placeholder="Por ejemplo, Pasaje" oninput="PLA.depto=this.value" autocomplete="off"><datalist id="dlDeptosP">${departamentos().map(d=>`<option value="${esc(d)}">`).join('')}</datalist></label>
+        <div><label style="margin-bottom:6px">Producto de todos</label><div class="negocios">${Object.entries(NEGOCIOS).map(([k,n])=>`<button type="button" class="${PLA.negocio===k?'on':''}" style="--nc:${n.color}" onclick="PLA.negocio=PLA.negocio==='${k}'?'':'${k}';pintarPlantilla()">${n.nombre}</button>`).join('')}</div></div>
+        <div><label style="margin-bottom:6px">Departamento de todos</label>${deptoBtns(PLA.depto, 'PLA.depto', 'pintarPlantilla')}</div>
         ${nYa ? `<label class="check"><input type="checkbox" ${PLA.tambien?'checked':''} onchange="PLA.tambien=this.checked;pintarPlantilla()"> Ponérselo también a los ${nYa} que ya estaban</label>` : ''}
       </div>
       <div class="pla-lista">${PLA.filas.map((f,i)=>`<label class="pla-fila ${f.si?'':'ign'}"><input type="checkbox" ${f.si?'checked':''} onchange="PLA.filas[${i}].si=this.checked;pintarPlantilla()">
@@ -994,9 +1081,11 @@ const FILTRO_J = { todos:'Todos', pasa:'Se pasan', bien:'Llegan', falta:'No lleg
 const MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 /* el seguimiento va por semanas: su año empieza el lunes de la semana 1 y acaba el domingo de la última */
 const iniSeg = y => lunesDe(`${y}-01-04`), finSeg = y => sumaDias(lunesDe(`${y+1}-01-04`), -1);
-/* días de jornada de ese año sin bajas (todos, o los de actividad si es fijo discontinuo) */
+/* días de jornada de ese año sin bajas: con rotación, sus días de trabajo; si no, todos (o los de actividad si es fijo discontinuo) */
 function diasEf(t, y){
-  const a = iniSeg(y), b = finSeg(y), baja = diasDe(t.bajas, y, a, b), out = [];
+  const a = iniSeg(y), b = finSeg(y);
+  if(tieneRot(t, y)) return diasTrabajo(t, y, a, b);
+  const baja = diasDe(t.bajas, y, a, b), out = [];
   if(t.contrato==='discontinuo') diasActivos(t, y, a, b).forEach(d=>{ if(!baja.has(d)) out.push(d); });
   else for(let d=a; d<=b; d=sumaDias(d,1)) if(!baja.has(d)) out.push(d);
   return out.sort();
@@ -1009,8 +1098,10 @@ function corteDe(y=S.anio){
   return { primera: ls[0], ultima: ls[ls.length-1], hasta: fin };
 }
 /* todo va con una banda [min, max]: con jornada fija min = max; sin garantía, del pMin al pMax % */
+const MARGEN_H = 20;    // con jornada garantizada, el plan apunta a sus horas menos 20
+const SEGUIDAS = 4;     // parciales sin garantía: aviso si van tantas semanas seguidas por encima de su máximo
 function seguimientoDe(t, y, corte){
-  const r = { t, sinG: sinGarantia(t), pct: pctEf(t), garant: anualBase(t), rango: rangoDe(t, y), hechas: hechasDe(t, y), semanas: semanasDe(t, y).length };
+  const r = { t, sinG: sinGarantia(t), banda: conBanda(t), pct: pctEf(t), garant: anualBase(t), rango: rangoDe(t, y), hechas: hechasDe(t, y), semanas: semanasDe(t, y).length };
   r.computo = r.rango ? r.rango.max : null;
   if(!r.rango || faltaJornada(t)){ r.estado = 'inc'; return r; }
   const ef = diasEf(t, y); r.ef = ef;
@@ -1022,19 +1113,34 @@ function seguimientoDe(t, y, corte){
   r.necesita = restantes > 0 ? Math.max(0, r.rango.min - r.hechas) / (restantes/7) : null;
   r.necesitaMax = restantes > 0 ? Math.max(0, r.rango.max - r.hechas) / (restantes/7) : null;
   r.prevision = fr > 0 ? r.hechas / fr : (r.hechas || null);
+  /* con la rotación: días de trabajo del año, los que quedan hasta el 31 de diciembre y el plan semana a semana */
+  if(tieneRot(t, y)){
+    const dt = diasTrabajo(t, y), hoy = hoyIso();
+    const desde = corte ? sumaDias(corte.hasta, 1) : (hoy > `${y}-01-01` ? hoy : `${y}-01-01`);
+    const resto = dt.filter(d=>d>=desde);
+    r.rot = true; r.diasTrab = dt.length; r.diasResto = resto.length; r.resto = new Set(resto); r.vacRot = vacEnRot(t, y);
+    r.semResto = new Set(resto.map(lunesDe)).size;
+    if(!r.banda){ r.objetivo = r.rango.max - MARGEN_H; r.pend = Math.max(0, r.objetivo - r.hechas); r.hDia = resto.length ? r.pend / resto.length : null; }
+    else { r.hDiaMin = resto.length ? Math.max(0, r.rango.min - r.hechas) / resto.length : null; r.hDiaMax = resto.length ? Math.max(0, r.rango.max - r.hechas) / resto.length : null; }
+  }
+  /* parciales sin garantía: semanas seguidas, hasta la última importada, por encima de lo que le toca a su máximo */
+  r.seguidas = 0;
+  if(r.sinG && corte){ const s = new Set(ef), n = ef.length || 1;
+    for(let l=corte.ultima; l>=corte.primera; l=sumaDias(l,-7)){ const h = t.horas?.[l]; if(h===undefined) break;
+      const dias = [0,1,2,3,4,5,6].filter(k=>s.has(sumaDias(l,k))).length; if(!dias || h <= dias*r.rango.max/n) break; r.seguidas++; } }
   /* semanas sin horas entre la primera y la última importadas en las que tenía jornada */
   r.faltan = 0;
   if(corte){ const s = new Set(ef); for(let l=corte.primera; l<=corte.ultima; l=sumaDias(l,7)){
     if(t.horas?.[l]===undefined && [0,1,2,3,4,5,6].some(k=>s.has(sumaDias(l,k)))) r.faltan++; } }
   if(!r.semanas) r.estado = 'sin';
   else if(r.hechas > r.rango.max + 0.005) r.estado = 'pasado';
-  else if(r.espMax <= 0) r.estado = r.sinG ? 'dentro' : 'bien';
-  else r.estado = r.hechas > r.espMax*(1+MARGEN) ? 'pasa' : r.hechas < r.espMin*(1-MARGEN) ? 'falta' : r.sinG ? 'dentro' : 'bien';
+  else if(r.espMax <= 0) r.estado = r.banda ? 'dentro' : 'bien';
+  else r.estado = r.hechas > r.espMax*(1+MARGEN) ? 'pasa' : r.hechas < r.espMin*(1-MARGEN) ? 'falta' : r.banda ? 'dentro' : 'bien';
   return r;
 }
 const grupoJ = e => e==='pasado' || e==='pasa' ? 'pasa' : e==='inc' ? 'sin' : e==='dentro' ? 'bien' : e;
 /* diferencia de la previsión con lo que tiene que hacer */
-const difPrev = r => !r.sinG ? conSigno(r.prevision - r.rango.max) : r.prevision < r.rango.min ? conSigno(r.prevision - r.rango.min)+' al mínimo' : r.prevision > r.rango.max ? conSigno(r.prevision - r.rango.max)+' al máximo' : 'dentro de su banda';
+const difPrev = r => !r.banda ? conSigno(r.prevision - r.rango.max) : r.prevision < r.rango.min ? conSigno(r.prevision - r.rango.min)+' al mínimo' : r.prevision > r.rango.max ? conSigno(r.prevision - r.rango.max)+' al máximo' : 'dentro de su banda';
 const difCls = r => ({pasado:'mas', pasa:'mas', falta:'menos'})[r.estado] || '';
 const conSigno = n => (n > 0.005 ? '+' : n < -0.005 ? '−' : '') + nh(Math.abs(n)) + ' h';
 
@@ -1044,33 +1150,46 @@ function vJornada(){
     <p>Cómo va cada trabajador con su jornada de ${y}: lo que lleva, lo que debería llevar y si va a llegar.</p></div>`;
   if(!S.trabajadores.length) return cab + `<div class="tarjeta vacio anim" style="--i:1"><h3>Todavía no hay nadie</h3><p>Añade a los trabajadores en Personal y luego importa sus turnos.</p>
     <div class="fila" style="justify-content:center"><button class="btn primario" onclick="ir('personal')">Ir a Personal</button></div></div>`;
-  const todos = S.trabajadores.map(t=>seguimientoDe(t, y, corte));
+  const todos = S.trabajadores.filter(enOrg).map(t=>seguimientoDe(t, y, corte));
+  const hayRot = todos.some(r=>r.rot);
   const q = UI.buscar.trim().toLowerCase(), fj = UI.filtroJ || 'todos';
   const rs = todos.filter(r=>(fj==='todos' || grupoJ(r.estado)===fj) && (!q || r.t.nombre.toLowerCase().includes(q) || String(r.t.num).includes(q)))
     .sort((a,b)=>a.t.nombre.localeCompare(b.t.nombre,'es'));
   const n = k => todos.filter(r=>grupoJ(r.estado)===k).length;
   const faltan = todos.filter(r=>r.faltan).length;
   const chip = r => `<span class="estj ${ESTADO_J[r.estado].cls}">${ESTADO_J[r.estado].txt}</span>`;
-  const garant = r => r.sinG ? 'Sin garantía' : r.pct==null ? '—' : `${nh(r.pct)} %`;
+  const garant = r => r.sinG ? 'Sin garantía' : r.banda ? `${nh(mesesFD(r.t))} meses` : r.pct==null ? '—' : `${nh(r.pct)} %`;
   const tiene = r => !r.rango ? '—' : entre(r.rango.min, r.rango.max);
+  const avisoS = r => r.seguidas >= SEGUIDAS ? `<span class="aviso" title="Parcial sin jornada garantizada: cuidado con darle muchas horas seguidas">${r.seguidas} semanas seguidas por encima</span>` : '';
+  const diasCelda = r => !r.rot ? '<span class="muted">—</span><div class="sub">sin rotación</div>'
+    : `<span class="hecha">${r.diasTrab} días</span><div class="sub">quedan ${r.diasResto} hasta el 31 dic</div><div class="sub">vacaciones ${r.vacRot} de ${vacDe(r.t)}</div>`;
+  const planCelda = (r, corto) => {
+    if(r.estado==='inc') return '—';
+    if(r.rot){ if(!r.diasResto) return corto ? '' : '—<div class="sub">no le quedan días de trabajo</div>';
+      if(r.banda) return corto ? `Plan <b>${entre(r.hDiaMin, r.hDiaMax, '')} h/día</b>` : `${entre(r.hDiaMin, r.hDiaMax, '')} h/día<div class="sub">del mínimo al máximo</div>`;
+      return corto ? `Plan <b>${nh(r.hDia)} h/día</b>` : `${nh(r.hDia)} h/día<div class="sub">≈ ${nh(r.pend/r.semResto)} h/sem · objetivo ${nh(r.objetivo)} h</div>`; }
+    if(r.necesita==null) return corto ? '' : '—';
+    return corto ? `Necesita <b>${r.banda?entre(r.necesita, r.necesitaMax, ''):nh(r.necesita)} h/sem</b>`
+      : r.banda ? `${entre(r.necesita, r.necesitaMax)}/sem<div class="sub">del mínimo al máximo</div>` : `${nh(r.necesita)} h/sem<div class="sub">su jornada: ${nh(semanaEf(r.t))} h</div>`;
+  };
   const avisoF = r => r.faltan ? `<span class="aviso" title="Hay semanas importadas en las que no sale">Faltan ${r.faltan} semana${r.faltan===1?'':'s'}</span>` : '';
   const filas = rs.map(r=>{ const t = r.t, inc = r.estado==='inc';
     return `<tr onclick="abrirFicha('${t.id}')">
       <td><div class="nombre">${esc(t.nombre)}</div><div class="sub"><span class="chip ${t.contrato}" style="padding:1px 8px;font-size:12px">${CONTRATOS[t.contrato].corto}</span>${t.reducido?' reducida':''} ${negocioChip(t)}${t.depto?` ${esc(t.depto)}`:''}</div></td>
-      <td class="num"><span class="hecha">${garant(r)}</span><div class="sub">${r.sinG?bandaPct()+' de un completo':r.garant==null?'':nh(r.garant)+' h'}</div></td>
-      <td class="num"><span class="anual">${tiene(r)}</span>${r.sinG?(diasBaja(t,y)?`<div class="sub">${diasBaja(t,y)} días de baja</div>`:''):!inc && r.garant!=null && Math.abs(r.computo-r.garant)>0.005?`<div class="sub">${t.contrato==='discontinuo'?'por actividad':''}${t.contrato==='discontinuo'&&diasBaja(t,y)?' y ':''}${diasBaja(t,y)?`${diasBaja(t,y)} días de baja`:''}</div>`:''}</td>
+      <td class="num"><span class="anual">${tiene(r)}</span><div class="sub">${garant(r)}${r.banda?' · '+bandaPct():''}${diasBaja(t,y)?` · ${diasBaja(t,y)} días de baja`:''}</div></td>
+      <td class="num">${diasCelda(r)}</td>
       <td class="num"><span class="hecha">${nh(r.hechas)} h</span><div class="sub">${r.semanas} semana${r.semanas===1?'':'s'}</div></td>
-      <td class="num">${inc||!corte?'—':entre(r.espMin, r.espMax)}</td>
-      <td class="num">${inc||!corte||!r.semanas?'—':`<b class="dif ${difCls(r)}">${conSigno(r.dif)}</b>`}</td>
+      <td class="num">${inc||!corte||!r.semanas?'—':`<b class="dif ${difCls(r)}">${conSigno(r.dif)}</b>`}${inc||!corte?'':`<div class="sub">debería llevar ${entre(r.espMin, r.espMax)}</div>`}</td>
       <td class="num">${inc||!r.semanas||r.prevision==null?'—':`${nh(Math.round(r.prevision))} h<div class="sub">${difPrev(r)}</div>`}</td>
-      <td class="num">${inc||r.necesita==null?'—':r.sinG?`${entre(r.necesita, r.necesitaMax)}<div class="sub">del mínimo al máximo</div>`:`${nh(r.necesita)} h<div class="sub">su jornada: ${nh(semanaEf(t))} h</div>`}</td>
-      <td>${chip(r)}${avisoF(r)?'<br>'+avisoF(r):''}</td></tr>`; }).join('');
+      <td class="num">${planCelda(r)}</td>
+      <td>${chip(r)}${avisoF(r)?'<br>'+avisoF(r):''}${avisoS(r)?'<br>'+avisoS(r):''}</td></tr>`; }).join('');
   const tarjetas = rs.map(r=>{ const t = r.t, inc = r.estado==='inc';
     return `<button class="tm" onclick="abrirFicha('${t.id}')"><div class="l1"><b>${esc(t.nombre)}</b>${chip(r)}</div>
-      <div class="l2"><span>${garant(r)} · ${r.sinG?'entre':'cómputo'} ${tiene(r)}</span><b>${nh(r.hechas)} h</b></div>
+      <div class="l2"><span>${garant(r)} · ${r.banda?'entre':'cómputo'} ${tiene(r)}</span><b>${nh(r.hechas)} h</b></div>
+      ${r.rot && !inc ? `<div class="l3"><span>Días de trabajo <b>${r.diasTrab}</b> · quedan <b>${r.diasResto}</b></span><span>${planCelda(r, true)}</span></div>` : ''}
       ${inc||!corte ? '' : `<div class="l3"><span>Debería llevar <b>${entre(r.espMin, r.espMax)}</b></span><span>${r.semanas?`<b class="dif ${difCls(r)}">${conSigno(r.dif)}</b>`:''}</span></div>
-      <div class="l3"><span>Previsión <b>${r.semanas&&r.prevision!=null?nh(Math.round(r.prevision))+' h':'—'}</b></span><span>${r.necesita==null?'':`Necesita <b>${r.sinG?entre(r.necesita, r.necesitaMax, ''):nh(r.necesita)} h/sem</b>`}</span></div>`}
-      ${avisoF(r)?`<div style="margin-top:6px">${avisoF(r)}</div>`:''}</button>`; }).join('');
+      <div class="l3"><span>Previsión <b>${r.semanas&&r.prevision!=null?nh(Math.round(r.prevision))+' h':'—'}</b></span><span>${r.rot?'':planCelda(r, true)}</span></div>`}
+      ${avisoF(r)||avisoS(r)?`<div style="margin-top:6px">${avisoF(r)} ${avisoS(r)}</div>`:''}</button>`; }).join('');
   const fb = k => `<button class="${fj===k?'on':''}" onclick="UI.filtroJ='${k}';pintar()">${FILTRO_J[k]}</button>`;
   const cifra = (k, txt, cc) => `<button class="cifra filtra ${fj===k?'on':''}" style="--cc:${cc}" onclick="UI.filtroJ=UI.filtroJ==='${k}'?'todos':'${k}';pintar()"><b>${n(k)}</b><span>${txt}</span></button>`;
   return cab + `<div class="resumen anim" style="--i:1">
@@ -1083,14 +1202,16 @@ function vJornada(){
         <div class="seg" role="group" aria-label="Filtrar por estado">${Object.keys(FILTRO_J).map(fb).join('')}</div>
         <div class="anio" title="Año"><button onclick="cambiarAnio(-1)" aria-label="Año anterior">‹</button><b>${y}</b><button onclick="cambiarAnio(1)" aria-label="Año siguiente">›</button></div>
         <span class="esp"></span>
+        <button class="btn" onclick="abrirRotaciones()">${ICO.calendario} Importar rotaciones</button>
         <button class="btn" onclick="abrirImportar()">${ICO.subir} Importar turnos</button>
       </div>
+      ${filtrosOrg()}
       ${!corte ? `<p class="muted" style="margin:4px 0 14px">Todavía no hay turnos de ${y}. Importa el archivo de una semana para empezar el seguimiento.</p>` : ''}
-      ${rs.length ? `<div class="tabla-escritorio"><table class="plantilla jtab"><thead><tr><th>Trabajador</th><th class="num">Jornada garantizada</th><th class="num">Cómputo ${y}</th><th class="num">Lleva</th><th class="num">Debería llevar</th><th class="num">Diferencia</th><th class="num">Previsión a fin de año</th><th class="num">Necesita a la semana</th><th>Estado</th></tr></thead><tbody>${filas}</tbody></table></div>
+      ${rs.length ? `<div class="tabla-escritorio"><table class="plantilla jtab"><thead><tr><th>Trabajador</th><th class="num">Cómputo ${y}</th><th class="num">Días de trabajo</th><th class="num">Lleva</th><th class="num">Diferencia</th><th class="num">Previsión a fin de año</th><th class="num">Plan para llegar</th><th>Estado</th></tr></thead><tbody>${filas}</tbody></table></div>
         <div class="tarjetas-movil">${tarjetas}</div>` : '<p class="muted" style="margin:10px 0">Nadie coincide con el filtro.</p>'}
-      <p class="muted nota">«Debería llevar» reparte su cómputo por igual entre sus días de jornada hasta el ${corte?fmt(corte.hasta):'último turno importado'}, sin contar las bajas. Llega si va dentro de un ${nf(MARGEN*100)} % arriba o abajo. La previsión supone que sigue al mismo ritmo. En los parciales sin jornada garantizada todo va por banda, entre su mínimo y su máximo.</p>
+      <p class="muted nota">«Debería llevar» reparte su cómputo por igual entre sus días de jornada hasta el ${corte?fmt(corte.hasta):'último turno importado'}, sin contar las bajas. Llega si va dentro de un ${nf(MARGEN*100)} % arriba o abajo. La previsión supone que sigue al mismo ritmo. Con rotación, todo se reparte por sus días de trabajo (sin vacaciones, descansos, festivos ni ajustes) y el plan apunta a sus horas menos ${MARGEN_H} h. Los parciales sin garantía y los fijos discontinuos van por banda, entre su mínimo y su máximo, sin margen.</p>
     </div>
-    ${corte ? seguimientoHTML(todos.filter(r=>rs.includes(r)), y, corte) : ''}`;
+    ${corte || hayRot ? seguimientoHTML(todos.filter(r=>rs.includes(r)), y, corte) : ''}`;
 }
 
 /* seguimiento por semanas o por meses: lo que hizo en cada una frente a lo que le tocaba */
@@ -1101,8 +1222,14 @@ function seguimientoHTML(rs, y, corte){
     return { cab:m, sub:'', desde:a, hasta:b, semanas: l => anioSemana(l)===y && Number(sumaDias(l,3).slice(5,7))===i+1 }; });
   else { periodos = []; for(let l=lunesDe(`${y}-01-04`); anioSemana(l)===y; l=sumaDias(l,7))
     periodos.push({ cab:`S${numSemana(l)}`, sub:fCorto(l), desde:l, hasta:sumaDias(l,6), semanas: x => x===l, l }); }
+  const hasta = corte ? corte.hasta : '0000';
   const celdas = r => periodos.map(p=>{
-    if(p.desde > corte.hasta) return `<td class="fut"></td>`;
+    if(p.desde > hasta){
+      if(!r.rot || r.estado==='inc') return `<td class="fut"></td>`;
+      const dias = r.ef.filter(d=>d>=p.desde && d<=p.hasta && r.resto.has(d)).length;
+      if(!dias) return `<td class="fut" title="Sin días de trabajo"></td>`;
+      if(r.banda) return `<td class="plan" title="${esc(p.cab)}: plan entre ${nh(dias*r.hDiaMin)} y ${nh(dias*r.hDiaMax)} h en ${dias} días de trabajo"><small>${nh(Math.round(dias*r.hDiaMin))}–${nh(Math.round(dias*r.hDiaMax))}</small></td>`;
+      return `<td class="plan" title="${esc(p.cab)}: plan de ${nh(dias*r.hDia)} h en ${dias} días de trabajo">${nh(Math.round(dias*r.hDia*10)/10)}</td>`; }
     if(r.estado==='inc') return `<td></td>`;
     const ls = Object.keys(r.t.horas||{}).filter(p.semanas);
     const dias = r.ef.filter(d=>d>=p.desde && d<=p.hasta).length, n = r.ef.length || 1;
@@ -1117,11 +1244,127 @@ function seguimientoHTML(rs, y, corte){
     <div class="barra-herr"><h3 style="font-size:24px;margin:0">Seguimiento</h3>
       <div class="seg" role="group" aria-label="Ver por"><button class="${modo==='semana'?'on':''}" onclick="UI.segJ='semana';pintar()">Por semanas</button><button class="${modo==='mes'?'on':''}" onclick="UI.segJ='mes';pintar()">Por meses</button></div>
       <span class="esp"></span>
-      <span class="leyj"><span><i class="ok"></i>Lo que le toca</span><span><i class="bajo"></i>Menos</span><span><i class="alto"></i>Más</span><span><i class="vacia"></i>Sin horas</span></span></div>
-    <div class="seg-scroll"><table class="segj"><thead><tr><th>Trabajador</th>${periodos.map(p=>`<th class="${p.desde<=corte.hasta && p.hasta>=corte.hasta?'ult':''}">${p.cab}${p.sub?`<small>${p.sub}</small>`:''}</th>`).join('')}<th class="tot">Total</th></tr></thead>
+      <span class="leyj"><span><i class="ok"></i>Lo que le toca</span><span><i class="bajo"></i>Menos</span><span><i class="alto"></i>Más</span><span><i class="vacia"></i>Sin horas</span><span><i class="plan"></i>Plan</span></span></div>
+    <div class="seg-scroll"><table class="segj"><thead><tr><th>Trabajador</th>${periodos.map(p=>`<th class="${corte && p.desde<=corte.hasta && p.hasta>=corte.hasta?'ult':''}">${p.cab}${p.sub?`<small>${p.sub}</small>`:''}</th>`).join('')}<th class="tot">Total</th></tr></thead>
       <tbody>${rs.map(fila).join('')}</tbody></table></div>
-    <p class="muted nota">Horas que hizo en cada ${modo==='mes'?'mes':'semana'}. El color compara con lo que le tocaba según su cómputo: verde si va dentro de un 10 % arriba o abajo.${modo==='mes'?' Cada semana cuenta en el mes de su jueves.':''}</p>
+    <p class="muted nota">Horas que hizo en cada ${modo==='mes'?'mes':'semana'}. El color compara con lo que le tocaba según su cómputo: verde si va dentro de un 10 % arriba o abajo. Con rotación, las semanas que faltan llevan en gris el plan para llegar.${modo==='mes'?' Cada semana cuenta en el mes de su jueves.':''}</p>
   </div>`;
+}
+
+/* =========================================================
+   Importar rotaciones anuales
+   Un Excel con una fila de fechas (un día por columna) y una
+   fila por trabajador con los códigos de cada día. Las casillas
+   vacías son días de trabajo. Se empareja cada nombre con un
+   trabajador como en los turnos, y se guarda la rotación del año
+   (sustituye a la que hubiera).
+   ========================================================= */
+let ROT = null;
+function abrirRotaciones(){
+  ROT = null;
+  $('#capa').innerHTML = `<div class="fondo" onclick="if(event.target===this)cerrarRot()"><div class="dlg" role="dialog" aria-modal="true" aria-labelledby="rTit">
+    <div class="dlg-cab"><h2 id="rTit">Importar rotaciones</h2><button class="cerrar" onclick="cerrarRot()" aria-label="Cerrar">×</button></div>
+    <div class="dlg-cuerpo">
+      <p style="margin:0">Sube el Excel con la rotación del año: una fila por trabajador y una columna por día, con sus códigos (R, H, F, X, AJ…). Las casillas vacías cuentan como días de trabajo. Lo revisas antes de apuntar nada.</p>
+      <label class="soltar" ondragover="event.preventDefault();this.classList.add('encima')" ondragleave="this.classList.remove('encima')" ondrop="event.preventDefault();this.classList.remove('encima');leerRotaciones(event.dataTransfer.files[0])">
+        <input type="file" accept=".xlsx,.xlsm,.csv,.txt" onchange="leerRotaciones(this.files[0])">
+        ${ICO.calendario.replace('<svg','<svg width="30" height="30"')}<b>Elegir archivo</b><span class="muted">o arrástralo aquí · Excel (.xlsx o .xlsm) o .csv</span></label>
+    </div>
+    <div class="dlg-pie"><button class="btn" onclick="cerrarRot()">Cancelar</button></div></div></div>`;
+}
+function cerrarRot(){ ROT = null; $('#capa').innerHTML = ''; }
+async function leerRotaciones(f){
+  if(!f) return;
+  if(/\.xls$/i.test(f.name)) return toast('Ese Excel es del formato antiguo (.xls). Guárdalo como .xlsx o .csv y vuelve a subirlo');
+  toast('Leyendo la rotación…');
+  try {
+    const buf = await f.arrayBuffer(), b = new Uint8Array(buf);
+    prepararRot((b[0]===0x50 && b[1]===0x4B) ? await leerXlsx(buf) : [{ nombre:f.name, filas:leerCSV(textoDe(b)) }], f.name);
+  } catch(e){ console.error(e); toast('No se ha podido leer el archivo. Prueba a guardarlo como .xlsx o .csv'); }
+}
+/* una celda de la fila de fechas: número de fecha de Excel, 15/03/2027 o 2027-03-15 */
+function fechaCelda(v){
+  if(typeof v==='number') return v>36000 && v<60000 && v%1===0 ? isoDe(new Date(Date.UTC(1899,11,30) + v*864e5)) : null;
+  const s = String(v ?? '').trim(); let m;
+  if((m = s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/))) return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+  if((m = s.match(/^(\d{4})-(\d{2})-(\d{2})/))) return m[0];
+  return null;
+}
+function prepararRot(hojas, archivo){
+  /* la fila con más fechas de todas las hojas es la cabecera */
+  let mejor = null;
+  hojas.forEach(h=>h.filas.forEach((f, ri)=>{ const fechas = {}; let n = 0;
+    f.forEach((v, c)=>{ const d = fechaCelda(v); if(d){ fechas[c] = d; n++; } });
+    if(n>=28 && (!mejor || n>mejor.n)) mejor = {h, ri, fechas, n}; }));
+  if(!mejor) return toast('No encuentro la fila con las fechas de los días. ¿Es una rotación anual?');
+  const {h, ri, fechas} = mejor, abajo = h.filas.slice(ri+1), ancho = Math.max(0, ...h.filas.map(f=>f.length));
+  let cn = -1, mx = 0;
+  for(let c=0; c<ancho; c++){ if(fechas[c]) continue; const k = abajo.filter(f=>esNombre(f[c])).length; if(k>mx){ mx = k; cn = c; } }
+  if(cn<0) return toast('No encuentro los nombres de los trabajadores');
+  const datos = abajo.filter(f=>esNombre(f[cn]));
+  let ci = -1;
+  for(let c=0; c<ancho; c++){ if(c===cn || fechas[c]) continue; const k = datos.filter(f=>/^\d{4,10}$/.test(String(f[c] ?? '').trim())).length; if(k && k>=datos.length*0.6){ ci = c; break; } }
+  const porAnio = {}; Object.values(fechas).forEach(d=>{ const y = d.slice(0,4); porAnio[y] = (porAnio[y]||0) + 1; });
+  const y = Number(Object.keys(porAnio).sort((a,b)=>porAnio[b]-porAnio[a])[0]);
+  const cols = Object.keys(fechas).map(Number).filter(c=>fechas[c].startsWith(y+'-'));
+  const codigos = {};
+  ROT = { archivo, y, completo: porAnio[y]===diasAnio(y), hayNum: ci>=0, ponerNum: true, filas: datos.map(f=>{
+    const nombre = String(f[cn]).replace(/\s+/g,' ').trim(), num = ci>=0 ? String(f[ci] ?? '').trim() : '';
+    const dias = Array(diasAnio(y)).fill('?');
+    cols.forEach(c=>{ const v = f[c]; const cod = v==null || v==='' ? '' : String(v).trim().toUpperCase().replace(/,/g,' ');
+      dias[idxDia(fechas[c])] = cod; codigos[cod] = (codigos[cod]||0) + 1; });
+    const m = emparejar(nombre, num ? [num] : []);
+    return { nombre, num, dias, trab: dias.filter(c=>!NO_TRABAJO.has(c)).length, vac: dias.filter(c=>COD_VAC.has(c)).length, id:m.id, como:m.como, manual:false };
+  }) };
+  ROT.codigos = codigos;
+  pintarRot(true);
+}
+function pintarRot(primera){
+  const d0 = $('#capa .dlg'), sc = d0 ? d0.scrollTop : 0, y = ROT.y;
+  const opciones = S.trabajadores.slice().sort((a,b)=>a.nombre.localeCompare(b.nombre,'es')).map(t=>`<option value="${t.id}">${esc(t.nombre)}</option>`).join('');
+  const usados = {}; ROT.filas.forEach(f=>{ if(f.id && f.id!=='nuevo') usados[f.id] = (usados[f.id]||0) + 1; });
+  const ok = ROT.filas.filter(f=>f.id && f.id!=='nuevo' && ESTADOS[f.como]?.[0]==='ok').length, duda = ROT.filas.filter(f=>f.id && f.como==='posible').length,
+        no = ROT.filas.filter(f=>!f.id).length, nuevos = ROT.filas.filter(f=>f.id==='nuevo').length, repes = Object.values(usados).filter(n=>n>1).length;
+  const ya = ROT.filas.filter(f=>f.id && f.id!=='nuevo' && S.trabajadores.find(t=>t.id===f.id)?.rot?.[y]).length;
+  const cods = Object.entries(ROT.codigos).sort((a,b)=>b[1]-a[1]).map(([c,n])=>`<span class="${NO_TRABAJO.has(c)?'':'t'}">${c===''?'Vacías':esc(c)}${COD_NOMBRE[c]&&c!==''?` (${COD_NOMBRE[c]})`:''}: ${n}</span>`).join('');
+  const filasHTML = ROT.filas.map((f,i)=>{ const est = f.id==='nuevo' ? 'nuevo' : !f.id ? 'nada' : f.como; const [cls, txt] = ESTADOS[est];
+    return `<div class="imp-fila ${f.id?'':'ign'}"><span class="nf">${esc(f.nombre)}<span class="sub" style="display:block;font-weight:600">${f.num?`Nº ${esc(f.num)} · `:''}${f.trab} días de trabajo · ${f.vac} de vacaciones</span></span><span></span>
+      <select aria-label="Trabajador para ${esc(f.nombre)}" onchange="ROT.filas[${i}].id=this.value;ROT.filas[${i}].como='manual';pintarRot()">
+        <option value="">No apuntar</option><option value="nuevo">Añadir como trabajador nuevo</option>${opciones}</select>
+      <span class="est ${cls}">${f.id && f.id!=='nuevo' && usados[f.id]>1 ? 'Repetido: elige otro' : txt}</span></div>`; }).join('');
+  const nAp = ROT.filas.filter(f=>f.id).length;
+  $('#capa').innerHTML = `<div class="fondo${primera?'':' quieto'}" onclick="if(event.target===this)cerrarRot()"><div class="dlg ancho" role="dialog" aria-modal="true" aria-labelledby="rTit">
+    <div class="dlg-cab"><h2 id="rTit">Revisa las rotaciones de ${y}</h2><button class="cerrar" onclick="cerrarRot()" aria-label="Cerrar">×</button></div>
+    <div class="dlg-cuerpo">
+      <p class="muted" style="margin:0;font-size:14px">${esc(ROT.archivo)} · ${ROT.filas.length} trabajadores${ROT.completo?' · el año entero':' · <b>no trae el año entero</b>: los días que faltan no cuentan como trabajo'}</p>
+      <div><p style="margin:0 0 6px;font-size:14px;font-weight:700">Códigos del archivo <span class="muted" style="font-weight:600">· en verde, los que cuentan como día de trabajo</span></p><div class="rot-cods">${cods}</div></div>
+      <div class="imp-res"><span>${ROT.filas.length} filas</span>${ok?`<span class="est ok">${ok} emparejadas</span>`:''}${duda?`<span class="est duda">${duda} por revisar</span>`:''}${nuevos?`<span class="est nuevo">${nuevos} nuevas</span>`:''}${no?`<span class="est no">${no} sin apuntar</span>`:''}</div>
+      ${(()=>{ const dup = [...new Set(ROT.filas.filter(f=>f.num && ROT.filas.filter(g=>g.num===f.num).length>1).map(f=>f.num))];
+        return dup.length ? `<p class="aviso-suave" style="margin:0">El nº de empleado ${dup.join(', ')} sale en más de una fila (${ROT.filas.filter(f=>dup.includes(f.num)).map(f=>esc(f.nombre)).join(', ')}). No se apunta: ponlo a mano en su ficha.</p>` : ''; })()}
+      ${ROT.hayNum ? `<label class="check"><input type="checkbox" ${ROT.ponerNum?'checked':''} onchange="ROT.ponerNum=this.checked"> Apuntar también el nº de empleado a quien no lo tenga</label>` : ''}
+      ${ya ? `<p class="muted" style="margin:0;font-size:14px">${ya} ya tenía${ya===1?'':'n'} rotación de ${y}: se sustituye por la del archivo.</p>` : ''}
+      ${repes ? `<p class="aviso" style="margin:0">Hay trabajadores elegidos en dos filas. Cada rotación tiene que ir a una persona distinta.</p>` : ''}
+      <div class="imp-filas"><div class="imp-fila tit"><span>En el archivo</span><span></span><span>Trabajador</span><span></span></div>${filasHTML}</div>
+    </div>
+    <div class="dlg-pie"><button class="btn" onclick="abrirRotaciones()">Otro archivo</button><button class="btn primario" ${nAp && !repes?'':'disabled'} onclick="guardarRot()">Apuntar ${nAp} rotaci${nAp===1?'ón':'ones'}</button></div></div></div>`;
+  document.querySelectorAll('#capa .imp-fila select').forEach((s,i)=>{ s.value = ROT.filas[i].id; });
+  const d = $('#capa .dlg'); if(d && !primera) d.scrollTop = sc;
+}
+/* un nº de empleado que sale dos veces en el archivo o que ya tiene otro trabajador no se apunta */
+const numRepe = n => ROT.filas.filter(f=>f.num===n).length>1 || S.trabajadores.some(t=>t.num===n);
+function guardarRot(){
+  const y = ROT.y; let n = 0, nums = 0;
+  ROT.filas.filter(f=>f.id).forEach(f=>{
+    let t;
+    if(f.id==='nuevo'){ t = nuevoTrabajador({ id:uid(), nombre:f.nombre, num:f.num, ...(f.nombre.includes(',') ? separarNombre(f.nombre) : {}) }); t.nombre = nombreCompleto(t); S.trabajadores.push(t); }
+    else { t = S.trabajadores.find(x=>x.id===f.id); if(!t) return;
+      if(f.como==='posible' || f.como==='manual') S.alias[normNombre(f.nombre)] = t.id;
+      if(ROT.ponerNum && f.num && !t.num && !numRepe(f.num)){ t.num = f.num; nums++; } }
+    t.rot = t.rot || {}; t.rot[y] = f.dias.join(','); n++;
+  });
+  const dup = [...new Set(ROT.filas.filter(f=>f.num && ROT.filas.filter(g=>g.num===f.num).length>1).map(f=>f.num))];
+  S.anio = y; guardar(); cerrarRot(); pintar();
+  toast(`Rotación de ${y} apuntada a ${n} trabajador${n===1?'':'es'}${nums?` · ${nums} nº de empleado nuevos`:''}${dup.length?` · el nº ${dup.join(', ')} sale repetido en el archivo: ponlo a mano`:''}`);
 }
 
 /* =========================================================

@@ -1,7 +1,10 @@
 {
-  "version": "10.10.0",
+  "version": "10.11.0",
   "fecha": "2026-11-25",
   "novedades": [
-    "Horario concretado: nueva opción «Horario/rotación propia»"
+    "Fijos discontinuos por banda de 10 meses (708–1.275 h)",
+    "Filtros de producto y departamento (Pasaje, Ops)",
+    "Días de vacaciones en la ficha",
+    "Importar rotaciones: días de trabajo y plan semana a semana"
   ]
 }
