@@ -1,7 +1,8 @@
 {
-  "version": "10.17.1",
+  "version": "10.18.0",
   "fecha": "2026-11-25",
   "novedades": [
-    "Vacaciones por trabajador: filtros y cuentas a la izquierda, 12 meses en 3 filas de 4 a la derecha"
+    "Vacaciones editables: pincha o arrastra días y elige qué poner",
+    "Deshacer y atajos de teclado"
   ]
 }

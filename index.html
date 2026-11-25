@@ -237,6 +237,24 @@ table.vgrid{border-collapse:separate;border-spacing:0;font-size:13px;font-varian
 .vd{position:relative;min-height:40px;border-radius:6px;display:grid;justify-items:center;align-content:end;padding-bottom:4px;font-size:12.5px;font-weight:700;border:1px solid #EEF0F3}
 .vd i{position:absolute;top:2px;left:4px;font-style:normal;font-size:10px;font-weight:600;opacity:.75}
 .vd.hoy{outline:2px solid var(--senal);outline-offset:-1px}
+/* editar días */
+.vgrid td[data-d],.vd[data-d]{cursor:pointer;user-select:none;-webkit-user-select:none}
+.vgrid td[data-d]:hover,.vd[data-d]:hover{box-shadow:inset 0 0 0 2px #9AA1AD}
+.vgrid td.dsel,.vd.dsel{box-shadow:inset 0 0 0 3px var(--pista)!important;filter:brightness(.93)}
+.vayuda{font-size:13.5px}
+.mdia{position:fixed;z-index:60;width:320px;background:var(--papel);border-radius:14px;box-shadow:0 24px 60px -18px rgba(0,0,0,.5),0 0 0 1px var(--linea);padding:12px;animation:subir .14s ease-out}
+.mdia-cab{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:10px}
+.mdia-cab b{display:block;font-family:var(--cond);font-size:18px;line-height:1.1}
+.mdia-cab span{font-size:13px;color:var(--gris);font-weight:600}
+.mdia-cab .cerrar{width:30px;height:30px;font-size:18px}
+.mdia-ops{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.mdia-ops button{display:flex;align-items:center;gap:8px;border:1px solid var(--linea);background:#fff;border-radius:9px;padding:7px 9px;font-size:13.5px;font-weight:600;cursor:pointer;text-align:left;color:var(--asfalto)}
+.mdia-ops button:hover,.mdia-ops button:focus-visible{border-color:var(--asfalto)}
+.mdia-ops button.grande{font-weight:700}
+.mdia-ops button.grande:first-child{background:#E3F3E8;border-color:#9ED3B0}
+.mdia-ops button i{display:inline-grid;place-items:center;min-width:28px;height:22px;border-radius:5px;font-style:normal;font-size:11px;font-weight:700;border:1px solid #D5D9E0;flex:0 0 auto}
+.mdia-ops button small{margin-left:auto;color:var(--gris);font-weight:600}
+.mdia-pie{margin:10px 0 0;font-size:12.5px;color:var(--gris);line-height:1.4}
 .chip.singar{background:#F1F3F6;color:var(--gris)}
 .banda-j{border:2px dashed var(--linea);border-radius:12px;padding:12px 14px;background:#FAFBFC}
 .banda-j b{font-family:var(--cond);font-size:28px}
@@ -428,6 +446,9 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
   .semana{grid-template-columns:1fr 110px 40px}
   .ficha-cuerpo .calculo{position:static}
   .sep-fila{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr)}
+  .mdia{width:calc(100vw - 16px);padding:10px} .vayuda{display:none}
+  .mdia-ops{grid-template-columns:1fr 1fr 1fr;gap:5px} .mdia-ops button{flex-direction:column;align-items:center;text-align:center;gap:3px;padding:6px 4px;font-size:12px}
+  .mdia-ops button small{display:none} .mdia-cab{margin-bottom:8px} .mdia-pie{font-size:12px;margin-top:8px}
   .vgrid th.esq,.vgrid tbody th,.vgrid tfoot th{min-width:140px;max-width:140px}
   .vsel{flex:1 1 100%} .vnombre{font-size:21px;flex:1;text-align:center}
   .combo{flex:1 1 100%;min-width:0} .vfiltros .seg{flex-wrap:wrap;overflow:visible} .vfiltros .buscar{flex:1 1 100%} .vfiltros .flab{margin-left:0;flex:1 1 100%}
@@ -458,9 +479,17 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
    Control Planning 10 — rehecha desde cero
    Datos en localStorage, con una clave nueva.
    ========================================================= */
-const APP_VERSION = '10.17.1';
+const APP_VERSION = '10.18.0';
 const CLAVE = 'control-planning-v10';
 const NOVEDADES = {
+  '10.18.0': [
+    { titulo:'Pon y quita vacaciones con un clic', donde:'Vacaciones',
+      texto:'Pincha un día en el calendario de cualquiera, o arrastra para coger un periodo, y elige en el menú: Vacaciones, Quitar vacaciones, Trabaja, Descanso, Festivo, Festivo de empresa, Ajuste o Permiso. Funciona en la vista del departamento y en la de cada trabajador.' },
+    { titulo:'Las vacaciones, solo en días de trabajo', donde:'Vacaciones',
+      texto:'Si coges un periodo con descansos o festivos dentro, las vacaciones se ponen solo en sus días de trabajo y lo demás se queda igual. El menú te dice cuántas lleva y cuántas le corresponden, y te avisa si se pasa.' },
+    { titulo:'Rápido y sin miedo', donde:'Vacaciones',
+      texto:'Con el menú abierto, pincha otro día de la misma persona para alargar el periodo. Atajos: H vacaciones, Supr quitar, T trabaja, R descanso, F festivo, X festivo de empresa, Esc cerrar. Y cualquier cambio se deshace con el botón «Deshacer» o Ctrl + Z.' },
+  ],
   '10.17.1': [
     { titulo:'Calendario de cada uno, mejor ordenado', donde:'Vacaciones › Por trabajador',
       texto:'A la izquierda, el buscador, los filtros y sus cuentas; a la derecha, los 12 meses en 3 filas de 4. En pantallas más estrechas pasa a 3 columnas, y en el móvil a una.' },
@@ -610,7 +639,7 @@ const numSemana = l => Math.round((pd(l) - pd(lunesDe(`${anioSemana(l)}-01-04`))
 const fCorto = s => pd(s).toLocaleDateString('es-ES',{day:'numeric',month:'short',timeZone:'UTC'}).replace('.','');
 const semanaTxt = l => `${fCorto(l)} – ${fCorto(sumaDias(l,6))}${anioSemana(l)!==S.anio?' '+anioSemana(l):''}`;
 const r2 = n => Math.round(n*100)/100;
-function toast(t){ const d = document.createElement('div'); d.className='aviso-toast'; d.textContent=t; document.body.appendChild(d); setTimeout(()=>d.remove(), 2600); }
+function toast(t){ document.querySelectorAll('.aviso-toast').forEach(x=>x.remove()); const d = document.createElement('div'); d.className='aviso-toast'; d.textContent=t; document.body.appendChild(d); setTimeout(()=>d.remove(), 2600); }
 const ICO = {
   flecha:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
   personal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="17" cy="9" r="2.4"/><path d="M16 14.2c2.3.2 3.9 1.8 4.5 4.8"/></svg>',
@@ -1534,7 +1563,9 @@ function vVacaciones(){
   const barra = `<div class="barra-herr">
       <div class="seg" role="group" aria-label="Vista"><button class="${tab==='dep'?'on':''}" onclick="UI.vacTab='dep';pintar()">Departamento</button><button class="${tab==='trab'?'on':''}" onclick="UI.vacTab='trab';pintar()">Por trabajador</button></div>
       <div class="anio" title="Año"><button onclick="cambiarAnio(-1)" aria-label="Año anterior">‹</button><b>${y}</b><button onclick="cambiarAnio(1)" aria-label="Año siguiente">›</button></div>
+      <span class="muted vayuda">Pincha un día, o arrastra para coger varios, y elige qué poner.</span>
       <span class="esp"></span>
+      ${DESHACER.length ? `<button class="btn" onclick="deshacerDia()" title="Ctrl + Z">↶ Deshacer</button>` : ''}
       <button class="btn" onclick="abrirRotaciones()">${ICO.calendario} Importar rotaciones</button>
     </div>`;
   const leyenda = `<div class="leyv">${LEYENDA_VAC.map(c=>`<span><i class="${DIA_EST[c].cls}">${DIA_EST[c].txt}</i>${DIA_EST[c].nombre}</span>`).join('')}</div>`;
@@ -1585,8 +1616,8 @@ function vacDepartamento(ts, y){
   const conTexto = zoom!=='anio';
   const cls = d => `${diaSem(d)>=5?' fin':''}${d===hoy?' hoy':''}${d.endsWith('-01')?' m1':''}`;
   const meses = []; dias.forEach(d=>{ const m = Number(d.slice(5,7))-1; if(!meses.length || meses[meses.length-1].m!==m) meses.push({m, n:0}); meses[meses.length-1].n++; });
-  const celda = (t, d) => { const c = diaDe(t, d); if(c==null) return `<td class="c-nd${cls(d)}"></td>`; const e = estDia(c);
-    return `<td class="${e.cls}${cls(d)}"${conTexto?` title="${fCorto(d)}: ${e.nombre}"`:''}>${conTexto?e.txt:''}</td>`; };
+  const celda = (t, d) => { const c = diaDe(t, d); if(c==null) return `<td class="c-nd${cls(d)}" data-t="${t.id}" data-d="${d}"></td>`; const e = estDia(c);
+    return `<td class="${e.cls}${cls(d)}" data-t="${t.id}" data-d="${d}"${conTexto?` title="${fCorto(d)}: ${e.nombre}"`:''}>${conTexto?e.txt:''}</td>`; };
   const fila = t => { const n = cuentasDe(t, y), h = (n.H||0)+(n.V||0)+(n.VAC||0);
     return `<tr><th scope="row" onclick="UI.vacTab='trab';UI.vacTrab='${t.id}';pintar()" title="Ver su calendario"><span class="vn">${esc(t.nombre)}</span>
       <span class="vs">${t.contrato==='discontinuo'?'FD · ':''}${tieneRot(t, y) ? `H ${h} de ${vacDe(t)}` : 'sin rotación'}</span></th>${dias.map(d=>celda(t, d)).join('')}</tr>`; };
@@ -1614,7 +1645,7 @@ function vacTrabajador(lista, t, y, filtros=''){
     return `<div class="vmesc"><div class="vmes-cab"><b>${MESES_L[m]}</b>${hm?`<span class="c-h">${hm} H</span>`:''}</div>
       <div class="vcal">${DIAS_SEM.map(x=>`<span class="ds">${x}</span>`).join('')}${'<span></span>'.repeat(diaSem(p))}
       ${ds.map(d=>{ const c = diaDe(t, d), e = c==null ? DIA_EST['?'] : estDia(c);
-        return `<span class="vd ${e.cls}${diaSem(d)>=5?' fin':''}${d===hoy?' hoy':''}" title="${fCorto(d)}: ${e.nombre}"><i>${Number(d.slice(8))}</i>${e.txt}</span>`; }).join('')}</div></div>`; };
+        return `<span class="vd ${e.cls}${diaSem(d)>=5?' fin':''}${d===hoy?' hoy':''}" data-t="${t.id}" data-d="${d}" title="${fCorto(d)}: ${e.nombre}"><i>${Number(d.slice(8))}</i>${e.txt}</span>`; }).join('')}</div></div>`; };
   return `<div class="vtrab"><aside class="vlado">${filtros}
     <div class="vbarra vcab">
       <div class="vsel"><button class="btn" onclick="UI.vacTrab='${lista[(i-1+lista.length)%lista.length].id}';pintar()" aria-label="Anterior" title="Anterior">‹</button>
@@ -1642,6 +1673,125 @@ function vacTrabajador(lista, t, y, filtros=''){
     ${tieneRot(t, y) ? '' : `<p class="aviso-suave" style="margin:0 0 12px">No tiene rotación de ${y}${t.contrato==='discontinuo'?': solo se ve su inactividad':''}. Impórtala con «Importar rotaciones» para ver sus días y sus vacaciones.</p>`}
     </aside><div class="vder"><div class="vmeses">${MESES_L.map((_,m)=>mes(m)).join('')}</div>
     <p class="muted nota">Los días libres están sujetos a modificaciones por necesidades de la operativa.</p></div></div>`;
+}
+
+/* =========================================================
+   Editar vacaciones y días
+   Se pincha un día (o se arrastra para coger varios) en
+   cualquiera de los dos calendarios y sale un menú junto al
+   último día: poner o quitar vacaciones, descanso, festivo…
+   Con otro clic (o Mayús + clic) en un día de la misma persona
+   se alarga el periodo. Todo se puede deshacer.
+   Las vacaciones solo se ponen en días de trabajo: los
+   descansos y festivos que caigan dentro se quedan como están.
+   ========================================================= */
+let SEL = null;
+const DESHACER = [];
+const OPS_DIA = [
+  ['H','Vacaciones','c-h'], ['-H','Quitar vacaciones','c-t'], ['T','Trabaja','c-t'], ['R','Descanso','c-r'],
+  ['F','Festivo','c-f'], ['X','Festivo de empresa','c-x'], ['AJ','Ajuste de jornada','c-aj'], ['PR','Permiso retribuido','c-p'], ['PNR','Permiso no retribuido','c-p'],
+];
+const celdaDia = el => el?.closest?.('[data-t][data-d]');
+const rangoSel = () => SEL.a <= SEL.b ? [SEL.a, SEL.b] : [SEL.b, SEL.a];
+function marcarSel(){
+  document.querySelectorAll('.dsel').forEach(x=>x.classList.remove('dsel'));
+  if(!SEL) return; const [a, b] = rangoSel();
+  document.querySelectorAll(`[data-t="${SEL.t}"][data-d]`).forEach(x=>{ if(x.dataset.d>=a && x.dataset.d<=b) x.classList.add('dsel'); });
+}
+function cerrarMenuDia(){ $('#menuDia')?.remove(); SEL = null; marcarSel(); }
+document.addEventListener('pointerdown', e=>{
+  if(e.target.closest('#menuDia')) return;
+  const c = celdaDia(e.target);
+  if(!c || e.button>0 || UI.vista!=='vacaciones'){ if($('#menuDia') && !c) cerrarMenuDia(); return; }
+  /* con el menú abierto, otro día de la misma persona (o Mayús + clic) alarga el periodo */
+  if(SEL && SEL.fin && c.dataset.t===SEL.t){ SEL.b = c.dataset.d; SEL.el = c; marcarSel(); abrirMenuDia(); return; }
+  $('#menuDia')?.remove();
+  SEL = { t:c.dataset.t, a:c.dataset.d, b:c.dataset.d, el:c, fin:false, tactil: e.pointerType==='touch' };
+  if(!SEL.tactil) e.preventDefault();
+  marcarSel();
+});
+document.addEventListener('pointermove', e=>{
+  if(!SEL || SEL.fin || SEL.tactil) return;
+  const c = celdaDia(document.elementFromPoint(e.clientX, e.clientY));
+  if(c && c.dataset.t===SEL.t && c.dataset.d!==SEL.b){ SEL.b = c.dataset.d; SEL.el = c; marcarSel(); }
+});
+document.addEventListener('pointerup', ()=>{ if(SEL && !SEL.fin){ SEL.fin = true; abrirMenuDia(); } });
+document.addEventListener('keydown', e=>{
+  if(UI.vista!=='vacaciones' || $('#bloqueo') || $('#capa').innerHTML) return;
+  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase()==='z' && DESHACER.length && !e.target.closest('input')){ e.preventDefault(); deshacerDia(); return; }
+  if(!$('#menuDia') || e.target.closest('input')) return;
+  const k = e.key.toUpperCase();
+  if(e.key==='Escape'){ cerrarMenuDia(); return; }
+  const mapa = { H:'H', T:'T', R:'R', F:'F', X:'X', A:'AJ', P:'PR', DELETE:'-H', BACKSPACE:'-H' };
+  if(mapa[k]){ e.preventDefault(); aplicarDia(mapa[k]); }
+});
+addEventListener('scroll', ()=>{ if($('#menuDia')) colocarMenu(); }, true);
+addEventListener('resize', ()=>{ if($('#menuDia')) colocarMenu(); });
+
+function abrirMenuDia(){
+  const t = S.trabajadores.find(x=>x.id===SEL.t); if(!t) return cerrarMenuDia();
+  const [a, b] = rangoSel(), n = Math.round((pd(b)-pd(a))/864e5) + 1;
+  const ds = []; for(let d=a; d<=b; d=sumaDias(d,1)) ds.push(d);
+  const trab = ds.filter(d=>{ const c = codigoDia(t, d); return c==='' || c==null || c==='?'; }).length;
+  const h = vacEnRot(t, S.anio) || 0;
+  const m = $('#menuDia') || Object.assign(document.createElement('div'), { id:'menuDia', className:'mdia' });
+  m.setAttribute('role','dialog'); m.setAttribute('aria-label','Cambiar días');
+  m.innerHTML = `<div class="mdia-cab"><div><b>${esc(t.nombre)}</b><span>${a===b ? fmt(a) : `${fCorto(a)} – ${fmt(b)}`} · ${n} día${n===1?'':'s'}</span></div><button class="cerrar" onclick="cerrarMenuDia()" aria-label="Cerrar">×</button></div>
+    <div class="mdia-ops">${OPS_DIA.map(([k,txt,cls],i)=>`<button type="button" class="${i<2?'grande':''}" onclick="aplicarDia('${k}')"><i class="${cls}">${k==='-H'?'—':k==='T'?'':k}</i>${txt}${k==='H'&&trab<n?` <small>${trab} día${trab===1?'':'s'}</small>`:''}</button>`).join('')}</div>
+    <p class="mdia-pie">Lleva <b>${h} de ${vacDe(t)}</b> días de vacaciones. Las vacaciones solo se ponen en sus días de trabajo. ${SEL.tactil?'Toca':'Pincha'} otro día suyo para alargar${SEL.tactil?'':', o arrastra'}.</p>`;
+  const nuevo = !m.parentNode; if(nuevo) document.body.appendChild(m);
+  colocarMenu();
+  /* en el móvil el menú va abajo: que el día elegido quede a la vista por encima */
+  if(innerWidth < 760){ const el = document.querySelector(`[data-t="${SEL.t}"][data-d="${SEL.b}"]`), r = el?.getBoundingClientRect();
+    if(r && r.bottom > innerHeight - m.offsetHeight - 12){ scrollBy(0, r.bottom - (innerHeight - m.offsetHeight - 24)); } }
+  m.querySelector('button.grande')?.focus({preventScroll:true});
+}
+function colocarMenu(){
+  const m = $('#menuDia'); if(!m || !SEL) return;
+  const el = document.querySelector(`[data-t="${SEL.t}"][data-d="${SEL.b}"]`) || SEL.el; if(!el) return;
+  const r = el.getBoundingClientRect(), w = m.offsetWidth, h = m.offsetHeight, vw = innerWidth, vh = innerHeight;
+  if(vw < 760){ m.style.left = '8px'; m.style.top = (vh - h - 8) + 'px'; return; }
+  let x = r.right + 8, y = r.top - 10;
+  if(x + w > vw - 8) x = r.left - w - 8;
+  if(x < 8) x = Math.max(8, Math.min(vw - w - 8, r.left + r.width/2 - w/2));
+  if(y + h > vh - 8) y = vh - h - 8;
+  if(y < 62) y = 62;
+  m.style.left = x + 'px'; m.style.top = y + 'px';
+}
+/* cambia los días elegidos en la rotación de esa persona */
+function aplicarDia(cod){
+  if(!SEL) return;
+  const t = S.trabajadores.find(x=>x.id===SEL.t); if(!t) return cerrarMenuDia();
+  const [a, b] = rangoSel(), y = Number(a.slice(0,4));
+  t.rot = t.rot || {};
+  const antes = t.rot[y] ?? null;
+  const arr = antes ? antes.split(',') : Array(diasAnio(y)).fill('?');
+  let cambiados = 0;
+  for(let d=a; d<=b; d=sumaDias(d,1)){
+    if(d.slice(0,4)!==String(y)) continue;
+    const i = idxDia(d), cur = arr[i] ?? '?';
+    let nuevo = cur;
+    if(cod==='H'){ if(cur==='' || cur==='?') nuevo = 'H'; }
+    else if(cod==='-H'){ if(COD_VAC.has(cur)) nuevo = ''; }
+    else if(cod==='T') nuevo = '';
+    else nuevo = cod;
+    if(nuevo!==cur){ arr[i] = nuevo; cambiados++; }
+  }
+  if(!cambiados){ toast(cod==='H' ? 'No hay días de trabajo en lo que has elegido' : cod==='-H' ? 'No había vacaciones en esos días' : 'Esos días ya estaban así'); return; }
+  DESHACER.push({ id:t.id, y, antes });
+  if(DESHACER.length > 50) DESHACER.shift();
+  t.rot[y] = arr.join(',');
+  guardar(); cerrarMenuDia(); pintar();
+  const h = vacEnRot(t, y), v = vacDe(t), nombre = OPS_DIA.find(o=>o[0]===cod)[1].toLowerCase();
+  toast(cod==='H' ? `${cambiados} día${cambiados===1?'':'s'} de vacaciones · lleva ${h} de ${v}${h>v?` (se pasa en ${h-v})`:''}`
+      : cod==='-H' ? `${cambiados} día${cambiados===1?'':'s'} de vacaciones quitado${cambiados===1?'':'s'} · lleva ${h} de ${v}`
+      : `${cambiados} día${cambiados===1?'':'s'}: ${nombre}`);
+}
+function deshacerDia(){
+  const u = DESHACER.pop(); if(!u) return;
+  const t = S.trabajadores.find(x=>x.id===u.id); if(!t) return;
+  if(u.antes==null) delete t.rot[u.y]; else t.rot[u.y] = u.antes;
+  guardar(); cerrarMenuDia(); pintar(); toast('Cambio deshecho');
 }
 
 /* =========================================================
