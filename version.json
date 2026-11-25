@@ -1,9 +1,8 @@
 {
-  "version": "10.5.0",
+  "version": "10.6.0",
   "fecha": "2026-11-25",
   "novedades": [
-    "Nuevo módulo: Control de jornada (llega, no llega o se pasa)",
-    "Seguimiento por semanas o por meses",
-    "Arreglo: las horas importadas y las bajas ya no se pierden al volver a abrir la app"
+    "Añadir desde Excel: carga la plantilla subiendo el archivo",
+    "Revisión antes de añadir: no duplica a nadie y deja fuera las plazas ficticias"
   ]
 }
