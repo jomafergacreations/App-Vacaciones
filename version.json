@@ -1,8 +1,8 @@
 {
-  "version": "10.8.0",
+  "version": "10.9.0",
   "fecha": "2026-11-25",
   "novedades": [
-    "Tiempos parciales con o sin jornada garantizada",
-    "Sin garantía: banda de 850 h a 1.530 h al año, también en Control de jornada"
+    "Negocio (GroundHandling o RedBull) y departamento en la ficha",
+    "Fijos discontinuos: periodos de inactividad, mínimo 60 días al año"
   ]
 }

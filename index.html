@@ -109,6 +109,14 @@ table.plantilla{width:100%;border-collapse:collapse;font-variant-numeric:tabular
 .chip.parcial{background:#EEE6F7;color:var(--c-parcial)}
 .chip.discontinuo{background:#FBEBDC;color:var(--c-disc)}
 .chip.reducida{background:var(--senal-suave);color:#7A5600}
+.neg{display:inline-block;border-radius:5px;padding:1px 7px;font-size:11.5px;font-weight:700;color:#fff;letter-spacing:.01em;vertical-align:1px}
+.neg.gh{background:#1F5FBF} .neg.rb{background:#E8650F}
+.negocios{display:inline-flex;gap:8px;flex-wrap:wrap}
+.negocios button{border:2px solid var(--nc);background:#fff;color:var(--nc);border-radius:10px;padding:9px 16px;font-weight:700;cursor:pointer;transition:background .15s,color .15s}
+.negocios button.on{background:var(--nc);color:#fff}
+.check{flex-direction:row;align-items:center;gap:8px;color:var(--asfalto);font-size:14.5px;cursor:pointer}
+.check input{width:18px;height:18px;margin:0}
+.tm .l0{margin-top:6px;font-size:13px;color:var(--gris);font-weight:600}
 .chip.singar{background:#F1F3F6;color:var(--gris)}
 .banda-j{border:2px dashed var(--linea);border-radius:12px;padding:12px 14px;background:#FAFBFC}
 .banda-j b{font-family:var(--cond);font-size:28px}
@@ -309,9 +317,17 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
    Control Planning 10 — rehecha desde cero
    Datos en localStorage, con una clave nueva.
    ========================================================= */
-const APP_VERSION = '10.8.0';
+const APP_VERSION = '10.9.0';
 const CLAVE = 'control-planning-v10';
 const NOVEDADES = {
+  '10.9.0': [
+    { titulo:'Negocio y departamento', donde:'Personal › ficha del trabajador',
+      texto:'Cada ficha tiene ahora su negocio, GroundHandling (azul) o RedBull (naranja), y su departamento. En la lista se ven junto al nombre.' },
+    { titulo:'A toda la plantilla de una vez', donde:'Personal › Añadir desde Excel',
+      texto:'Al subir el Excel puedes poner el negocio y el departamento a todos. Si ya los habías añadido, vuelve a subir el mismo archivo y marca «Ponérselo también a los que ya estaban»: no se duplica nadie.' },
+    { titulo:'Fijos discontinuos: periodos de inactividad', donde:'Personal › ficha del trabajador',
+      texto:'Ahora apuntas cuándo para, no cuándo trabaja: el resto del año cuenta como actividad. Puedes añadir varios periodos si para en varias veces. Tiene que parar al menos 60 días al año: si no llega, la ficha te avisa y no deja guardar.' },
+  ],
   '10.8.0': [
     { titulo:'Tiempo parcial: ¿jornada garantizada?', donde:'Personal › ficha del trabajador',
       texto:'En los tiempos parciales hay una pregunta nueva. Si tiene jornada garantizada, escríbela en horas o en % de un tiempo completo y la app calcula sus horas (por ejemplo, 60 % = 1.020 h al año). Si no la tiene, su jornada es una banda: entre 850 h y 1.530 h al año, del 50 % al 90 % de un tiempo completo.' },
@@ -400,12 +416,15 @@ const ICO = {
 };
 
 /* ---------- catálogos fijos ---------- */
+const NEGOCIOS = { gh:{nombre:'GroundHandling', color:'#1F5FBF'}, rb:{nombre:'RedBull', color:'#E8650F'} };
+const negocioChip = t => NEGOCIOS[t.negocio] ? `<span class="neg ${t.negocio}">${NEGOCIOS[t.negocio].nombre}</span>` : '';
+const departamentos = () => [...new Set(['Pasaje', ...S.trabajadores.map(t=>t.depto).filter(Boolean)])].sort((a,b)=>a.localeCompare(b,'es'));
 const TURNOS = { manana:'Mañanas', tarde:'Tardes', noche:'Noches' };
 const horarioTxt = t => !t.concretado ? '' : `${TURNOS[t.horario?.turno]||'Horario concretado'}${t.horario?.desde&&t.horario?.hasta?` ${t.horario.desde}–${t.horario.hasta}`:''}`;
 const CONTRATOS = {
   completo:    {nombre:'Tiempo completo', corto:'Completo', desc:'Jornada entera todo el año', color:'#1F5FBF'},
   parcial:     {nombre:'Tiempo parcial', corto:'Parcial', desc:'Menos horas que un completo', color:'#7A4FB5'},
-  discontinuo: {nombre:'Fijo discontinuo', corto:'Discontinuo', desc:'Trabaja por periodos de actividad', color:'#C46A12'},
+  discontinuo: {nombre:'Fijo discontinuo', corto:'Discontinuo', desc:'Para al menos 60 días al año', color:'#C46A12'},
 };
 
 /* ---------- estado ---------- */
@@ -426,7 +445,7 @@ function separarNombre(s){
   if(w.length>=4 && NOMBRES_DOBLES.has(sinAcentos(w[k-1]).toUpperCase())) k--;
   return { ape:w.slice(0,k).join(' '), nom:w.slice(k).join(' ') };
 }
-const nuevoTrabajador = (o={}) => ({ id:null, nombre:'', nom:'', ape:'', num:'', contrato:'completo', garantizada:true, modo:'semana', valor:null, actividad:[], reducido:false, red:{modo:'semana', valor:null}, concretado:false, horario:{turno:'', desde:'', hasta:''}, bajas:[], horas:{}, ...o });
+const nuevoTrabajador = (o={}) => ({ id:null, nombre:'', nom:'', ape:'', num:'', negocio:'', depto:'', contrato:'completo', garantizada:true, modo:'semana', valor:null, actividad:[], cese:[], reducido:false, red:{modo:'semana', valor:null}, concretado:false, horario:{turno:'', desde:'', hasta:''}, bajas:[], horas:{}, ...o });
 function normalizar(d){
   const b = estadoInicial();
   d = Object.assign(b, d || {});
@@ -437,6 +456,8 @@ function normalizar(d){
     reducido: t.reducido, red: t.red, concretado: t.concretado, horario: t.horario, conc: t.conc, bajas: t.bajas, horas: t.horas,
     ...(t.red===undefined && t.conc ? { reducido: !!t.concretado, red: t.conc, concretado: false } : {}),
     nom: t.nom, ape: t.ape, garantizada: t.garantizada !== false,
+    negocio: NEGOCIOS[t.negocio] ? t.negocio : '', depto: String(t.depto||'').trim(),
+    cese: Array.isArray(t.cese) && t.cese.length ? t.cese : inactividadDe(t.actividad),
   })).map(t=>({ ...t,
     ...(()=>{ let nom = String(t.nom||'').trim(), ape = String(t.ape||'').trim();
       if(!nom && !ape && t.nombre.includes(',')) ({nom, ape} = separarNombre(t.nombre));
@@ -485,6 +506,15 @@ const pctDeSuJornada = t => { const pc = pctDe(t), pe = pctEf(t); return pc && p
 const anualBase = t => { const p = pctEf(t); return p==null ? null : p/100 * S.ajustes.hAnio; };
 /* días de actividad de un fijo discontinuo dentro del año */
 /* días de una lista de periodos que caen dentro del año, sin contar dos veces los que se pisan */
+/* de la versión anterior, que apuntaba la actividad: la inactividad es el resto de esos años */
+function inactividadDe(act){
+  const ps = (Array.isArray(act) ? act : []).filter(p=>p && p.desde && p.hasta && p.hasta>=p.desde).sort((a,b)=>a.desde<b.desde?-1:1);
+  if(!ps.length) return [];
+  const out = []; let d = `${ps[0].desde.slice(0,4)}-01-01`; const fin = `${ps[ps.length-1].hasta.slice(0,4)}-12-31`;
+  ps.forEach(p=>{ if(p.desde > d) out.push({desde:d, hasta:sumaDias(p.desde,-1)}); if(sumaDias(p.hasta,1) > d) d = sumaDias(p.hasta,1); });
+  if(d <= fin) out.push({desde:d, hasta:fin});
+  return out;
+}
 function diasDe(periodos, y, ini=`${y}-01-01`, fin=`${y}-12-31`){
   const dias = new Set();
   (periodos||[]).forEach(p=>{ if(!p || !p.desde || !p.hasta || p.hasta<p.desde) return;
@@ -492,13 +522,21 @@ function diasDe(periodos, y, ini=`${y}-01-01`, fin=`${y}-12-31`){
     while(d<=h){ dias.add(d); d = sumaDias(d,1); } });
   return dias;
 }
-const diasActividad = (t, y=S.anio) => diasDe(t.actividad, y).size;
+/* días activos de un fijo discontinuo: todo el rango menos sus periodos de inactividad (`cese`) */
+const MIN_INACTIVO = 60;   // un fijo discontinuo para al menos 60 días al año
+const diasInactivo = (t, y=S.anio) => diasDe(t.cese, y).size;
+function diasActivos(t, y, ini=`${y}-01-01`, fin=`${y}-12-31`){
+  const c = diasDe(t.cese, y, ini, fin), out = new Set();
+  for(let d=ini; d<=fin; d=sumaDias(d,1)) if(!c.has(d)) out.add(d);
+  return out;
+}
+const diasActividad = (t, y=S.anio) => diasActivos(t, y).size;
 /* días del año con los que se calcula su jornada: todo el año, o los de actividad si es fijo discontinuo */
 const diasJornada = (t, y=S.anio) => t.contrato==='discontinuo' ? diasActividad(t, y) : diasAnio(y);
 /* días de baja que caen en esos días */
 function diasBaja(t, y=S.anio){
   const b = diasDe(t.bajas, y); if(t.contrato!=='discontinuo') return b.size;
-  const a = diasDe(t.actividad, y); let n = 0; b.forEach(d=>{ if(a.has(d)) n++; }); return n;
+  const a = diasActivos(t, y); let n = 0; b.forEach(d=>{ if(a.has(d)) n++; }); return n;
 }
 /* jornada anual del año elegido */
 function anualDe(t, y=S.anio){
@@ -569,18 +607,19 @@ function vPersonal(){
   const ts = todos.filter(t=>(UI.filtro==='todos'||t.contrato===UI.filtro) && (!q || t.nombre.toLowerCase().includes(q) || String(t.num).includes(q)))
     .sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
   const avisos = t => faltaJornada(t) ? '<span class="aviso">Falta la jornada</span>' : faltaActividad(t) ? `<span class="aviso">Sin actividad en ${S.anio}</span>` : '';
+  const avisoFD = t => t.contrato==='discontinuo' && diasInactivo(t) < MIN_INACTIVO ? `<div><span class="aviso">Para ${diasInactivo(t)} días: mínimo ${MIN_INACTIVO}</span></div>` : '';
   const filas = ts.map(t=>{ const c = CONTRATOS[t.contrato];
     return `<tr onclick="abrirFicha('${t.id}')">
-      <td><div class="nombre">${esc(t.nombre)}</div>${t.num?`<div class="sub">Nº ${esc(t.num)}</div>`:''}</td>
+      <td><div class="nombre">${esc(t.nombre)}</div>${t.num||t.negocio||t.depto?`<div class="sub">${negocioChip(t)}${t.depto?` ${esc(t.depto)}`:''}${t.num?`${t.negocio||t.depto?' · ':''}Nº ${esc(t.num)}`:''}</div>`:''}</td>
       <td><span class="chip ${t.contrato}">${c.nombre}</span>${sinGarantia(t)?' <span class="chip singar">Sin garantía</span>':''}${t.reducido?' <span class="chip reducida">Reducida</span>':''}${t.concretado?` <span class="chip concretada">${esc(horarioTxt(t))}</span>`:''}</td>
       <td class="num">${sinGarantia(t)?bandaSemana():semanaEf(t)==null?'—':nh(semanaEf(t))+' h'}${t.reducido&&semanaDe(t)!=null?`<div class="sub">de ${nh(semanaDe(t))} h</div>`:''}</td>
       <td class="num">${sinGarantia(t)?bandaPct():pctEf(t)==null?'—':nh(pctEf(t))+' %'}</td>
-      <td class="num">${t.contrato==='discontinuo'?`${diasActividad(t)} días`:'<span class="muted">Todo el año</span>'}</td>
+      <td class="num">${t.contrato==='discontinuo'?`${diasActividad(t)} días${ceseTxt(t)?`<div class="sub">${ceseTxt(t)}</div>`:''}${avisoFD(t)}`:'<span class="muted">Todo el año</span>'}</td>
       <td class="num">${avisos(t) || (sinGarantia(t) ? `<span class="anual">${entre(rangoDe(t).min, rangoDe(t).max)}</span><div class="sub">sin jornada garantizada${diasBaja(t)?` · ${diasBaja(t)} días de baja`:''}</div>`
         : `<span class="anual">${nh(computoDe(t))} h</span>${diasBaja(t)?`<div class="sub">de ${nh(anualDe(t))} h · ${diasBaja(t)} días de baja</div>`:''}`)}</td>
       <td class="num">${horasCelda(t)}</td>
       <td class="num">${quedanCelda(t)}</td></tr>`; }).join('');
-  const tarjetas = ts.map(t=>`<button class="tm" onclick="abrirFicha('${t.id}')"><div class="l1"><b>${esc(t.nombre)}</b><span class="chip ${t.contrato}">${CONTRATOS[t.contrato].corto}</span></div>
+  const tarjetas = ts.map(t=>`<button class="tm" onclick="abrirFicha('${t.id}')"><div class="l1"><b>${esc(t.nombre)}</b><span class="chip ${t.contrato}">${CONTRATOS[t.contrato].corto}</span></div>${t.negocio||t.depto?`<div class="l0">${negocioChip(t)}${t.depto?` ${esc(t.depto)}`:''}</div>`:''}
       <div class="l2"><span>${sinGarantia(t)?'Sin garantía · '+bandaPct():`${semanaEf(t)==null?'—':nh(semanaEf(t))+' h/sem'} · ${pctEf(t)==null?'—':nh(pctEf(t))+' %'}`}${t.reducido?' · reducida':''}${t.concretado?' · '+esc(horarioTxt(t)):''}</span>${avisos(t) || `<b>${sinGarantia(t)?entre(rangoDe(t).min, rangoDe(t).max):nh(computoDe(t))+' h'}</b>`}</div>
       ${faltaJornada(t)||faltaActividad(t) ? '' : `<div class="l3"><span>Hechas <b>${nh(hechasDe(t))} h</b></span><span>${quedanCelda(t, true)}</span></div>${barra(t)}`}</button>`).join('');
   const fb = (k,t) => `<button class="${UI.filtro===k?'on':''}" onclick="UI.filtro='${k}';pintar()">${t}</button>`;
@@ -607,6 +646,12 @@ function vPersonal(){
     </div>`;
 }
 
+/* resumen de la inactividad de un fijo discontinuo, para la lista */
+function ceseTxt(t){
+  if(t.contrato!=='discontinuo') return '';
+  const ps = (t.cese||[]).filter(p=>p.desde && p.hasta && p.hasta>=`${S.anio}-01-01` && p.desde<=`${S.anio}-12-31`);
+  return !ps.length ? 'sin inactividad' : ps.length===1 ? `para ${fCorto(ps[0].desde)} – ${fCorto(ps[0].hasta)}` : `para en ${ps.length} periodos`;
+}
 /* hechas y quedan, en la lista */
 function barra(t){
   const r = rangoDe(t), h = hechasDe(t); if(!r || faltaJornada(t) || faltaActividad(t)) return '';
@@ -645,14 +690,16 @@ function pintarFicha(primera){
       <input id="j_${modo}" inputmode="decimal" ${e.contrato==='completo'?'disabled':''} value="${valor==null?'':nh(valor).replace(/\./g,'')}" aria-label="${titulo}"
         onfocus="if(UI.edit.modo!=='${modo}') cambiarModo('${modo}', this)" oninput="UI.edit.valor=num(this.value);recalcular()"> <span class="ud">${ud}</span></div>`; };
   const contratoBtn = k => { const c = CONTRATOS[k]; return `<button type="button" class="${e.contrato===k?'on':''}" style="--cc:${c.color}" onclick="UI.edit.contrato='${k}';pintarFicha()"><b>${c.nombre}</b><span>${c.desc}</span></button>`; };
-  const periodos = e.contrato!=='discontinuo' ? '' : `<div class="bloque"><h3>Periodos de actividad</h3>
-      <div class="periodos">${(e.actividad.length?e.actividad:[]).map((p,i)=>`<div class="periodo">
-        <label>Desde<input type="date" value="${p.desde||''}" onchange="UI.edit.actividad[${i}].desde=this.value;pintarFicha()"></label>
-        <label>Hasta<input type="date" value="${p.hasta||''}" onchange="UI.edit.actividad[${i}].hasta=this.value;pintarFicha()"></label>
-        <span class="dias">${p.desde&&p.hasta&&p.hasta>=p.desde?`${diasEntre(p.desde,p.hasta)} días`:''}</span>
-        <button type="button" class="quitar" aria-label="Quitar periodo" onclick="UI.edit.actividad.splice(${i},1);pintarFicha()">×</button></div>`).join('')}
+  const inact = e.contrato==='discontinuo' ? diasInactivo(e) : 0;
+  const periodos = e.contrato!=='discontinuo' ? '' : `<div class="bloque"><h3>Periodos de inactividad en ${S.anio}</h3>
+      <div class="periodos">${e.cese.map((p,i)=>`<div class="periodo">
+        <label>Desde<input type="date" value="${p.desde||''}" onchange="UI.edit.cese[${i}].desde=this.value;pintarFicha()"></label>
+        <label>Hasta<input type="date" value="${p.hasta||''}" onchange="UI.edit.cese[${i}].hasta=this.value;pintarFicha()"></label>
+        <span class="dias">${p.desde&&p.hasta&&p.hasta>=p.desde?`${diasDe([p], S.anio).size} días en ${S.anio}`:''}</span>
+        <button type="button" class="quitar" aria-label="Quitar periodo" onclick="UI.edit.cese.splice(${i},1);pintarFicha()">×</button></div>`).join('')}
       </div>
-      <div class="fila" style="margin-top:8px"><button type="button" class="btn" onclick="UI.edit.actividad.push({desde:'',hasta:''});pintarFicha()">${ICO.mas} Añadir periodo</button></div></div>`;
+      <div class="fila" style="margin-top:8px"><button type="button" class="btn" onclick="UI.edit.cese.push({desde:'',hasta:''});pintarFicha()">${ICO.mas} Añadir periodo de inactividad</button></div>
+      <p class="${inact<MIN_INACTIVO?'aviso-suave':'muted'}" style="margin:8px 0 0;font-size:13.5px">${inact<MIN_INACTIVO ? `Lleva <b>${inact} días</b> de inactividad en ${S.anio}: un fijo discontinuo tiene que parar al menos ${MIN_INACTIVO} días al año. Si para en varias veces, añade un periodo por cada una.` : `<b>${inact} días</b> de inactividad y <b>${diasActividad(e)} días</b> de actividad en ${S.anio}.`}</p></div>`;
   const cc = e.red, cSem = semanaEf(e), cPct = pctDeSuJornada(e);
   const ccampo = (modo, titulo, valor, ud) => `<div class="jcampo ${cc.modo===modo?'on':''}"><small>${titulo}</small>
       <input id="r_${modo}" inputmode="decimal" value="${e.reducido && valor!=null ? nh(valor).replace(/\./g,'') : ''}" aria-label="${titulo}"
@@ -681,6 +728,11 @@ function pintarFicha(primera){
         <label style="flex:3 1 240px">Apellidos<input id="fApe" value="${esc(e.ape)}" oninput="UI.edit.ape=this.value" autocomplete="off"></label>
         <label style="flex:1 1 120px">Nº de empleado<input value="${esc(e.num)}" oninput="UI.edit.num=this.value" autocomplete="off"></label></div>
       ${e._junto ? `<p class="aviso-suave">Venía junto como «${esc(e._junto)}» y lo he separado yo. Revisa que el nombre y los apellidos estén bien antes de guardar.</p>` : ''}
+      <div class="bloque"><h3>Negocio y departamento</h3>
+        <div class="fila" style="align-items:flex-end">
+          <div class="negocios" role="group" aria-label="Negocio">${Object.entries(NEGOCIOS).map(([k,n])=>`<button type="button" class="${e.negocio===k?'on':''}" style="--nc:${n.color}" onclick="UI.edit.negocio=UI.edit.negocio==='${k}'?'':'${k}';pintarFicha()">${n.nombre}</button>`).join('')}</div>
+          <label style="flex:1 1 200px">Departamento<input value="${esc(e.depto)}" list="dlDeptos" placeholder="Por ejemplo, Pasaje" oninput="UI.edit.depto=this.value" autocomplete="off"></label>
+          <datalist id="dlDeptos">${departamentos().map(d=>`<option value="${esc(d)}">`).join('')}</datalist></div></div>
       <div class="bloque"><h3>Contrato</h3><div class="contratos">${Object.keys(CONTRATOS).map(contratoBtn).join('')}</div></div>
       ${e.contrato==='parcial' ? `<div class="bloque"><h3>¿Tiene jornada garantizada?</h3>${siNo('garantizada', '')}</div>` : ''}
       ${sinGarantia(e) ? `<div class="bloque"><h3>Jornada</h3><div class="banda-j">Entre <b>${nh(A.pMin/100*A.hAnio)} h</b> y <b>${nh(A.pMax/100*A.hAnio)} h</b> al año
@@ -795,10 +847,12 @@ function guardarFicha(){
     if(pe==null){ toast('Escribe su jornada reducida, o marca «No»'); $('#r_'+e.red.modo)?.focus(); return; }
     if(pe<=0 || pe>p+0.001){ toast('La jornada reducida tiene que ser menor que la de su contrato'); return; }
   }
-  if(e.contrato==='discontinuo' && e.actividad.some(x=>x.desde&&x.hasta&&x.hasta<x.desde)){ toast('Hay un periodo que acaba antes de empezar'); return; }
+  if(e.contrato==='discontinuo' && e.cese.some(x=>x.desde&&x.hasta&&x.hasta<x.desde)){ toast('Hay un periodo de inactividad que acaba antes de empezar'); return; }
+  if(e.contrato==='discontinuo' && diasInactivo(e) < MIN_INACTIVO){ toast(`Un fijo discontinuo tiene que parar al menos ${MIN_INACTIVO} días en ${S.anio}: lleva ${diasInactivo(e)}`); return; }
   if(e.bajas.some(x=>x.desde&&x.hasta&&x.hasta<x.desde)){ toast('Hay una baja que acaba antes de empezar'); return; }
   if(Object.values(e.horas).some(v=>v!=null && v<0)){ toast('Las horas de una semana no pueden ser negativas'); return; }
-  e.actividad = e.actividad.filter(x=>x.desde && x.hasta);
+  e.actividad = []; e.cese = e.contrato==='discontinuo' ? e.cese.filter(x=>x.desde && x.hasta).sort((a,b)=>a.desde<b.desde?-1:1) : [];
+  e.depto = (e.depto||'').trim().replace(/\s+/g,' ');
   e.bajas = e.bajas.filter(x=>x.desde && x.hasta);
   e.horas = Object.fromEntries(Object.entries(e.horas).filter(([,v])=>v!=null).map(([k,v])=>[k, r2(v)]));
   if(e.contrato==='completo'){ e.valor = null; e.modo = 'semana'; }
@@ -870,13 +924,13 @@ function prepararPlantilla(hojas, archivo, pegado){
     else if(ch<0 && vs.every(v=>{ const x = num(v); return x!=null && x>0 && x<=S.ajustes.hSemana; })) ch = k; }
   const vistos = new Set();
   const fuera = pegado ? 0 : h.filas.filter(f=>!esNombre(f[c]) && /FICTICI/i.test(String(f[c]||''))).length;
-  PLA = { archivo, cc, ch, fuera, filas: filas.map(f=>{
+  PLA = { archivo, cc, ch, fuera, negocio:'', depto: /pasaje/i.test(archivo) ? 'Pasaje' : '', tambien:false, filas: filas.map(f=>{
     const nombre = String(f[c]).replace(/\s+/g,' ').trim(), k = normNombre(nombre);
     const m = emparejar(nombre, []), ya = m.id && ['exacto','orden','guardado'].includes(m.como);
     const ficticio = /\bFICTICI[OA]\b|\bEVENTUAL\b.*\d|^PAX\b/i.test(sinAcentos(nombre));
     const repe = vistos.has(k); vistos.add(k);
     const contrato = cc>=0 ? contratoDe(f[cc]) || 'completo' : 'completo';
-    return { nombre, contrato, horas: ch>=0 ? num(f[ch]) : null, ya: ya ? S.trabajadores.find(t=>t.id===m.id)?.nombre : '', ficticio, repe, si: !ya && !ficticio && !repe };
+    return { nombre, contrato, horas: ch>=0 ? num(f[ch]) : null, ya: ya ? S.trabajadores.find(t=>t.id===m.id)?.nombre : '', yaId: ya ? m.id : '', ficticio, repe, si: !ya && !ficticio && !repe };
   }) };
   pintarPlantilla(true);
 }
@@ -890,19 +944,28 @@ function pintarPlantilla(primera){
       <p class="muted" style="margin:0;font-size:14px">${esc(PLA.archivo)} · ${PLA.filas.length} nombres${PLA.cc>=0?' · con contrato':''}${PLA.ch>=0?' · con horas a la semana':''}</p>
       <div class="imp-res"><span class="est ok">${nSi} se añaden</span>${nYa?`<span class="est duda">${nYa} ya estaban</span>`:''}${nFic?`<span class="est no">${nFic} ficticios fuera</span>`:''}
         <button type="button" class="btn" style="padding:5px 12px;margin-left:auto" onclick="PLA.filas.forEach(f=>f.si=!f.ya&&!f.ficticio&&!f.repe);pintarPlantilla()">Marcar todos</button></div>
+      <div class="imp-ajustes">
+        <div><label style="margin-bottom:6px">Negocio de todos</label><div class="negocios">${Object.entries(NEGOCIOS).map(([k,n])=>`<button type="button" class="${PLA.negocio===k?'on':''}" style="--nc:${n.color}" onclick="PLA.negocio=PLA.negocio==='${k}'?'':'${k}';pintarPlantilla()">${n.nombre}</button>`).join('')}</div></div>
+        <label>Departamento de todos<input value="${esc(PLA.depto)}" list="dlDeptosP" placeholder="Por ejemplo, Pasaje" oninput="PLA.depto=this.value" autocomplete="off"><datalist id="dlDeptosP">${departamentos().map(d=>`<option value="${esc(d)}">`).join('')}</datalist></label>
+        ${nYa ? `<label class="check"><input type="checkbox" ${PLA.tambien?'checked':''} onchange="PLA.tambien=this.checked;pintarPlantilla()"> Ponérselo también a los ${nYa} que ya estaban</label>` : ''}
+      </div>
       <div class="pla-lista">${PLA.filas.map((f,i)=>`<label class="pla-fila ${f.si?'':'ign'}"><input type="checkbox" ${f.si?'checked':''} onchange="PLA.filas[${i}].si=this.checked;pintarPlantilla()">
         <span class="nf">${esc(f.nombre)}</span><span class="pla-dato">${f.contrato!=='completo'||PLA.cc>=0?`<span class="chip ${f.contrato}">${CONTRATOS[f.contrato].corto}</span>`:''}${f.horas!=null&&f.contrato!=='completo'?` ${nh(f.horas)} h`:''}</span>${nota(f)}</label>`).join('')}</div>
       <p class="muted" style="margin:0;font-size:13.5px">Todos entran como ${PLA.cc>=0?'dice el archivo':'tiempo completo'}. Después, en la ficha de cada uno, puedes cambiar el contrato, la jornada, la reducción, el horario y todo lo demás.</p>
     </div>
-    <div class="dlg-pie"><button class="btn" onclick="abrirPegar()">Otro archivo</button><button class="btn primario" ${nSi?'':'disabled'} onclick="guardarPlantilla()">Añadir ${nSi} trabajador${nSi===1?'':'es'}</button></div></div></div>`;
+    <div class="dlg-pie"><button class="btn" onclick="abrirPegar()">Otro archivo</button><button class="btn primario" ${nSi||(nYa&&PLA.tambien)?'':'disabled'} onclick="guardarPlantilla()">Añadir ${nSi} trabajador${nSi===1?'':'es'}</button></div></div></div>`;
   const d = $('#capa .dlg'); if(d && !primera) d.scrollTop = sc;
 }
 function guardarPlantilla(){
-  const fs = PLA.filas.filter(f=>f.si); if(!fs.length) return;
-  fs.forEach(f=>S.trabajadores.push(nuevoTrabajador({ id:uid(), nombre:f.nombre, ...(f.nombre.includes(',') ? separarNombre(f.nombre) : {}), contrato:f.contrato, valor: f.contrato==='completo' ? null : f.horas })));
+  const fs = PLA.filas.filter(f=>f.si), depto = PLA.depto.trim().replace(/\s+/g,' ');
+  let n = 0;
+  if(PLA.tambien) PLA.filas.filter(f=>f.yaId).forEach(f=>{ const t = S.trabajadores.find(x=>x.id===f.yaId); if(!t) return;
+    if(PLA.negocio) t.negocio = PLA.negocio; if(depto) t.depto = depto; n++; });
+  if(!fs.length && !n) return;
+  fs.forEach(f=>S.trabajadores.push(nuevoTrabajador({ id:uid(), negocio:PLA.negocio, depto, nombre:f.nombre, ...(f.nombre.includes(',') ? separarNombre(f.nombre) : {}), contrato:f.contrato, valor: f.contrato==='completo' ? null : f.horas })));
   guardar(); cerrarPegar(); pintar();
   const sin = fs.filter(f=>f.contrato!=='completo' && f.horas==null).length;
-  toast(`${fs.length} trabajador${fs.length===1?'':'es'} añadido${fs.length===1?'':'s'}${sin?` · a ${sin} les falta la jornada`:''}`);
+  toast(`${fs.length} trabajador${fs.length===1?'':'es'} añadido${fs.length===1?'':'s'}${n?` · ${n} actualizado${n===1?'':'s'}`:''}${sin?` · a ${sin} les falta la jornada`:''}`);
 }
 
 /* =========================================================
@@ -927,7 +990,7 @@ const iniSeg = y => lunesDe(`${y}-01-04`), finSeg = y => sumaDias(lunesDe(`${y+1
 /* días de jornada de ese año sin bajas (todos, o los de actividad si es fijo discontinuo) */
 function diasEf(t, y){
   const a = iniSeg(y), b = finSeg(y), baja = diasDe(t.bajas, y, a, b), out = [];
-  if(t.contrato==='discontinuo') diasDe(t.actividad, y, a, b).forEach(d=>{ if(!baja.has(d)) out.push(d); });
+  if(t.contrato==='discontinuo') diasActivos(t, y, a, b).forEach(d=>{ if(!baja.has(d)) out.push(d); });
   else for(let d=a; d<=b; d=sumaDias(d,1)) if(!baja.has(d)) out.push(d);
   return out.sort();
 }
@@ -986,7 +1049,7 @@ function vJornada(){
   const avisoF = r => r.faltan ? `<span class="aviso" title="Hay semanas importadas en las que no sale">Faltan ${r.faltan} semana${r.faltan===1?'':'s'}</span>` : '';
   const filas = rs.map(r=>{ const t = r.t, inc = r.estado==='inc';
     return `<tr onclick="abrirFicha('${t.id}')">
-      <td><div class="nombre">${esc(t.nombre)}</div><div class="sub"><span class="chip ${t.contrato}" style="padding:1px 8px;font-size:12px">${CONTRATOS[t.contrato].corto}</span>${t.reducido?' reducida':''}</div></td>
+      <td><div class="nombre">${esc(t.nombre)}</div><div class="sub"><span class="chip ${t.contrato}" style="padding:1px 8px;font-size:12px">${CONTRATOS[t.contrato].corto}</span>${t.reducido?' reducida':''} ${negocioChip(t)}${t.depto?` ${esc(t.depto)}`:''}</div></td>
       <td class="num"><span class="hecha">${garant(r)}</span><div class="sub">${r.sinG?bandaPct()+' de un completo':r.garant==null?'':nh(r.garant)+' h'}</div></td>
       <td class="num"><span class="anual">${tiene(r)}</span>${r.sinG?(diasBaja(t,y)?`<div class="sub">${diasBaja(t,y)} días de baja</div>`:''):!inc && r.garant!=null && Math.abs(r.computo-r.garant)>0.005?`<div class="sub">${t.contrato==='discontinuo'?'por actividad':''}${t.contrato==='discontinuo'&&diasBaja(t,y)?' y ':''}${diasBaja(t,y)?`${diasBaja(t,y)} días de baja`:''}</div>`:''}</td>
       <td class="num"><span class="hecha">${nh(r.hechas)} h</span><div class="sub">${r.semanas} semana${r.semanas===1?'':'s'}</div></td>
