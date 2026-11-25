@@ -1,7 +1,7 @@
 {
-  "version": "10.19.1",
+  "version": "10.20.0",
   "fecha": "2026-11-25",
   "novedades": [
-    "Empareja nombres con una letra distinta (Alexander Bezrukavy)"
+    "Desprogramaciones: mover un día de vacaciones a otra fecha, con contador de 3 al año"
   ]
 }

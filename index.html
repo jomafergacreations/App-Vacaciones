@@ -254,6 +254,17 @@ table.vgrid{border-collapse:separate;border-spacing:0;font-size:13px;font-varian
 .mdia-ops button.grande:first-child{background:#E3F3E8;border-color:#9ED3B0}
 .mdia-ops button i{display:inline-grid;place-items:center;min-width:28px;height:22px;border-radius:5px;font-style:normal;font-size:11px;font-weight:700;border:1px solid #D5D9E0;flex:0 0 auto}
 .mdia-ops button small{margin-left:auto;color:var(--gris);font-weight:600}
+.mdia-desp{display:block;width:100%;margin:0 0 8px;border:1px solid #EBD27A;background:var(--senal-suave);border-radius:9px;padding:8px 10px;text-align:left;font-size:13.5px;cursor:pointer;color:var(--asfalto)}
+.mdia-desp:hover{border-color:var(--asfalto)}
+.mdia-desp small{display:block;color:#7A5600;font-weight:700;margin-top:2px}
+.vgrid td.mov{position:relative}
+.vgrid td.mov::after,.vd.mov::after{content:'';position:absolute;top:0;right:0;border:5px solid transparent;border-top-color:var(--senal);border-right-color:var(--senal);border-top-right-radius:3px}
+.vgrid td.dorig,.vd.dorig{outline:3px dashed #C46A12;outline-offset:-3px}
+.mover-aviso{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:70;background:var(--asfalto);color:#fff;border-radius:14px;padding:10px 12px 10px 18px;display:flex;align-items:center;gap:14px;box-shadow:0 20px 40px -14px rgba(0,0,0,.5);max-width:calc(100vw - 24px);font-size:14px}
+.mover-aviso b{color:var(--senal)}
+.mover-aviso .btn{color:var(--asfalto);flex:0 0 auto}
+.c-desp{background:var(--senal-suave);color:#7A5600}
+.tramo button{border:0;background:none;cursor:pointer;font-weight:700;color:inherit;padding:0 0 0 4px}
 .mdia-pie{margin:10px 0 0;font-size:12.5px;color:var(--gris);line-height:1.4}
 .chip.singar{background:#F1F3F6;color:var(--gris)}
 .banda-j{border:2px dashed var(--linea);border-radius:12px;padding:12px 14px;background:#FAFBFC}
@@ -416,7 +427,7 @@ table.segj{border-collapse:separate;border-spacing:0;font-variant-numeric:tabula
 .puntos{display:flex;gap:6px}
 .puntos i{width:8px;height:8px;border-radius:50%;background:var(--linea)} .puntos i.on{background:var(--asfalto)}
 
-.aviso-toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--asfalto);color:#fff;padding:11px 18px;border-radius:10px;font-weight:600;z-index:200;animation:subir .2s}
+.aviso-toast{pointer-events:none;position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--asfalto);color:#fff;padding:11px 18px;border-radius:10px;font-weight:600;z-index:200;animation:subir .2s}
 
 /* ficha de jornada */
 .dlg.fichaj{width:min(1180px,100%);max-height:calc(100vh - 24px)}
@@ -543,9 +554,15 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
    Control Planning 10 — rehecha desde cero
    Datos en localStorage, con una clave nueva.
    ========================================================= */
-const APP_VERSION = '10.19.1';
+const APP_VERSION = '10.20.0';
 const CLAVE = 'control-planning-v10';
 const NOVEDADES = {
+  '10.20.0': [
+    { titulo:'Desprogramaciones', donde:'Vacaciones',
+      texto:'Cada trabajador tiene 3 desprogramaciones al año por convenio: quitar un día de vacaciones y ponerlo en otra fecha. Pincha un día de vacaciones, elige «Desprogramar» y luego pincha el día de trabajo al que pasa. Esc o «Cancelar» para dejarlo.' },
+    { titulo:'El contador', donde:'Vacaciones › Por trabajador',
+      texto:'En sus cuentas verás «Desprog. 1 de 3» y la lista de las que lleva (5 mar → 12 abr). Cada una se puede deshacer con su ×. Los días que llegan por desprogramación llevan una esquina amarilla en el calendario. Si ya ha gastado las 3, la app te pregunta antes de hacer otra.' },
+  ],
   '10.19.1': [
     { titulo:'Nombres con una letra distinta', donde:'Importar rotaciones y turnos',
       texto:'Si un apellido está escrito con una letra de más o de menos (como «BEZRUKAVY» y «BEZRUKAVYY»), la app ya lo empareja y te lo propone para que lo revises. Vuelve a importar la rotación para que Alexander tenga la suya.' },
@@ -771,7 +788,7 @@ function separarNombre(s){
   return { ape:w.slice(0,k).join(' '), nom:w.slice(k).join(' ') };
 }
 const numPos = v => { const n = typeof v==='number' ? v : num(v); return n!=null && n>=0 ? n : null; };
-const nuevoTrabajador = (o={}) => ({ id:null, nombre:'', nom:'', ape:'', num:'', vac:null, meses:null, rot:{}, grupo:'', negocio:'', depto:'', contrato:'completo', garantizada:true, modo:'semana', valor:null, actividad:[], cese:[], reducido:false, red:{modo:'semana', valor:null}, concretado:false, horario:{turno:'', desde:'', hasta:''}, bajas:[], horas:{}, ...o });
+const nuevoTrabajador = (o={}) => ({ id:null, nombre:'', nom:'', ape:'', num:'', vac:null, meses:null, rot:{}, desprog:{}, grupo:'', negocio:'', depto:'', contrato:'completo', garantizada:true, modo:'semana', valor:null, actividad:[], cese:[], reducido:false, red:{modo:'semana', valor:null}, concretado:false, horario:{turno:'', desde:'', hasta:''}, bajas:[], horas:{}, ...o });
 function normalizar(d){
   const b = estadoInicial();
   d = Object.assign(b, d || {});
@@ -785,6 +802,7 @@ function normalizar(d){
     negocio: NEGOCIOS[t.negocio] ? t.negocio : '', depto: normDepto(t.depto),
     cese: Array.isArray(t.cese) && t.cese.length ? t.cese : inactividadDe(t.actividad),
     vac: numPos(t.vac), meses: numPos(t.meses), grupo: String(t.grupo||'').trim(),
+    desprog: Object.fromEntries(Object.entries(t.desprog && typeof t.desprog==='object' ? t.desprog : {}).filter(([y,v])=>/^\d{4}$/.test(y) && Array.isArray(v)).map(([y,v])=>[y, v.filter(m=>m && m.de && m.a)])),
     rot: Object.fromEntries(Object.entries(t.rot && typeof t.rot==='object' ? t.rot : {}).filter(([y,v])=>/^\d{4}$/.test(y) && typeof v==='string')),
   })).map(t=>({ ...t,
     ...(()=>{ let nom = String(t.nom||'').trim(), ape = String(t.ape||'').trim();
@@ -1171,6 +1189,7 @@ function bloqueVacaciones(e){
       <span class="muted" style="font-size:13.5px;padding-bottom:12px">Si lo dejas vacío, ${vacDefecto(e)}: 24 en tiempo completo y parcial, 20 en fijo discontinuo.</span></div>
     ${dt ? `<p class="${enRot!==vacDe(e)?'aviso-suave':'muted'}" style="margin:8px 0 0;font-size:13.5px">Rotación de ${S.anio}: <b>${dt.length} días de trabajo</b> y <b>${enRot} de vacaciones</b>${enRot!==vacDe(e)?` (le corresponden ${vacDe(e)})`:''}.
       <button type="button" class="enlace" onclick="if(confirm('¿Quitar la rotación de ${S.anio}?')){delete UI.edit.rot['${S.anio}'];pintarFicha()}">Quitar rotación</button></p>` : ''}
+    <p class="muted" style="margin:6px 0 0;font-size:13.5px">Desprogramaciones de ${S.anio}: <b>${desprogDe(e).length} de ${DESPROG}</b>${desprogDe(e).length?` (${desprogDe(e).map(m=>`${fCorto(m.de)} → ${fCorto(m.a)}`).join(', ')})`:''}. Se hacen en Vacaciones, pinchando un día de vacaciones.</p>
   </div>`;
 }
 /* bajas: periodos a mano que descuentan su parte de la jornada */
@@ -1799,6 +1818,7 @@ const grupoTxt = t => t.grupo || 'Sin grupo';
 const ordenGrupo = (a, b) => (a==='Sin grupo') - (b==='Sin grupo') || a.localeCompare(b, 'es', {numeric:true});
 
 function vVacaciones(){
+  if(MOVER) setTimeout(pintarMover, 0);
   const y = S.anio, tab = UI.vacTab || 'dep';
   /* filtros propios del módulo: nombre, contrato y producto */
   const con = UI.vacCon || 'todos', prod = UI.vacProd || 'todos';
@@ -1874,10 +1894,11 @@ function vacDepartamento(ts, y){
   const cls = d => `${diaSem(d)>=5?' fin':''}${d===hoy?' hoy':''}${d.endsWith('-01')?' m1':''}`;
   const meses = []; dias.forEach(d=>{ const m = Number(d.slice(5,7))-1; if(!meses.length || meses[meses.length-1].m!==m) meses.push({m, n:0}); meses[meses.length-1].n++; });
   const celda = (t, d) => { const c = diaDe(t, d); if(c==null) return `<td class="c-nd${cls(d)}" data-t="${t.id}" data-d="${d}"></td>`; const e = estDia(c);
-    return `<td class="${e.cls}${cls(d)}" data-t="${t.id}" data-d="${d}"${conTexto?` title="${fCorto(d)}: ${e.nombre}"`:''}>${conTexto?e.txt:''}</td>`; };
+    const mv = movidoA(t, d);
+    return `<td class="${e.cls}${cls(d)}${mv?' mov':''}" data-t="${t.id}" data-d="${d}"${conTexto?` title="${fCorto(d)}: ${e.nombre}${mv?` (desprogramado del ${fCorto(mv.de)})`:''}"`:''}>${conTexto?e.txt:''}</td>`; };
   const fila = t => { const n = cuentasDe(t, y), h = (n.H||0)+(n.V||0)+(n.VAC||0);
     return `<tr><th scope="row" onclick="UI.vacTab='trab';UI.vacTrab='${t.id}';pintar()" title="Ver su calendario"><span class="vn">${esc(t.nombre)}</span>
-      <span class="vs">${t.contrato==='discontinuo'?'FD · ':''}${tieneRot(t, y) ? `H ${h} de ${vacDe(t)}` : 'sin rotación'}</span></th>${dias.map(d=>celda(t, d)).join('')}</tr>`; };
+      <span class="vs">${t.contrato==='discontinuo'?'FD · ':''}${tieneRot(t, y) ? `H ${h} de ${vacDe(t)}${desprogDe(t, y).length?` · D ${desprogDe(t, y).length}/${DESPROG}`:''}` : 'sin rotación'}</span></th>${dias.map(d=>celda(t, d)).join('')}</tr>`; };
   const cuenta = (pred) => dias.map(d=>{ const k = ts.filter(t=>pred(diaDe(t, d))).length; return `<td class="cnt${cls(d)}${k?'':' cero'}">${conTexto||k?k:''}</td>`; }).join('');
   const nav = zoom==='anio' ? '' : `<div class="anio vmes"><button onclick="UI.vacMes=${Math.max(0, desdeM-nm)};pintar()" aria-label="Anterior" ${desdeM===0?'disabled':''}>‹</button><b>${nm===1?MESES_L[desdeM]:`${MESES[desdeM]} – ${MESES[desdeM+nm-1]}`}</b><button onclick="UI.vacMes=${Math.min(12-nm, desdeM+nm)};pintar()" aria-label="Siguiente" ${desdeM+nm>=12?'disabled':''}>›</button></div>`;
   setTimeout(()=>{ const c = document.querySelector('.vgrid-scroll'), h = c?.querySelector('th.hoy'); if(c && h && zoom==='anio') c.scrollLeft = Math.max(0, h.offsetLeft - c.clientWidth/2); }, 0);
@@ -1902,7 +1923,7 @@ function vacTrabajador(lista, t, y, filtros=''){
     return `<div class="vmesc"><div class="vmes-cab"><b>${MESES_L[m]}</b>${hm?`<span class="c-h">${hm} H</span>`:''}</div>
       <div class="vcal">${DIAS_SEM.map(x=>`<span class="ds">${x}</span>`).join('')}${'<span></span>'.repeat(diaSem(p))}
       ${ds.map(d=>{ const c = diaDe(t, d), e = c==null ? DIA_EST['?'] : estDia(c);
-        return `<span class="vd ${e.cls}${diaSem(d)>=5?' fin':''}${d===hoy?' hoy':''}" data-t="${t.id}" data-d="${d}" title="${fCorto(d)}: ${e.nombre}"><i>${Number(d.slice(8))}</i>${e.txt}</span>`; }).join('')}</div></div>`; };
+        const mv = movidoA(t, d); return `<span class="vd ${e.cls}${diaSem(d)>=5?' fin':''}${d===hoy?' hoy':''}${mv?' mov':''}" data-t="${t.id}" data-d="${d}" title="${fCorto(d)}: ${e.nombre}${mv?` (desprogramado del ${fCorto(mv.de)})`:''}"><i>${Number(d.slice(8))}</i>${e.txt}</span>`; }).join('')}</div></div>`; };
   return `<div class="vtrab"><aside class="vlado">${filtros}
     <div class="vbarra vcab">
       <div class="vsel"><button class="btn" onclick="UI.vacTrab='${lista[(i-1+lista.length)%lista.length].id}';pintar()" aria-label="Anterior" title="Anterior">‹</button>
@@ -1920,10 +1941,12 @@ function vacTrabajador(lista, t, y, filtros=''){
       ${dato('X', n.X||0, 'festivos de empresa')}
       ${dato('AJ', n.AJ||0, 'ajustes de jornada')}
       ${dato('PR · PNR', `${n.PR||0} · ${n.PNR||0}`, 'permisos')}
+      ${dato('Desprog.', `${desprogDe(t, y).length} de ${DESPROG}`, 'vacaciones movidas', desprogDe(t, y).length>DESPROG ? 'aviso-v' : '')}
       ${t.contrato==='discontinuo' ? dato('Inactividad', `${n.INA||0} días`, n.INA<MIN_INACTIVO ? `mínimo ${MIN_INACTIVO}` : '', n.INA<MIN_INACTIVO ? 'aviso-v' : '') : ''}
       ${n.B ? dato('Baja', `${n.B} días`, '') : ''}
     </div>
     <div class="vtramos">
+      ${desprogDe(t, y).length ? `<div><b>Desprogramaciones</b>${desprogDe(t, y).map((m,k)=>`<span class="tramo c-desp">${fCorto(m.de)} → ${fCorto(m.a)} <button type="button" title="Deshacer esta desprogramación" onclick="quitarDesprog('${t.id}',${y},${k})">×</button></span>`).join('')}</div>` : ''}
       <div><b>Vacaciones asignadas</b>${vacs.length ? vacs.map(p=>`<span class="tramo c-h">${tramoTxt(p)} <em>${p.h} H</em></span>`).join('') : '<span class="muted">Ninguna en la rotación</span>'}</div>
       ${t.contrato==='discontinuo' ? `<div><b>Inactividad</b>${inas.length ? inas.map(p=>`<span class="tramo c-ina">${tramoTxt(p)} <em>${diasTramo(p)} días</em></span>`).join('') : '<span class="muted">Sin periodos</span>'}</div>` : ''}
     </div>
@@ -1957,6 +1980,7 @@ function marcarSel(){
 }
 function cerrarMenuDia(){ $('#menuDia')?.remove(); SEL = null; marcarSel(); }
 document.addEventListener('pointerdown', e=>{
+  if(MOVER){ const c = celdaDia(e.target); if(c && UI.vista==='vacaciones'){ e.preventDefault(); terminarDesprog(c); } return; }
   if(e.target.closest('#menuDia')) return;
   const c = celdaDia(e.target);
   if(!c || e.button>0 || UI.vista!=='vacaciones'){ if($('#menuDia') && !c) cerrarMenuDia(); return; }
@@ -1976,6 +2000,7 @@ document.addEventListener('pointerup', ()=>{ if(SEL && !SEL.fin){ SEL.fin = true
 document.addEventListener('keydown', e=>{
   if(UI.vista!=='vacaciones' || $('#bloqueo') || $('#capa').innerHTML) return;
   if((e.ctrlKey || e.metaKey) && e.key.toLowerCase()==='z' && DESHACER.length && !e.target.closest('input')){ e.preventDefault(); deshacerDia(); return; }
+  if(MOVER && e.key==='Escape'){ cancelarMover(); return; }
   if(!$('#menuDia') || e.target.closest('input')) return;
   const k = e.key.toUpperCase();
   if(e.key==='Escape'){ cerrarMenuDia(); return; }
@@ -1994,9 +2019,12 @@ function abrirMenuDia(){
   const m = $('#menuDia') || Object.assign(document.createElement('div'), { id:'menuDia', className:'mdia' });
   m.setAttribute('role','dialog'); m.setAttribute('aria-label','Cambiar días');
   m.innerHTML = `<div class="mdia-cab"><div><b>${esc(t.nombre)}</b><span>${a===b ? fmt(a) : `${fCorto(a)} – ${fmt(b)}`} · ${n} día${n===1?'':'s'}</span></div><button class="cerrar" onclick="cerrarMenuDia()" aria-label="Cerrar">×</button></div>
+    ${a===b && COD_VAC.has(codigoDia(t, a)||'') ? `<button type="button" class="mdia-desp" onclick="empezarDesprog()"><b>Desprogramar</b>: pasar este día de vacaciones a otra fecha <small>${desprogDe(t, Number(a.slice(0,4))).length} de ${DESPROG} usadas</small></button>` : ''}
     <div class="mdia-ops">${OPS_DIA.map(([k,txt,cls],i)=>`<button type="button" class="${i<2?'grande':''}" onclick="aplicarDia('${k}')"><i class="${cls}">${k==='-H'?'—':k==='T'?'':k}</i>${txt}${k==='H'&&trab<n?` <small>${trab} día${trab===1?'':'s'}</small>`:''}</button>`).join('')}</div>
     <p class="mdia-pie">Lleva <b>${h} de ${vacDe(t)}</b> días de vacaciones. Las vacaciones solo se ponen en sus días de trabajo. ${SEL.tactil?'Toca':'Pincha'} otro día suyo para alargar${SEL.tactil?'':', o arrastra'}.</p>`;
   const nuevo = !m.parentNode; if(nuevo) document.body.appendChild(m);
+  /* el clic que sigue al toque no debe pulsar un botón del menú que acaba de salir debajo del dedo */
+  m.style.pointerEvents = 'none'; clearTimeout(m._t); m._t = setTimeout(()=>{ m.style.pointerEvents = ''; }, 400);
   colocarMenu();
   /* en el móvil el menú va abajo: que el día elegido quede a la vista por encima */
   if(innerWidth < 760){ const el = document.querySelector(`[data-t="${SEL.t}"][data-d="${SEL.b}"]`), r = el?.getBoundingClientRect();
@@ -2044,10 +2072,59 @@ function aplicarDia(cod){
       : cod==='-H' ? `${cambiados} día${cambiados===1?'':'s'} de vacaciones quitado${cambiados===1?'':'s'} · lleva ${h} de ${v}`
       : `${cambiados} día${cambiados===1?'':'s'}: ${nombre}`);
 }
+/* ---------- desprogramaciones: mover un día de vacaciones a otra fecha (3 al año por convenio) ---------- */
+const DESPROG = 3;
+const desprogDe = (t, y=S.anio) => (t.desprog?.[y] || []);
+const movidoA = (t, d) => desprogDe(t, Number(d.slice(0,4))).find(m=>m.a===d);
+let MOVER = null;   // { t, desde } mientras se elige el día nuevo
+function empezarDesprog(){
+  if(!SEL) return;
+  const t = S.trabajadores.find(x=>x.id===SEL.t), d = SEL.a, y = Number(d.slice(0,4)), usadas = desprogDe(t, y).length;
+  if(usadas >= DESPROG && !confirm(`${t.nombre} ya ha usado sus ${DESPROG} desprogramaciones de ${y}. ¿Hacer otra igualmente?`)) return;
+  MOVER = { t:t.id, desde:d };
+  cerrarMenuDia(); pintarMover();
+}
+function pintarMover(){
+  $('#moverAviso')?.remove(); if(!MOVER) return;
+  const t = S.trabajadores.find(x=>x.id===MOVER.t), y = Number(MOVER.desde.slice(0,4));
+  const d = document.createElement('div'); d.id = 'moverAviso'; d.className = 'mover-aviso';
+  d.innerHTML = `<span><b>Desprogramación ${desprogDe(t, y).length + 1} de ${DESPROG}</b> · ${esc(t.nombre)}: ${UI.vista==='vacaciones'?'pincha':'elige'} el día de trabajo al que pasa el ${fCorto(MOVER.desde)}.</span><button class="btn" onclick="cancelarMover()">Cancelar</button>`;
+  document.body.appendChild(d);
+  document.querySelectorAll('.dorig').forEach(x=>x.classList.remove('dorig'));
+  document.querySelector(`[data-t="${MOVER.t}"][data-d="${MOVER.desde}"]`)?.classList.add('dorig');
+}
+function cancelarMover(){ MOVER = null; $('#moverAviso')?.remove(); document.querySelectorAll('.dorig').forEach(x=>x.classList.remove('dorig')); }
+/* el día nuevo: tiene que ser de la misma persona, del mismo año y de trabajo */
+function terminarDesprog(c){
+  const t = S.trabajadores.find(x=>x.id===MOVER.t), a = c.dataset.d, de = MOVER.desde, y = Number(de.slice(0,4));
+  if(c.dataset.t!==MOVER.t){ toast(`Elige un día de ${t.nombre}`); return; }
+  if(a===de){ cancelarMover(); return; }
+  if(Number(a.slice(0,4))!==y){ toast(`Tiene que ser un día de ${y}`); return; }
+  const arr = t.rot[y].split(','), i = idxDia(a), cur = arr[i];
+  if(!(cur==='' || cur==='?')){ toast('Elige un día de trabajo: ese no lo es'); return; }
+  DESHACER.push({ id:t.id, y, antes:t.rot[y], desprog: JSON.stringify(t.desprog || {}) });
+  arr[idxDia(de)] = ''; arr[i] = 'H'; t.rot[y] = arr.join(',');
+  t.desprog = t.desprog || {}; t.desprog[y] = [...desprogDe(t, y), { de, a, el: hoyIso() }];
+  const n = t.desprog[y].length;
+  cancelarMover(); guardar(); pintar();
+  toast(`Desprogramación ${n} de ${DESPROG}: ${fCorto(de)} → ${fCorto(a)}${n>DESPROG?` (se pasa en ${n-DESPROG})`:''}`);
+}
+function quitarDesprog(id, y, k){
+  const t = S.trabajadores.find(x=>x.id===id), m = desprogDe(t, y)[k]; if(!m) return;
+  if(!confirm(`¿Deshacer la desprogramación del ${fCorto(m.de)} al ${fCorto(m.a)}? Las vacaciones vuelven al ${fCorto(m.de)}.`)) return;
+  const arr = t.rot[y].split(',');
+  DESHACER.push({ id:t.id, y, antes:t.rot[y], desprog: JSON.stringify(t.desprog || {}) });
+  if(COD_VAC.has(arr[idxDia(m.a)])) arr[idxDia(m.a)] = '';
+  if(arr[idxDia(m.de)]==='' || arr[idxDia(m.de)]==='?') arr[idxDia(m.de)] = 'H';
+  t.rot[y] = arr.join(','); t.desprog[y] = desprogDe(t, y).filter((_,i)=>i!==k);
+  guardar(); pintar(); toast('Desprogramación deshecha');
+}
+
 function deshacerDia(){
   const u = DESHACER.pop(); if(!u) return;
   const t = S.trabajadores.find(x=>x.id===u.id); if(!t) return;
   if(u.antes==null) delete t.rot[u.y]; else t.rot[u.y] = u.antes;
+  if(u.desprog!=null) t.desprog = JSON.parse(u.desprog);
   guardar(); cerrarMenuDia(); pintar(); toast('Cambio deshecho');
 }
 
