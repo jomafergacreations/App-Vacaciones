@@ -1,7 +1,7 @@
 {
-  "version": "10.22.0",
+  "version": "10.22.1",
   "fecha": "2026-11-25",
   "novedades": [
-    "Novedades en un botón de la barra de arriba, sin recorrido al actualizar"
+    "Los fijos discontinuos no pueden tener vacaciones en su periodo de inactividad"
   ]
 }

@@ -261,6 +261,7 @@ table.vgrid{border-collapse:separate;border-spacing:0;font-size:13px;font-varian
 .mdia-ops button{display:flex;align-items:center;gap:8px;border:1px solid var(--linea);background:#fff;border-radius:9px;padding:7px 9px;font-size:13.5px;font-weight:600;cursor:pointer;text-align:left;color:var(--asfalto)}
 .mdia-ops button:hover,.mdia-ops button:focus-visible{border-color:var(--asfalto)}
 .mdia-ops button.grande{font-weight:700}
+.mdia-ops button:disabled{opacity:.45;cursor:not-allowed;border-color:var(--linea)} .mdia-ops button:disabled small{color:#B3261E}
 .mdia-ops button.grande:first-child{background:#E3F3E8;border-color:#9ED3B0}
 .mdia-ops button i{display:inline-grid;place-items:center;min-width:28px;height:22px;border-radius:5px;font-style:normal;font-size:11px;font-weight:700;border:1px solid #D5D9E0;flex:0 0 auto}
 .mdia-ops button small{margin-left:auto;color:var(--gris);font-weight:600}
@@ -590,9 +591,13 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
    Control Planning 10 — rehecha desde cero
    Datos en localStorage, con una clave nueva.
    ========================================================= */
-const APP_VERSION = '10.22.0';
+const APP_VERSION = '10.22.1';
 const CLAVE = 'control-planning-v10';
 const NOVEDADES = {
+  '10.22.1': [
+    { titulo:'Sin vacaciones en la inactividad', donde:'Vacaciones',
+      texto:'A un fijo discontinuo ya no se le pueden poner vacaciones en su periodo de inactividad, igual que en descansos y festivos. Si eliges solo esos días, «Vacaciones» sale desactivado; si eliges un tramo que los cruza, solo se ponen en sus días de trabajo. Tampoco se puede desprogramar un día hacia la inactividad.' },
+  ],
   '10.22.0': [
     { titulo:'Novedades, a un botón', donde:'Arriba a la derecha',
       texto:'Al actualizar ya no se abre un recorrido con «Siguiente» ni se acumulan las versiones que te hayas saltado. Lo que trae cada versión está en el botón «Novedades» de la barra de arriba, todo junto; el punto amarillo te avisa de que hay algo sin ver.' },
@@ -960,7 +965,13 @@ function diasTrabajo(t, y=S.anio, ini=`${y}-01-01`, fin=`${y}-12-31`, conBajas=t
   for(let d=ini; d<=fin; d=sumaDias(d,1)){ const c = codigoDia(t, d); if(c==null || NO_TRABAJO.has(c) || baja.has(d) || (act && !act.has(d))) continue; out.push(d); }
   return out;
 }
-const vacEnRot = (t, y=S.anio) => { const a = rotDe(t, y); return a ? a.filter(c=>COD_VAC.has(c)).length : null; };
+/* inactividad de un fijo discontinuo: esos días no se trabaja ni se cogen vacaciones */
+const enCese = (t, d) => t.contrato==='discontinuo' && (t.cese||[]).some(p=>p.desde<=d && d<=p.hasta);
+/* solo se ponen vacaciones en días de trabajo (no descansos, festivos ni inactividad) */
+const admiteVac = (t, d, cur) => (cur==='' || cur==null || cur==='?') && !enCese(t, d);
+const vacEnRot = (t, y=S.anio) => { const a = rotDe(t, y); if(!a) return null;
+  const fd = t.contrato==='discontinuo' && (t.cese||[]).length;
+  return a.filter((c,i)=>COD_VAC.has(c) && !(fd && enCese(t, sumaDias(`${y}-01-01`, i)))).length; };
 /* jornada anual del año elegido */
 function anualDe(t, y=S.anio){
   const base = anualBase(t); if(base==null) return null;
@@ -1829,7 +1840,7 @@ const DIAS_SEM = ['L','M','X','J','V','S','D'];
 const MESES_L = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 /* qué tiene un trabajador un día: inactividad y baja mandan; si no, su rotación (null si no hay) */
 function diaDe(t, d){
-  if(t.contrato==='discontinuo' && (t.cese||[]).some(p=>p.desde<=d && d<=p.hasta)) return 'INA';
+  if(enCese(t, d)) return 'INA';
   if((t.bajas||[]).some(p=>p.desde<=d && d<=p.hasta)) return 'B';
   const c = codigoDia(t, d); if(c==null) return null;
   return c==='' ? 'T' : c;
@@ -2013,7 +2024,7 @@ function vacTrabajador(lista, t, y, filtros=''){
    Con otro clic (o Mayús + clic) en un día de la misma persona
    se alarga el periodo. Todo se puede deshacer.
    Las vacaciones solo se ponen en días de trabajo: los
-   descansos y festivos que caigan dentro se quedan como están.
+   descansos, festivos e inactividad (FD) que caigan dentro se quedan como están.
    ========================================================= */
 let SEL = null;
 const DESHACER = [];
@@ -2064,14 +2075,14 @@ function abrirMenuDia(){
   const t = S.trabajadores.find(x=>x.id===SEL.t); if(!t) return cerrarMenuDia();
   const [a, b] = rangoSel(), n = Math.round((pd(b)-pd(a))/864e5) + 1;
   const ds = []; for(let d=a; d<=b; d=sumaDias(d,1)) ds.push(d);
-  const trab = ds.filter(d=>{ const c = codigoDia(t, d); return c==='' || c==null || c==='?'; }).length;
+  const trab = ds.filter(d=>admiteVac(t, d, codigoDia(t, d))).length;
   const h = vacEnRot(t, S.anio) || 0;
   const m = $('#menuDia') || Object.assign(document.createElement('div'), { id:'menuDia', className:'mdia' });
   m.setAttribute('role','dialog'); m.setAttribute('aria-label','Cambiar días');
   m.innerHTML = `<div class="mdia-cab"><div><b>${esc(t.nombre)}</b><span>${a===b ? fmt(a) : `${fCorto(a)} – ${fmt(b)}`} · ${n} día${n===1?'':'s'}</span></div><button class="cerrar" onclick="cerrarMenuDia()" aria-label="Cerrar">×</button></div>
     ${a===b && COD_VAC.has(codigoDia(t, a)||'') ? `<button type="button" class="mdia-desp" onclick="empezarDesprog()"><b>Desprogramar</b>: pasar este día de vacaciones a otra fecha <small>${desprogDe(t, Number(a.slice(0,4))).length} de ${DESPROG} usadas</small></button>` : ''}
-    <div class="mdia-ops">${OPS_DIA.map(([k,txt,cls],i)=>`<button type="button" class="${i<2?'grande':''}" onclick="aplicarDia('${k}')"><i class="${cls}">${k==='-H'?'—':k==='T'?'':k}</i>${txt}${k==='H'&&trab<n?` <small>${trab} día${trab===1?'':'s'}</small>`:''}</button>`).join('')}</div>
-    <p class="mdia-pie">Lleva <b>${h} de ${vacDe(t)}</b> días de vacaciones. Las vacaciones solo se ponen en sus días de trabajo. ${SEL.tactil?'Toca':'Pincha'} otro día suyo para alargar${SEL.tactil?'':', o arrastra'}.</p>`;
+    <div class="mdia-ops">${OPS_DIA.map(([k,txt,cls],i)=>`<button type="button" class="${i<2?'grande':''}" onclick="aplicarDia('${k}')"${k==='H'&&!trab?' disabled title="Ningún día de trabajo en lo elegido"':''}><i class="${cls}">${k==='-H'?'—':k==='T'?'':k}</i>${txt}${k==='H'&&trab<n?` <small>${trab ? `${trab} día${trab===1?'':'s'}` : 'no se puede'}</small>`:''}</button>`).join('')}</div>
+    <p class="mdia-pie">Lleva <b>${h} de ${vacDe(t)}</b> días de vacaciones. Las vacaciones solo van en días de trabajo: ni descansos, ni festivos${t.contrato==='discontinuo'?', ni inactividad':''}. ${SEL.tactil?'Toca':'Pincha'} otro día suyo para alargar${SEL.tactil?'':', o arrastra'}.</p>`;
   const nuevo = !m.parentNode; if(nuevo) document.body.appendChild(m);
   /* el clic que sigue al toque no debe pulsar un botón del menú que acaba de salir debajo del dedo */
   m.style.pointerEvents = 'none'; clearTimeout(m._t); m._t = setTimeout(()=>{ m.style.pointerEvents = ''; }, 400);
@@ -2106,13 +2117,13 @@ function aplicarDia(cod){
     if(d.slice(0,4)!==String(y)) continue;
     const i = idxDia(d), cur = arr[i] ?? '?';
     let nuevo = cur;
-    if(cod==='H'){ if(cur==='' || cur==='?') nuevo = 'H'; }
+    if(cod==='H'){ if(admiteVac(t, d, cur)) nuevo = 'H'; }
     else if(cod==='-H'){ if(COD_VAC.has(cur)) nuevo = ''; }
     else if(cod==='T') nuevo = '';
     else nuevo = cod;
     if(nuevo!==cur){ arr[i] = nuevo; cambiados++; }
   }
-  if(!cambiados){ toast(cod==='H' ? 'No hay días de trabajo en lo que has elegido' : cod==='-H' ? 'No había vacaciones en esos días' : 'Esos días ya estaban así'); return; }
+  if(!cambiados){ toast(cod==='H' ? (enCese(t, a) || enCese(t, b) ? 'En su periodo de inactividad no se pueden poner vacaciones' : 'No hay días de trabajo en lo que has elegido (descansos y festivos no cuentan)') : cod==='-H' ? 'No había vacaciones en esos días' : 'Esos días ya estaban así'); return; }
   DESHACER.push({ id:t.id, y, antes });
   if(DESHACER.length > 50) DESHACER.shift();
   t.rot[y] = arr.join(',');
@@ -2151,6 +2162,7 @@ function terminarDesprog(c){
   if(a===de){ cancelarMover(); return; }
   if(Number(a.slice(0,4))!==y){ toast(`Tiene que ser un día de ${y}`); return; }
   const arr = t.rot[y].split(','), i = idxDia(a), cur = arr[i];
+  if(enCese(t, a)){ toast('Ese día está en su periodo de inactividad: no puede tener vacaciones'); return; }
   if(!(cur==='' || cur==='?')){ toast('Elige un día de trabajo: ese no lo es'); return; }
   DESHACER.push({ id:t.id, y, antes:t.rot[y], desprog: JSON.stringify(t.desprog || {}) });
   arr[idxDia(de)] = ''; arr[i] = 'H'; t.rot[y] = arr.join(',');
@@ -2165,7 +2177,7 @@ function quitarDesprog(id, y, k){
   const arr = t.rot[y].split(',');
   DESHACER.push({ id:t.id, y, antes:t.rot[y], desprog: JSON.stringify(t.desprog || {}) });
   if(COD_VAC.has(arr[idxDia(m.a)])) arr[idxDia(m.a)] = '';
-  if(arr[idxDia(m.de)]==='' || arr[idxDia(m.de)]==='?') arr[idxDia(m.de)] = 'H';
+  if(admiteVac(t, m.de, arr[idxDia(m.de)])) arr[idxDia(m.de)] = 'H';
   t.rot[y] = arr.join(','); t.desprog[y] = desprogDe(t, y).filter((_,i)=>i!==k);
   guardar(); pintar(); toast('Desprogramación deshecha');
 }
