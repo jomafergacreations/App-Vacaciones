@@ -418,6 +418,70 @@ table.segj{border-collapse:separate;border-spacing:0;font-variant-numeric:tabula
 
 .aviso-toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--asfalto);color:#fff;padding:11px 18px;border-radius:10px;font-weight:600;z-index:200;animation:subir .2s}
 
+/* ficha de jornada */
+.dlg.fichaj{width:min(1180px,100%);max-height:calc(100vh - 24px)}
+.fj-tit{display:flex;flex-direction:column;gap:8px;min-width:0}
+.fj-chips{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center}
+.fj-dato{background:#F1F3F6;border-radius:999px;padding:3px 10px;font-size:13px;font-weight:700;color:var(--gris)}
+.fj-bloque{border:1px solid var(--linea);border-radius:14px;padding:16px 18px}
+.fj-bloque h3{font-size:22px}
+.fj-cabbloque{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.fj-linea{padding:34px 0 30px}
+.fj-pista{position:relative;height:22px;background:#E3E6EB;border-radius:11px}
+.fj-hecho{position:absolute;left:0;top:0;bottom:0;background:var(--cj);border-radius:11px;transition:width .4s}
+.fj-banda{position:absolute;top:-4px;bottom:-4px;background:repeating-linear-gradient(135deg,rgba(34,38,46,.12) 0 5px,transparent 5px 10px);border-radius:4px}
+.fj-fin{position:absolute;top:-8px;bottom:-8px;width:3px;margin-left:-1.5px;background:var(--asfalto);border-radius:2px}
+.fj-marca{position:absolute;top:-8px;bottom:-8px;width:0;border-left:2px dashed var(--asfalto)}
+.fj-marca span{position:absolute;white-space:nowrap;font-size:12.5px;font-weight:700;transform:translateX(-50%);background:var(--papel);padding:0 4px}
+.fj-marca.deb span{bottom:calc(100% + 2px)}
+.fj-marca.izq span{transform:translateX(calc(-100% + 2px))} .fj-marca.der span{transform:translateX(-2px)}
+.fj-marca.prev{border-left-color:#C99A00}
+.fj-marca.prev span{top:calc(100% + 2px);color:#8A6A00}
+.fj-tres{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.fj-tres div,.fj-cifras div{display:flex;flex-direction:column;gap:2px}
+.fj-tres small,.fj-cifras small{font-size:12.5px;font-weight:700;color:var(--gris);text-transform:uppercase;letter-spacing:.03em}
+.fj-tres b{font-family:var(--cond);font-size:36px;line-height:1.05}
+.fj-tres span,.fj-cifras span{font-size:13.5px;color:var(--gris)}
+.fj-ritmo{display:flex;flex-direction:column;gap:6px;margin-top:16px}
+.fj-ritmo>div{display:grid;grid-template-columns:60px minmax(80px,1fr) 66px auto;gap:10px;align-items:center;font-size:14px}
+.fj-ritmo .prog{height:9px;margin:0;border-radius:5px}
+.fj-ritmo span{font-weight:700} .fj-ritmo b{font-family:var(--cond);font-size:18px;text-align:right;white-space:nowrap} .fj-ritmo em{font-style:normal;color:var(--gris)}
+.fj-frase{margin:14px 0 0;background:var(--senal-suave);border-radius:10px;padding:10px 14px;font-size:15px}
+.fj-cifras{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.fj-cifras div{background:#F7F8FA;border-radius:10px;padding:10px 12px}
+.fj-cifras b{font-family:var(--cond);font-size:26px;line-height:1.1}
+.fj-cifras .dif{font-size:26px}
+.fj-graf svg{width:100%;height:auto;display:block}
+.fj-eje{font-size:12px;fill:#7A818D;font-family:var(--texto)} .fj-eje.fuerte{fill:var(--asfalto);font-weight:700}
+.leyj i.fj-ley-deb{background:none;border-top:2px dashed #8C93A0;height:0;border-radius:0}
+.leyj i.fj-ley-plan{background:none;border-top:2px dashed #C99A00;height:0;border-radius:0}
+.leyj i.fj-ley-comp{background:none;border-top:2px dotted var(--asfalto);height:0;border-radius:0}
+.fj-tabla{overflow:auto;max-height:440px;border:1px solid var(--linea);border-radius:12px}
+table.fj-sem{width:100%;border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums;font-size:14.5px}
+.fj-sem th,.fj-sem td{padding:7px 12px;border-bottom:1px solid var(--linea);white-space:nowrap}
+.fj-sem thead th{position:sticky;top:0;background:#F7F8FA;font-family:var(--cond);font-size:15px;color:var(--gris);text-align:left;z-index:1}
+.fj-sem .num{text-align:right}
+.fj-sem tbody th{text-align:left;font-weight:700}
+.fj-sem tbody th small{font-weight:600;color:var(--gris);margin-left:4px}
+.fj-sem tr.fut{background:#FAFBFC}
+.fj-sem tr.ult th,.fj-sem tr.ult td{box-shadow:inset 0 -3px 0 var(--senal)}
+.fj-h{display:inline-block;min-width:52px;border-radius:6px;padding:2px 8px;font-weight:700;text-align:center}
+.fj-h.ok{background:#E3F3E8;color:#17643A} .fj-h.bajo{background:#FFF1C7;color:#7A5000} .fj-h.alto{background:#FBE1DE;color:#A2271E}
+.fj-plan{color:#7A818D;font-style:italic}
+.dif2 .mas{color:var(--mal);font-weight:700} .dif2 .menos{color:#8A5A00;font-weight:700}
+.fj-calc p{margin:6px 0 10px;color:var(--gris);font-size:14.5px}
+.fj-calc dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px 18px;margin:0}
+.fj-calc dt{font-size:12.5px;font-weight:700;color:var(--gris);text-transform:uppercase;letter-spacing:.03em}
+.fj-calc dd{margin:0;font-weight:600}
+@media (max-width:760px){
+  .fj-tres{grid-template-columns:1fr} .fj-tres b{font-size:30px}
+  .fj-ritmo>div{grid-template-columns:52px minmax(60px,1fr) 58px} .fj-ritmo em{grid-column:1/-1;margin-top:-4px;font-size:13px}
+  .fj-bloque{padding:14px} .fj-marca span{font-size:11.5px}
+  .fj-sem th,.fj-sem td{padding:6px 8px} .fj-sem tbody th small{display:block;margin:0}
+  .dlg-pie .izq{display:none}
+  .fj-cifras{grid-template-columns:repeat(2,minmax(0,1fr))} .fj-cifras b,.fj-cifras .dif{font-size:22px}
+  .fj-graf{overflow-x:auto} .fj-graf svg{min-width:640px}
+}
 /* movimiento */
 @keyframes subir{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 @keyframes aparecer{from{opacity:0}to{opacity:1}}
@@ -479,9 +543,17 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
    Control Planning 10 — rehecha desde cero
    Datos en localStorage, con una clave nueva.
    ========================================================= */
-const APP_VERSION = '10.18.0';
+const APP_VERSION = '10.19.0';
 const CLAVE = 'control-planning-v10';
 const NOVEDADES = {
+  '10.19.0': [
+    { titulo:'Una ficha de jornada para cada uno', donde:'Control de jornada',
+      texto:'Al pinchar en un trabajador ya no se abre su ficha de datos, sino su ficha de jornada: una línea con lo que lleva, lo que debería llevar, la previsión y su cómputo, y debajo cuánto le queda, la diferencia, el plan para llegar, su media semanal, días de trabajo, vacaciones y bajas.' },
+    { titulo:'Cómo va acumulando y semana a semana', donde:'Control de jornada › ficha',
+      texto:'Un gráfico con sus horas acumuladas frente a lo que debería llevar y el plan hasta fin de año (pasa el ratón para ver cada semana), y una tabla por semanas o por meses con lo que hizo, lo que le tocaba, la diferencia y el acumulado. Al final, cómo sale su cómputo.' },
+    { titulo:'Sus datos, a un botón', donde:'Control de jornada › ficha',
+      texto:'Si necesitas cambiar algo de su contrato, jornada o bajas, pulsa «Editar ficha» abajo y se abre la de siempre.' },
+  ],
   '10.18.0': [
     { titulo:'Pon y quita vacaciones con un clic', donde:'Vacaciones',
       texto:'Pincha un día en el calendario de cualquiera, o arrastra para coger un periodo, y elige en el menú: Vacaciones, Quitar vacaciones, Trabaja, Descanso, Festivo, Festivo de empresa, Ajuste o Permiso. Funciona en la vista del departamento y en la de cada trabajador.' },
@@ -725,7 +797,7 @@ function normalizar(d){
 let S;
 try { S = normalizar(JSON.parse(localStorage.getItem(CLAVE))); } catch(e){ S = estadoInicial(); }
 const guardar = () => { try { localStorage.setItem(CLAVE, JSON.stringify(S)); } catch(e){ toast('No se ha podido guardar en este navegador'); } };
-let UI = { vista:'inicio', buscar:'', filtro:'todos', filtroJ:'todos', segJ:'semana', fProd:'todos', fDep:'todos', vacTab:'dep', vacZoom:'mes', vacMes:null, vacTrab:null, vacQ:'', vacCon:'todos', vacProd:'todos', edit:null };
+let UI = { vista:'inicio', buscar:'', filtro:'todos', filtroJ:'todos', segJ:'semana', fProd:'todos', fDep:'todos', vacTab:'dep', vacZoom:'mes', vacMes:null, vacTrab:null, vacQ:'', vacCon:'todos', vacProd:'todos', edit:null, fichaJ:null, fjVer:'semana' };
 try { const u = JSON.parse(sessionStorage.getItem('cp-ui')||'{}'); if(u.vista) UI.vista=u.vista; } catch(e){}
 
 /* =========================================================
@@ -1403,7 +1475,7 @@ function vJornada(){
   };
   const avisoF = r => r.faltan ? `<span class="aviso" title="Hay semanas importadas en las que no sale">Faltan ${r.faltan} semana${r.faltan===1?'':'s'}</span>` : '';
   const filas = rs.map(r=>{ const t = r.t, inc = r.estado==='inc';
-    return `<tr onclick="abrirFicha('${t.id}')">
+    return `<tr onclick="abrirJornada('${t.id}')">
       <td><div class="nombre">${esc(t.nombre)}</div><div class="sub"><span class="chip ${t.contrato}" style="padding:1px 8px;font-size:12px">${CONTRATOS[t.contrato].corto}</span>${t.reducido?' reducida':''} ${negocioChip(t)}${t.depto?` ${esc(t.depto)}`:''}</div></td>
       <td class="num"><span class="anual">${tiene(r)}</span><div class="sub">${garant(r)}${r.banda?' · '+bandaPct():''}${diasBaja(t,y)?` · ${diasBaja(t,y)} días de baja`:''}</div></td>
       <td class="num">${diasCelda(r)}</td>
@@ -1413,7 +1485,7 @@ function vJornada(){
       <td class="num">${planCelda(r)}</td>
       <td>${chip(r)}${avisoF(r)?'<br>'+avisoF(r):''}${avisoS(r)?'<br>'+avisoS(r):''}</td></tr>`; }).join('');
   const tarjetas = rs.map(r=>{ const t = r.t, inc = r.estado==='inc';
-    return `<button class="tm" onclick="abrirFicha('${t.id}')"><div class="l1"><b>${esc(t.nombre)}</b>${chip(r)}</div>
+    return `<button class="tm" onclick="abrirJornada('${t.id}')"><div class="l1"><b>${esc(t.nombre)}</b>${chip(r)}</div>
       <div class="l2"><span>${garant(r)} · ${r.banda?'entre':'cómputo'} ${tiene(r)}</span><b>${nh(r.hechas)} h</b></div>
       ${r.rot && !inc ? `<div class="l3"><span>Días de trabajo <b>${r.diasTrab}</b> · quedan <b>${r.diasResto}</b></span><span>${planCelda(r, true)}</span></div>` : ''}
       ${inc||!corte ? '' : `<div class="l3"><span>Debería llevar <b>${entre(r.espMin, r.espMax)}</b></span><span>${r.semanas?`<b class="dif ${difCls(r)}">${conSigno(r.dif)}</b>`:''}</span></div>
@@ -1467,7 +1539,7 @@ function seguimientoHTML(rs, y, corte){
     const h = ls.reduce((a,l)=>a+(num(r.t.horas[l])||0),0);
     const cls = tMax<=0.005 ? (h>0?'alto':'ok') : h > tMax*1.1 ? 'alto' : h < tMin*0.9 ? 'bajo' : 'ok';
     return `<td class="${cls}" title="${esc(p.cab)}: ${nh(h)} h; le tocaban ${entre(tMin, tMax)}">${nh(h)}</td>`; }).join('');
-  const fila = r => `<tr><th scope="row" onclick="abrirFicha('${r.t.id}')">${esc(r.t.nombre)}</th>${celdas(r)}<td class="tot">${nh(r.hechas)}</td></tr>`;
+  const fila = r => `<tr><th scope="row" onclick="abrirJornada('${r.t.id}')">${esc(r.t.nombre)}</th>${celdas(r)}<td class="tot">${nh(r.hechas)}</td></tr>`;
   setTimeout(()=>{ const c = document.querySelector('.seg-scroll'), f = c?.querySelector('th.ult'); if(c && f) c.scrollLeft = Math.max(0, f.offsetLeft - c.clientWidth + 160); }, 0);
   return `<div class="tarjeta anim" style="--i:3">
     <div class="barra-herr"><h3 style="font-size:24px;margin:0">Seguimiento</h3>
@@ -1478,6 +1550,187 @@ function seguimientoHTML(rs, y, corte){
       <tbody>${rs.map(fila).join('')}</tbody></table></div>
     <p class="muted nota">Horas que hizo en cada ${modo==='mes'?'mes':'semana'}. El color compara con lo que le tocaba según su cómputo: verde si va dentro de un 10 % arriba o abajo. Con rotación, las semanas que faltan llevan en gris el plan para llegar.${modo==='mes'?' Cada semana cuenta en el mes de su jueves.':''}</p>
   </div>`;
+}
+
+/* =========================================================
+   Ficha de jornada: al pinchar a alguien en el Control de jornada.
+   Todo lo de su jornada del año en detalle: la línea de lo que
+   lleva y le queda, las cifras, cómo se calcula su cómputo, la
+   curva acumulada y el detalle semana a semana o mes a mes.
+   (La ficha de datos sigue en Personal y con «Editar ficha».)
+   ========================================================= */
+const COLOR_J = { bien:'var(--ok)', falta:'#C98A00', pasa:'var(--mal)', sin:'#9AA1AD' };
+function abrirJornada(id){ UI.fichaJ = id; pintarJornada(true); }
+function cerrarJornada(){ UI.fichaJ = null; $('#capa').innerHTML = ''; }
+function editarDesdeJornada(id){ cerrarJornada(); abrirFicha(id); }
+/* semana a semana del año de seguimiento: lo que hizo, lo que le tocaba, el plan y los acumulados */
+function semanasJ(r, y, corte){
+  const t = r.t, ef = r.ef || [], n = ef.length || 1, hasta = corte ? corte.hasta : '0000';
+  const restantes = ef.filter(d=>d>hasta).length;
+  const pMin = Math.max(0, r.rango.min - r.hechas), pMax = Math.max(0, r.rango.max - r.hechas);
+  const out = []; let aH = 0, aMin = 0, aMax = 0, aP = r.hechas, aPM = r.hechas;
+  for(let l=iniSeg(y); l<=finSeg(y); l=sumaDias(l,7)){
+    const f = sumaDias(l,6), dias = ef.filter(d=>d>=l && d<=f).length;
+    const tMin = dias*r.rango.min/n, tMax = dias*r.rango.max/n; aMin += tMin; aMax += tMax;
+    const pasada = f <= hasta, hv = t.horas?.[l]===undefined ? null : (num(t.horas[l])||0);
+    let plan = null;
+    if(pasada) aH += hv||0;
+    else { if(r.rot){ const dp = ef.filter(d=>d>=l && d<=f && r.resto.has(d)).length;
+        plan = r.banda ? [dp*(r.hRepMin||0), dp*(r.hRepMax||0)] : [dp*(r.hRep||0), dp*(r.hRep||0)]; }
+      else plan = restantes ? [dias*pMin/restantes, dias*pMax/restantes] : [0, 0];
+      aP += plan[0]; aPM += plan[1]; }
+    out.push({ l, f, n:numSemana(l), mes:Number(sumaDias(l,3).slice(5,7)), dias, tMin, tMax, h:hv, pasada, plan, aH: pasada ? aH : null, aMin, aMax, aP, aPM });
+  }
+  return out;
+}
+/* lo que hizo frente a lo que le tocaba: dentro de la banda es 0 */
+const difJ = (h, a, b) => h < a ? h - a : h > b ? h - b : 0;
+const clsJ = (h, a, b) => b<=0.005 ? (h>0?'alto':'ok') : h > b*1.1 ? 'alto' : h < a*0.9 ? 'bajo' : 'ok';
+
+function pintarJornada(primera){
+  const t = S.trabajadores.find(x=>x.id===UI.fichaJ); if(!t) return cerrarJornada();
+  const d0 = $('#capa .dlg'), sc = d0 ? d0.scrollTop : 0;
+  const y = S.anio, corte = corteDe(y), r = seguimientoDe(t, y, corte), inc = r.estado==='inc';
+  const est = ESTADO_J[r.estado], col = COLOR_J[grupoJ(r.estado)] || 'var(--asfalto)';
+  const chips = `<span class="chip ${t.contrato}">${CONTRATOS[t.contrato].nombre}</span>${t.reducido?'<span class="chip reducida">Jornada reducida</span>':''}${negocioChip(t)}${t.depto?`<span class="fj-dato">${esc(t.depto)}</span>`:''}${t.num?`<span class="fj-dato">Nº ${esc(t.num)}</span>`:''}${t.grupo?`<span class="fj-dato">${esc(t.grupo)}</span>`:''}${t.concretado?`<span class="fj-dato">${esc(horarioTxt(t))}</span>`:''}`;
+  const cab = `<div class="dlg-cab"><div class="fj-tit"><h2 id="fjTit">${esc(t.nombre)}</h2><div class="fj-chips">${chips}<span class="estj ${est.cls}">${est.txt}</span></div></div><button class="cerrar" onclick="cerrarJornada()" aria-label="Cerrar">×</button></div>`;
+  const pie = `<div class="dlg-pie"><span class="muted izq" style="font-size:13.5px">${corte?`Turnos hasta el ${fmt(corte.hasta)} (semana ${numSemana(corte.ultima)})`:`Sin turnos importados en ${y}`}</span><button class="btn" onclick="editarDesdeJornada('${t.id}')">Editar ficha</button><button class="btn primario" onclick="cerrarJornada()">Cerrar</button></div>`;
+  let cuerpo;
+  if(inc){
+    const ls = semanasDe(t, y);
+    cuerpo = `<p class="aviso-suave">${faltaActividad(t) ? 'No tiene días de actividad este año.' : 'Le falta la jornada.'} Complétala en su ficha para ver cuánto lleva, cuánto le queda y si va a llegar.</p>
+      <div class="fj-cifras"><div><small>Lleva</small><b>${nh(r.hechas)} h</b><span>${ls.length} semana${ls.length===1?'':'s'} importada${ls.length===1?'':'s'}</span></div></div>
+      ${ls.length ? `<div class="fj-tabla"><table class="fj-sem"><thead><tr><th>Semana</th><th class="num">Hizo</th></tr></thead><tbody>${ls.map(l=>`<tr><th scope="row">S${numSemana(l)} <small>${semanaTxt(l)}</small></th><td class="num">${nh(num(t.horas[l]))} h</td></tr>`).join('')}</tbody></table></div>` : ''}`;
+  } else {
+    const ss = semanasJ(r, y, corte), hastaN = corte ? r.ef.filter(d=>d<=corte.hasta).length : 0;
+    const pctT = r.ef.length ? hastaN / r.ef.length * 100 : 0, pctH = r.rango.min>0 ? r.hechas / r.rango.min * 100 : 0;
+    const media = r.semanas ? r.hechas / r.semanas : null;
+    /* ---- la línea: lleva, debería llevar, previsión y cómputo ---- */
+    const prev = r.semanas && r.prevision!=null ? r.prevision : null;
+    const esc0 = Math.max(r.rango.max, r.hechas, Math.min(prev||0, r.rango.max*1.25)) || 1;
+    const p = v => Math.max(0, Math.min(100, v / esc0 * 100));
+    const marca = (v, cls, txt) => `<i class="fj-marca ${cls}${p(v)>78?' izq':p(v)<22?' der':''}" style="left:${p(v)}%"><span>${txt}</span></i>`;
+    const queda = r.hechas > r.rango.max + 0.005 ? `<b class="de-mas">${nh(r.hechas - r.rango.max)} h</b><span>de más</span>`
+      : r.banda ? (r.hechas >= r.rango.min - 0.005 ? `<b>${nh(r.rango.max - r.hechas)} h</b><span>hasta el máximo (mínimo hecho)</span>` : `<b>${nh(r.rango.min - r.hechas)} h</b><span>al mínimo · ${nh(r.rango.max - r.hechas)} h al máximo</span>`)
+      : `<b>${nh(Math.max(0, r.rango.max - r.hechas))} h</b><span>${nf(Math.max(0, 100 - pctH))} % de su cómputo</span>`;
+    const linea = `<section class="fj-bloque"><div class="fj-linea" style="--cj:${col}">
+        <div class="fj-pista">${r.banda?`<i class="fj-banda" style="left:${p(r.rango.min)}%;width:${p(r.rango.max)-p(r.rango.min)}%" title="Su banda: ${entre(r.rango.min, r.rango.max)}"></i>`:''}
+          <i class="fj-hecho" style="width:${p(r.hechas)}%"></i>
+          ${corte && r.espMax>0 ? marca(r.espMin, 'deb', `Debería llevar ${entre(r.espMin, r.espMax)}`) : ''}
+          ${prev!=null ? marca(prev, 'prev', `Previsión ${nh(Math.round(prev))} h${prev > esc0 ? ' ›' : ''}`) : ''}
+          <i class="fj-fin" style="left:${p(r.rango.max)}%"></i>${r.banda?`<i class="fj-fin" style="left:${p(r.rango.min)}%"></i>`:''}
+        </div></div>
+      <div class="fj-tres">
+        <div><small>Lleva</small><b style="color:${col}">${nh(r.hechas)} h</b><span>${nf(pctH)} % ${r.banda?'del mínimo':'de su cómputo'}</span></div>
+        <div><small>Le ${r.hechas > r.rango.max + 0.005 ? 'sobran' : 'quedan'}</small>${queda}</div>
+        <div><small>${r.banda?'Su banda':'Cómputo'} ${y}</small><b>${entre(r.rango.min, r.rango.max)}</b><span>${r.banda ? (r.sinG ? `sin garantía · ${bandaPct()}` : `${nh(mesesFD(t))} meses · ${bandaPct()}`) : `${nh(r.pct)} % de ${nh(S.ajustes.hAnio)} h`}</span></div>
+      </div>
+      <div class="fj-ritmo">
+        <div><span>Tiempo</span><div class="prog"><i style="width:${Math.min(100,pctT)}%;background:#8C93A0"></i></div><b>${nf(pctT)} %</b><em>de sus días de jornada pasados${corte?` (${hastaN} de ${r.ef.length})`:''}</em></div>
+        <div><span>Horas</span><div class="prog"><i style="width:${Math.min(100,pctH)}%;background:${col}"></i></div><b>${nf(pctH)} %</b><em>${r.banda?'de su mínimo':'de su cómputo'} hechas</em></div>
+      </div>
+      <p class="fj-frase">${fraseJ(r, corte, prev)}</p></section>`;
+    /* ---- cifras ---- */
+    const cif = [];
+    cif.push(['Diferencia', !corte||!r.semanas ? '—' : `<span class="dif ${difCls(r)}">${conSigno(r.dif)}</span>`, corte ? `debería llevar ${entre(r.espMin, r.espMax)} al ${fCorto(corte.hasta)}` : 'sin turnos importados']);
+    cif.push(['Previsión a fin de año', prev==null ? '—' : `${nh(Math.round(prev))} h`, prev==null ? 'cuando tenga horas' : `${difPrev(r)} · si sigue al mismo ritmo`]);
+    if(r.estado==='pasado') cif.push(['Plan para llegar', '—', `ya ha pasado ${r.banda?'su máximo':'su cómputo'}: no le toca más`]);
+    else if(r.rot) cif.push(['Plan para llegar', !r.diasResto ? '—' : r.banda ? `${entre(r.hDiaMin, r.hDiaMax, '')} h/día` : `${nh(r.hDia)} h/día`, !r.diasResto ? 'no le quedan días de trabajo' : r.banda ? 'del mínimo al máximo' : `≈ ${nh(r.pend/r.semResto)} h/sem · objetivo ${nh(r.objetivo)} h (${MARGEN_H} h menos)`]);
+    else cif.push(['Necesita a la semana', r.necesita==null ? '—' : r.banda ? `${entre(r.necesita, r.necesitaMax, '')} h` : `${nh(r.necesita)} h`, r.necesita==null ? 'no le quedan días' : r.banda ? 'del mínimo al máximo' : `su jornada: ${nh(semanaEf(t))} h/sem`]);
+    cif.push(['Media semanal', media==null ? '—' : `${nh(Math.round(media*100)/100)} h`, `${r.semanas} semana${r.semanas===1?'':'s'} con horas${!r.banda?` · jornada ${nh(semanaEf(t))} h`:r.sinG?` · banda ${bandaSemana()}`:''}`]);
+    if(r.rot){ cif.push(['Días de trabajo', `${r.vacPend?'≈ ':''}${r.diasTrab}`, `quedan ${r.diasResto} hasta el 31 dic${r.semResto?` (${r.semResto} semanas)`:''}`]);
+      cif.push(['Vacaciones', `${r.vacRot} de ${vacDe(t)}`, r.vacPend ? `${r.vacPend} sin colocar en la rotación` : 'todas en su rotación']); }
+    else cif.push(['Días de jornada', nh(r.ef.length), `sin rotación · quedan ${r.ef.length - hastaN}`]);
+    const db = diasBaja(t, y); cif.push(['Bajas', db ? `${db} día${db===1?'':'s'}` : 'Ninguna', db ? 'descontados del cómputo' : `en ${y}`]);
+    const avisos = [r.faltan ? `<span class="aviso">${r.faltan===1?'Falta 1 semana':`Faltan ${r.faltan} semanas`}: hay semanas importadas en las que no sale</span>` : '',
+      r.seguidas >= SEGUIDAS ? `<span class="aviso">${r.seguidas} semanas seguidas por encima de su máximo</span>` : ''].filter(Boolean).join(' ');
+    const cifras = `<section class="fj-bloque"><div class="fj-cifras">${cif.map(([a,b,c])=>`<div><small>${a}</small><b>${b}</b><span>${c}</span></div>`).join('')}</div>${avisos?`<div style="margin-top:10px">${avisos}</div>`:''}</section>`;
+    /* ---- cómo se calcula ---- */
+    const bajas = (t.bajas||[]).filter(b=>b.desde && b.hasta && b.hasta>=`${y}-01-01` && b.desde<=`${y}-12-31`);
+    const inact = t.contrato==='discontinuo' ? (t.cese||[]).filter(b=>b.desde && b.hasta && b.hasta>=`${y}-01-01` && b.desde<=`${y}-12-31`) : [];
+    const calc = `<section class="fj-bloque fj-calc"><h3>Cómo sale su cómputo</h3><p>${esc(formulaDe(t))}</p>
+      <dl>${r.banda?'':`<div><dt>Jornada</dt><dd>${nh(semanaEf(t))} h/sem · ${nh(r.pct)} %${t.reducido?` (de ${nh(semanaDe(t))} h de su contrato)`:''}</dd></div><div><dt>Jornada anual</dt><dd>${nh(anualDe(t, y))} h</dd></div>`}
+        <div><dt>Días de jornada</dt><dd>${diasJornada(t, y)} ${tieneRot(t, y)?'de trabajo en su rotación':t.contrato==='discontinuo'?'de actividad':'naturales'}</dd></div>
+        ${bajas.length?`<div><dt>Bajas</dt><dd>${bajas.map(b=>`${tramoTxt(b)} (${diasTramo(b)} d)`).join(' · ')}</dd></div>`:''}
+        ${inact.length?`<div><dt>Inactividad</dt><dd>${inact.map(b=>`${tramoTxt(b)} (${diasTramo(b)} d)`).join(' · ')}</dd></div>`:''}
+        ${t.concretado?`<div><dt>Horario</dt><dd>${esc(horarioTxt(t))}</dd></div>`:''}</dl></section>`;
+    cuerpo = linea + cifras + graficoJ(r, ss, corte, col) + tablaJ(r, ss, corte) + calc;
+  }
+  $('#capa').innerHTML = `<div class="fondo${primera?'':' quieto'}" onclick="if(event.target===this)cerrarJornada()"><div class="dlg fichaj" role="dialog" aria-modal="true" aria-labelledby="fjTit">${cab}<div class="dlg-cuerpo">${cuerpo}</div>${pie}</div></div>`;
+  const d = $('#capa .dlg'); if(d && !primera) d.scrollTop = sc;
+}
+/* una frase que lo resume */
+function fraseJ(r, corte, prev){
+  if(r.estado==='sin') return corte ? `Todavía no tiene horas en ${S.anio}. Hasta el ${fmt(corte.hasta)} debería llevar ${entre(r.espMin, r.espMax)}.` : 'Todavía no hay turnos importados este año.';
+  const a = corte ? `Al ${fmt(corte.hasta)} ` : '';
+  const dif = r.dif < -0.005 ? `va <b>${nh(-r.dif)} h por debajo</b> de lo que debería llevar` : r.dif > 0.005 ? `va <b>${nh(r.dif)} h por encima</b> de lo que debería llevar` : 'va justo en lo que debería llevar';
+  const fin = r.estado==='pasado' ? `Ya ha pasado ${r.banda?'su máximo':'su cómputo'}.`
+    : prev!=null ? `A este ritmo acabaría el año con <b>${nh(Math.round(prev))} h</b> (${difPrev(r)}).` : '';
+  const plan = r.rot && r.diasResto && r.estado!=='pasado' ? ` Para llegar, ${r.banda ? `entre ${entre(r.hDiaMin, r.hDiaMax, '')} h` : `${nh(r.hDia)} h`} por día de trabajo que le queda.` : '';
+  return `${a}${dif}. ${fin}${plan}`;
+}
+/* la curva acumulada: lo que lleva, lo que debería llevar y el plan hasta fin de año */
+function graficoJ(r, ss, corte, col){
+  const W = 1000, H = 270, L = 52, R = 16, T = 16, B = 30, N = ss.length;
+  const ult = ss.filter(s=>s.pasada).length;   // semanas ya pasadas
+  const max = Math.max(r.rango.max, ss[N-1].aMax, ...ss.map(s=>s.aPM), r.hechas) * 1.06 || 1;
+  const x = i => L + i * (W-L-R) / N, yv = v => T + (H-T-B) * (1 - v/max);
+  const pts = arr => arr.map(([i,v])=>`${x(i).toFixed(1)},${yv(v).toFixed(1)}`).join(' ');
+  const debMin = [[0,0], ...ss.map((s,i)=>[i+1, s.aMin])], debMax = [[0,0], ...ss.map((s,i)=>[i+1, s.aMax])];
+  const lleva = [[0,0], ...ss.slice(0, ult).map((s,i)=>[i+1, s.aH])];
+  const plan = [[ult, r.hechas], ...ss.slice(ult).map((s,i)=>[ult+i+1, s.aP])], planM = [[ult, r.hechas], ...ss.slice(ult).map((s,i)=>[ult+i+1, s.aPM])];
+  const paso = max > 1500 ? 500 : max > 600 ? 200 : max > 200 ? 50 : 20, grid = [];
+  for(let v=0; v<=max; v+=paso) grid.push(v);
+  let mesAnt = 0; const meses = [];
+  ss.forEach((s,i)=>{ if(s.mes!==mesAnt){ meses.push([i, MESES[s.mes-1]]); mesAnt = s.mes; } });
+  const areaBanda = r.banda ? `<polygon points="${pts(debMax)} ${pts([...debMin].reverse())}" fill="#E3E6EB" opacity=".7"/>` : '';
+  const areaPlan = r.banda && ult < N ? `<polygon points="${pts(planM)} ${pts([...plan].reverse())}" fill="#F6C300" opacity=".18"/>` : '';
+  const hov = ss.map((s,i)=>`<rect x="${x(i)}" y="${T}" width="${(W-L-R)/N}" height="${H-T-B}" fill="transparent"><title>S${s.n} · ${semanaTxt(s.l)}\n${s.pasada ? `Hizo ${s.h==null?'—':nh(s.h)+' h'} · acumulado ${nh(s.aH)} h` : `Plan ${s.plan?entre(s.plan[0], s.plan[1]):'—'} · acumulado ≈ ${entre(s.aP, s.aPM)}`}\nDebería llevar ${entre(s.aMin, s.aMax)}</title></rect>`).join('');
+  return `<section class="fj-bloque"><div class="fj-cabbloque"><h3>Cómo va acumulando</h3>
+      <span class="leyj"><span><i style="background:${col}"></i>Lleva</span><span><i class="fj-ley-deb"></i>Debería llevar</span>${ult<N?'<span><i class="fj-ley-plan"></i>Plan</span>':''}<span><i class="fj-ley-comp"></i>${r.banda?'Mínimo y máximo':'Cómputo'}</span></span></div>
+    <div class="fj-graf"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Horas acumuladas en el año">
+      ${grid.map(v=>`<line x1="${L}" x2="${W-R}" y1="${yv(v)}" y2="${yv(v)}" stroke="#E3E6EB"/><text x="${L-8}" y="${yv(v)+4}" text-anchor="end" class="fj-eje">${nf(v)}</text>`).join('')}
+      ${meses.map(([i,m])=>`<line x1="${x(i)}" x2="${x(i)}" y1="${H-B}" y2="${H-B+5}" stroke="#B4BAC4"/><text x="${x(i)+3}" y="${H-B+18}" class="fj-eje">${m}</text>`).join('')}
+      ${areaBanda}${areaPlan}
+      <line x1="${L}" x2="${W-R}" y1="${yv(r.rango.max)}" y2="${yv(r.rango.max)}" stroke="#22262E" stroke-dasharray="2 4"/>
+      ${r.banda?`<line x1="${L}" x2="${W-R}" y1="${yv(r.rango.min)}" y2="${yv(r.rango.min)}" stroke="#22262E" stroke-dasharray="2 4"/>`:''}
+      <text x="${W-R}" y="${yv(r.rango.max)-6}" text-anchor="end" class="fj-eje fuerte">${r.banda?'Máximo':'Cómputo'} ${nh(Math.round(r.rango.max))} h</text>
+      ${r.banda?`<text x="${W-R}" y="${yv(r.rango.min)+15}" text-anchor="end" class="fj-eje fuerte">Mínimo ${nh(Math.round(r.rango.min))} h</text>`:''}
+      <polyline points="${pts(debMin)}" fill="none" stroke="#8C93A0" stroke-width="2" stroke-dasharray="6 5"/>
+      ${ult<N?`<polyline points="${pts(plan)}" fill="none" stroke="#C99A00" stroke-width="2.5" stroke-dasharray="3 5"/>`:''}
+      ${ult?`<polyline points="${pts(lleva)}" fill="none" stroke="${col}" stroke-width="3.5" stroke-linejoin="round"/><circle cx="${x(ult)}" cy="${yv(r.hechas)}" r="5" fill="${col}"/>
+        <line x1="${x(ult)}" x2="${x(ult)}" y1="${T}" y2="${H-B}" stroke="#F6C300" stroke-width="2"/><text x="${x(ult)-6}" y="${T+12}" text-anchor="end" class="fj-eje fuerte">S${ss[ult-1].n}</text>`:''}
+      ${hov}</svg></div>
+    <p class="muted nota">Pasa el ratón por el gráfico para ver cada semana. «Debería llevar» reparte su cómputo por sus días de jornada; el plan, lo que le falta por los días que le quedan.</p></section>`;
+}
+/* detalle por semanas o por meses */
+function tablaJ(r, ss, corte){
+  const modo = UI.fjVer || 'semana';
+  let filas;
+  if(modo==='mes'){
+    filas = MESES.map((m,i)=>{ const g = ss.filter(s=>s.mes===i+1); if(!g.length) return null;
+      const pas = g.filter(s=>s.pasada), fut = g.filter(s=>!s.pasada), u = g[g.length-1];
+      return { cab:m, sub:`${g.length} sem.`, dias:g.reduce((a,s)=>a+s.dias,0), tMin:g.reduce((a,s)=>a+s.tMin,0), tMax:g.reduce((a,s)=>a+s.tMax,0),
+        h: pas.some(s=>s.h!=null) ? pas.reduce((a,s)=>a+(s.h||0),0) : null, pasada: !fut.length, parcial: pas.length && fut.length,
+        plan: fut.length ? [fut.reduce((a,s)=>a+s.plan[0],0), fut.reduce((a,s)=>a+s.plan[1],0)] : null,
+        aH: pas.length ? pas[pas.length-1].aH : null, aMin:u.aMin, aMax:u.aMax, aP:u.aP, aPM:u.aPM, ult: corte && g.some(s=>s.l===corte.ultima) }; }).filter(Boolean);
+  } else filas = ss.map(s=>({ ...s, cab:`S${s.n}`, sub:semanaTxt(s.l), ult: corte && s.l===corte.ultima }));
+  const fila = f => {
+    const toca = f.dias ? entre(f.tMin, f.tMax) : '<span class="muted">sin jornada</span>';
+    let hizo, dif = '', acum;
+    if(f.pasada || f.parcial){
+      if(f.h==null) hizo = f.tMax>0.005 ? '<span class="muted">sin horas</span>' : '';
+      else { const c = clsJ(f.h, f.tMin, f.tMax), d = f.pasada ? difJ(f.h, f.tMin, f.tMax) : null;
+        hizo = `<span class="fj-h ${c}">${nh(f.h)}</span>`; if(d!=null && f.dias) dif = `<span class="${d<-0.005?'menos':d>0.005?'mas':''}">${conSigno(d)}</span>`; }
+      if(f.parcial && f.plan) hizo += `<small class="fj-plan"> + plan ${entre(f.plan[0], f.plan[1], '')}</small>`;
+      acum = f.parcial ? `≈ ${entre(f.aP, f.aPM)}` : `${nh(f.aH)} h`;
+    } else { hizo = f.plan && f.plan[1]>0.005 ? `<span class="fj-plan">plan ${entre(f.plan[0], f.plan[1], '')}</span>` : ''; acum = `<span class="fj-plan">≈ ${entre(f.aP, f.aPM)}</span>`; }
+    return `<tr class="${f.pasada?'':'fut'} ${f.ult?'ult':''}"><th scope="row">${f.cab} <small>${f.sub}</small></th><td class="num">${f.dias||''}</td><td class="num">${toca}</td><td class="num">${hizo}</td><td class="num dif2">${dif}</td><td class="num">${acum}</td><td class="num muted">${entre(f.aMin, f.aMax)}</td></tr>`; };
+  const b = k => `<button class="${modo===k?'on':''}" onclick="UI.fjVer='${k}';pintarJornada()">${k==='mes'?'Por meses':'Por semanas'}</button>`;
+  return `<section class="fj-bloque"><div class="fj-cabbloque"><h3>${modo==='mes'?'Mes a mes':'Semana a semana'}</h3><div class="seg" role="group" aria-label="Ver por">${b('semana')}${b('mes')}</div></div>
+    <div class="fj-tabla"><table class="fj-sem"><thead><tr><th>${modo==='mes'?'Mes':'Semana'}</th><th class="num">Días</th><th class="num">Le tocaba</th><th class="num">Hizo</th><th class="num">Diferencia</th><th class="num">Acumulado</th><th class="num">Debería llevar</th></tr></thead>
+      <tbody>${filas.map(fila).join('')}</tbody></table></div>
+    <p class="muted nota">Verde si hizo lo que le tocaba con un 10 % arriba o abajo; amarillo, menos; rojo, más. ${modo==='mes'?'Los meses':'Las semanas'} que faltan llevan en gris el plan para llegar.${modo==='mes'?' Cada semana cuenta en el mes de su jueves.':''}</p></section>`;
 }
 
 /* =========================================================

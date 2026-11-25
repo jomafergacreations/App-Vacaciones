@@ -1,8 +1,7 @@
 {
-  "version": "10.18.0",
+  "version": "10.19.0",
   "fecha": "2026-11-25",
   "novedades": [
-    "Vacaciones editables: pincha o arrastra días y elige qué poner",
-    "Deshacer y atajos de teclado"
+    "Control de jornada: al pinchar a un trabajador se abre su ficha de jornada, con la línea de lo que lleva y le queda, el gráfico acumulado y el detalle por semanas o meses"
   ]
 }
