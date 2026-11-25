@@ -38,6 +38,13 @@ header{position:sticky;top:0;z-index:20;background:var(--asfalto);color:#fff}
 .cab-acc{margin-left:auto;display:flex;align-items:center;gap:8px}
 .cabtn{display:inline-flex;align-items:center;gap:6px;border:1px solid #4A515E;background:#2E333D;color:#fff;border-radius:999px;padding:6px 13px;font-size:13.5px;font-weight:700;cursor:pointer;transition:border-color .15s}
 .cabtn:hover{border-color:var(--senal)}
+.cabtn{position:relative} .nov-punto{position:absolute;top:-2px;right:-2px;width:11px;height:11px;border-radius:50%;background:var(--senal);border:2px solid var(--asfalto)}
+.dlg.novs{width:min(620px,100%)}
+.novs-lista{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.novs-lista li{border:1px solid var(--linea);border-radius:12px;padding:12px 14px}
+.novs-lista small{font-family:var(--cond);font-weight:700;font-size:14px;color:var(--gris)}
+.novs-lista b{display:block;font-size:17px;margin:2px 0 4px}
+.novs-lista p{margin:0}
 .ver{border:1px solid #4A515E;background:#2E333D;color:#C9CED6;border-radius:999px;padding:5px 12px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:border-color .15s,color .15s}
 .ver:hover{border-color:var(--senal);color:#fff}
 .ver b{color:var(--senal);font-family:var(--cond);font-size:15px;margin-left:3px}
@@ -438,7 +445,7 @@ table.segj{border-collapse:separate;border-spacing:0;font-variant-numeric:tabula
 .est.no{background:#FBE7E5;color:var(--mal)}
 .est.nuevo{background:#E4ECF9;color:var(--pista)}
 
-/* bloqueo de actualización y recorrido */
+/* bloqueo de actualización */
 .bloqueo{position:fixed;inset:0;z-index:100;background:rgba(22,25,31,.82);display:grid;place-items:center;padding:16px}
 .caja{background:var(--papel);border-radius:20px;width:min(520px,100%);overflow:hidden;box-shadow:0 30px 80px -20px rgba(0,0,0,.6);animation:subir .25s cubic-bezier(.2,.7,.2,1)}
 .caja-cab{background:var(--senal);padding:20px 22px}
@@ -544,7 +551,7 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
   .semana{grid-template-columns:1fr 110px 40px}
   .ficha-cuerpo .calculo{position:static}
   .sep-fila{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr)}
-  .cabtn span,.verp{display:none} .ver{padding:5px 9px} .ver b{margin-left:0} .cab{gap:8px} .logo{width:30px;height:30px} .marca{gap:8px;min-width:0} .marca h1{font-size:19px} .cabtn{padding:7px 9px} .cab-acc{gap:6px} .marca h1{font-size:20px} .cop-estado{grid-template-columns:1fr}
+  .cabtn span,.verp{display:none} .ver{padding:5px 9px} .ver b{margin-left:0} .cab{gap:8px} .logo{width:30px;height:30px} .marca{gap:8px;min-width:0} .marca h1{font-size:19px} .cabtn{padding:7px 9px} .cab-acc{gap:6px} .marca h1{font-size:20px} .cop-estado{grid-template-columns:1fr} .marca h1{overflow:hidden;text-overflow:ellipsis;min-width:0} .cab-acc{flex-shrink:0} .cabtn{padding:7px 8px} .cab-acc{gap:5px}
   .mdia{width:calc(100vw - 16px);padding:10px} .vayuda{display:none}
   .mdia-ops{grid-template-columns:1fr 1fr 1fr;gap:5px} .mdia-ops button{flex-direction:column;align-items:center;text-align:center;gap:3px;padding:6px 4px;font-size:12px}
   .mdia-ops button small{display:none} .mdia-cab{margin-bottom:8px} .mdia-pie{font-size:12px;margin-top:8px}
@@ -570,6 +577,7 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
     <div class="cab-acc">
     <button class="cabtn" onclick="guardarCopia()" title="Descargar una copia de todos los datos"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg><span>Guardar</span></button>
     <button class="cabtn" onclick="abrirCopias()" title="Cargar una copia y ver el registro"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V4M7.5 8.5 12 4l4.5 4.5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg><span>Cargar</span></button>
+    <button class="cabtn" id="novBtn" onclick="abrirNovedades()" title="Qué trae esta versión"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.4 5.2 5.6.6-4.2 3.8 1.2 5.5L12 15.3 7 18.1l1.2-5.5L4 8.8l5.6-.6z"/></svg><span>Novedades</span><i class="nov-punto" hidden></i></button>
     <button class="ver" id="verBtn" onclick="buscarActualizacion()" title="Buscar una versión nueva"><span class="verp">Versión</span><b id="verTxt"></b></button>
     </div>
   </div>
@@ -582,9 +590,15 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
    Control Planning 10 — rehecha desde cero
    Datos en localStorage, con una clave nueva.
    ========================================================= */
-const APP_VERSION = '10.21.0';
+const APP_VERSION = '10.22.0';
 const CLAVE = 'control-planning-v10';
 const NOVEDADES = {
+  '10.22.0': [
+    { titulo:'Novedades, a un botón', donde:'Arriba a la derecha',
+      texto:'Al actualizar ya no se abre un recorrido con «Siguiente» ni se acumulan las versiones que te hayas saltado. Lo que trae cada versión está en el botón «Novedades» de la barra de arriba, todo junto; el punto amarillo te avisa de que hay algo sin ver.' },
+    { titulo:'Aviso de actualización más simple', donde:'Al salir una versión nueva',
+      texto:'El aviso solo trae el botón «Actualizar ahora». Lo nuevo lo ves después en «Novedades».' },
+  ],
   '10.21.0': [
     { titulo:'Guardar y cargar', donde:'Arriba a la derecha',
       texto:'Los datos se guardan en cada dispositivo. Con «Guardar» descargas una copia de todo (en el móvil se abre el menú para guardarla en Archivos o enviártela). Con «Cargar» la abres en el otro dispositivo y tendrás los mismos datos.' },
@@ -2726,7 +2740,7 @@ function guardarSeparar(){
 /* ---------- año de cálculo ---------- */
 function cambiarAnio(d){ S.anio += d; guardar(); pintar(); }
 /* =========================================================
-   Actualizaciones: aviso que bloquea y recorrido de novedades
+   Actualizaciones: aviso que bloquea y botón de novedades
    ========================================================= */
 const masNueva = (a,b) => { const x=a.split('.').map(Number), y=b.split('.').map(Number); for(let i=0;i<3;i++){ if((x[i]||0)!==(y[i]||0)) return (x[i]||0)>(y[i]||0); } return false; };
 let avisando = false;
@@ -2750,30 +2764,31 @@ function avisoActualizacion(v){
   avisando = true; cerrarFicha();
   const d = document.createElement('div'); d.className='bloqueo'; d.id='bloqueo';
   d.innerHTML = `<div class="caja" role="alertdialog" aria-modal="true" aria-labelledby="bTit"><div class="caja-cab"><small>Versión ${esc(v.version)}</small><h2 id="bTit">Hay una versión nueva</h2></div>
-    <div class="caja-cuerpo"><p>Actualiza para seguir usando la app. Tus datos se quedan como están.</p>${(v.novedades||[]).length?`<ul>${v.novedades.map(n=>`<li>${esc(n)}</li>`).join('')}</ul>`:''}</div>
+    <div class="caja-cuerpo"><p>Actualiza para seguir usando la app. Tus datos se quedan como están. Lo que trae lo verás después en «Novedades», arriba.</p></div>
     <div class="caja-pie"><span class="muted" style="font-size:13px">Tienes la ${APP_VERSION}</span><button class="btn primario" id="actBtn">Actualizar ahora</button></div></div>`;
   document.body.appendChild(d);
   const b = d.querySelector('#actBtn'); b.focus();
   b.onclick = () => { b.disabled = true; b.textContent = 'Actualizando…'; guardar(); location.replace(location.pathname + '?v=' + encodeURIComponent(v.version) + '&t=' + Date.now()); };
 }
-function recorrido(){
-  const pasos = Object.keys(NOVEDADES).filter(v=>masNueva(v, S.versionVista||'0')).sort((a,b)=>masNueva(a,b)?1:-1).flatMap(v=>NOVEDADES[v].map(p=>({...p, v})));
-  if(!pasos.length) return;
-  let i = 0; const d = document.createElement('div'); d.className='bloqueo'; document.body.appendChild(d);
-  const pinta = () => { const p = pasos[i], ult = i===pasos.length-1;
-    d.innerHTML = `<div class="caja" role="dialog" aria-modal="true" aria-labelledby="rTit"><div class="caja-cab"><small>Novedades ${esc(p.v)} · ${esc(p.donde)}</small><h2 id="rTit">${esc(p.titulo)}</h2></div>
-      <div class="caja-cuerpo"><p>${esc(p.texto)}</p></div>
-      <div class="caja-pie"><span class="puntos">${pasos.map((_,k)=>`<i class="${k===i?'on':''}"></i>`).join('')}</span><button class="btn primario" id="rSig">${ult?'Entendido':'Siguiente'}</button></div></div>`;
-    const b = d.querySelector('#rSig'); b.focus();
-    b.onclick = () => { if(ult){ S.versionVista = APP_VERSION; guardar(); d.remove(); } else { i++; pinta(); } }; };
-  pinta();
+/* «Novedades» en la barra: solo lo de la versión que tienes, todo junto.
+   El punto amarillo sale hasta que la abres (versionVista). */
+function puntoNovedades(){ const p = document.querySelector('#novBtn .nov-punto'); if(p) p.hidden = !(NOVEDADES[APP_VERSION] && masNueva(APP_VERSION, S.versionVista||'0')); }
+function abrirNovedades(){
+  const ns = NOVEDADES[APP_VERSION] || [];
+  $('#capa').innerHTML = `<div class="fondo" onclick="if(event.target===this)cerrarNovedades()"><div class="dlg novs" role="dialog" aria-modal="true" aria-labelledby="nTit">
+    <div class="dlg-cab"><div><small class="muted">Versión ${esc(APP_VERSION)}</small><h2 id="nTit">Novedades</h2></div><button class="cerrar" onclick="cerrarNovedades()" aria-label="Cerrar">×</button></div>
+    <div class="dlg-cuerpo">${ns.length ? `<ul class="novs-lista">${ns.map(n=>`<li><small>${esc(n.donde)}</small><b>${esc(n.titulo)}</b><p>${esc(n.texto)}</p></li>`).join('')}</ul>` : '<p>Esta versión no trae nada nuevo que contar.</p>'}</div>
+    <div class="dlg-pie"><button class="btn primario" onclick="cerrarNovedades()">Entendido</button></div></div></div>`;
+  if(masNueva(APP_VERSION, S.versionVista||'0')){ S.versionVista = APP_VERSION; guardar(); }
+  puntoNovedades();
 }
+function cerrarNovedades(){ $('#capa').innerHTML = ''; }
 
 /* ---------- arranque ---------- */
 document.addEventListener('keydown', e=>{ if(e.key==='Escape' && !$('#bloqueo') && $('#capa').innerHTML){ UI.edit=null; $('#capa').innerHTML=''; } });
 if('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(()=>{});
 pintar(true);
-if(masNueva(APP_VERSION, S.versionVista||'0')) recorrido();
+puntoNovedades();
 { const v = document.getElementById("verTxt"); if(v) v.textContent = APP_VERSION; }
 comprobarVersion(); setInterval(comprobarVersion, 60*1000);
 if(/[?&]v=/.test(location.search)) history.replaceState(null, '', location.pathname);

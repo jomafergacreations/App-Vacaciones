@@ -11,8 +11,8 @@ Los datos viven en el `localStorage` del navegador (clave `control-planning-v10`
 En el mismo commit:
 
 1. Subir `APP_VERSION` en `index.html` (semver: funciones nuevas suben el segundo número; arreglos, el tercero).
-2. Añadir en `NOVEDADES` una entrada con la nueva versión y sus pasos `{ titulo, donde, texto }`: es el recorrido que el usuario ve al actualizar. En español, claro y desde su punto de vista.
-3. Poner la misma versión en `version.json`, con un resumen corto en `novedades`. La app abierta lo consulta cada minuto y bloquea la pantalla hasta que se actualice.
+2. Añadir en `NOVEDADES` una entrada con la nueva versión y sus puntos `{ titulo, donde, texto }`. En español, claro y desde su punto de vista. No hay recorrido al actualizar: solo se enseñan las de la versión actual, todas juntas, en el botón «Novedades» de la barra (`abrirNovedades`; punto amarillo con `puntoNovedades` hasta que se abre, guarda `S.versionVista`). Nunca acumular versiones anteriores ni volver a un recorrido con «Siguiente».
+3. Poner la misma versión en `version.json`, con un resumen corto en `novedades`. La app abierta lo consulta cada minuto y bloquea la pantalla hasta que se actualice; el aviso solo lleva el botón «Actualizar ahora» (no enseña la lista).
 
 Si `version.json` lleva una versión mayor que la de `index.html`, la app entra en bucle de actualización: subirlas siempre juntas.
 

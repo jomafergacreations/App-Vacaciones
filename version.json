@@ -1,8 +1,7 @@
 {
-  "version": "10.21.0",
+  "version": "10.22.0",
   "fecha": "2026-11-25",
   "novedades": [
-    "Guardar y cargar copias para pasar los datos entre el móvil y el ordenador",
-    "Fecha y hora de cada copia y registro"
+    "Novedades en un botón de la barra de arriba, sin recorrido al actualizar"
   ]
 }
