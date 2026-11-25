@@ -115,6 +115,7 @@ table.plantilla{width:100%;border-collapse:collapse;font-variant-numeric:tabular
 .neg{display:inline-block;border-radius:5px;padding:1px 7px;font-size:11.5px;font-weight:700;color:#fff;letter-spacing:.01em;vertical-align:1px}
 .neg.gh{background:#1F5FBF} .neg.rb{background:#E8650F}
 .negocios{display:inline-flex;gap:8px;flex-wrap:wrap}
+.imp-ajustes .negocios{flex-wrap:nowrap}
 .negocios button{border:2px solid var(--nc);background:#fff;color:var(--nc);border-radius:10px;padding:9px 16px;font-weight:700;cursor:pointer;transition:background .15s,color .15s}
 .negocios button.on{background:var(--nc);color:#fff}
 .check{flex-direction:row;align-items:center;gap:8px;color:var(--asfalto);font-size:14.5px;cursor:pointer}
@@ -421,9 +422,13 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
    Control Planning 10 — rehecha desde cero
    Datos en localStorage, con una clave nueva.
    ========================================================= */
-const APP_VERSION = '10.15.1';
+const APP_VERSION = '10.16.0';
 const CLAVE = 'control-planning-v10';
 const NOVEDADES = {
+  '10.16.0': [
+    { titulo:'Producto y departamento al importar rotaciones', donde:'Importar rotaciones',
+      texto:'Al revisar la rotación eliges de qué producto y departamento es el archivo (si el nombre del archivo lo dice, ya viene marcado: «PAX_GH» es Pasaje GroundHandling). Se les pone a todos los que apuntes, y así los filtros de Vacaciones y Control de jornada enseñan solo a los de ese archivo.' },
+  ],
   '10.15.1': [
     { titulo:'Vacaciones: salen todos', donde:'Vacaciones',
       texto:'Ahora salen todos los trabajadores, tengan rotación o no. Los que aún no la tienen aparecen en blanco con «sin rotación», y arriba un aviso te dice cuántos son y te deja importarla.' },
@@ -1613,7 +1618,9 @@ function prepararRot(hojas, archivo){
   const y = Number(Object.keys(porAnio).sort((a,b)=>porAnio[b]-porAnio[a])[0]);
   const cols = Object.keys(fechas).map(Number).filter(c=>fechas[c].startsWith(y+'-'));
   const codigos = {};
-  ROT = { archivo, y, completo: porAnio[y]===diasAnio(y), hayNum: ci>=0, ponerNum: true, filas: datos.map(f=>{
+  ROT = { archivo, y, completo: porAnio[y]===diasAnio(y), hayNum: ci>=0, ponerNum: true,
+    negocio: /red\s*bull|_rb\b|\brb\b/i.test(archivo) ? 'rb' : /ground|_gh|\bgh\b/i.test(archivo) ? 'gh' : '',
+    depto: /pasaje|pax/i.test(archivo) ? 'Pasaje' : /\bops\b|operaciones/i.test(archivo) ? 'Ops' : '', filas: datos.map(f=>{
     const nombre = String(f[cn]).replace(/\s+/g,' ').trim(), num = ci>=0 ? String(f[ci] ?? '').trim() : '';
     const dias = Array(diasAnio(y)).fill('?');
     cols.forEach(c=>{ const v = f[c]; const cod = v==null || v==='' ? '' : String(v).trim().toUpperCase().replace(/,/g,' ');
@@ -1646,6 +1653,9 @@ function pintarRot(primera){
       <div class="imp-res"><span>${ROT.filas.length} filas</span>${ok?`<span class="est ok">${ok} emparejadas</span>`:''}${duda?`<span class="est duda">${duda} por revisar</span>`:''}${nuevos?`<span class="est nuevo">${nuevos} nuevas</span>`:''}${no?`<span class="est no">${no} sin apuntar</span>`:''}</div>
       ${(()=>{ const dup = [...new Set(ROT.filas.filter(f=>f.num && ROT.filas.filter(g=>g.num===f.num).length>1).map(f=>f.num))];
         return dup.length ? `<p class="aviso-suave" style="margin:0">El nº de empleado ${dup.join(', ')} sale en más de una fila (${ROT.filas.filter(f=>dup.includes(f.num)).map(f=>esc(f.nombre)).join(', ')}). No se apunta: ponlo a mano en su ficha.</p>` : ''; })()}
+      <div class="imp-ajustes"><div><label style="margin-bottom:6px">Producto de este archivo</label><div class="negocios">${Object.entries(NEGOCIOS).map(([k,n])=>`<button type="button" class="${ROT.negocio===k?'on':''}" style="--nc:${n.color}" onclick="ROT.negocio=ROT.negocio==='${k}'?'':'${k}';pintarRot()">${n.nombre}</button>`).join('')}</div></div>
+        <div><label style="margin-bottom:6px">Departamento de este archivo</label>${deptoBtns(ROT.depto, 'ROT.depto', 'pintarRot')}</div>
+        <p class="muted" style="margin:0;font-size:13px;grid-column:1/-1">Se les pone a todos los que apuntes, para que luego puedas filtrar por producto y departamento.</p></div>
       ${ROT.hayNum ? `<label class="check"><input type="checkbox" ${ROT.ponerNum?'checked':''} onchange="ROT.ponerNum=this.checked"> Apuntar también el nº de empleado a quien no lo tenga</label>` : ''}
       ${ya ? `<p class="muted" style="margin:0;font-size:14px">${ya} ya tenía${ya===1?'':'n'} rotación de ${y}: se sustituye por la del archivo.</p>` : ''}
       ${repes ? `<p class="aviso" style="margin:0">Hay trabajadores elegidos en dos filas. Cada rotación tiene que ir a una persona distinta.</p>` : ''}
@@ -1665,7 +1675,8 @@ function guardarRot(){
     else { t = S.trabajadores.find(x=>x.id===f.id); if(!t) return;
       if(f.como==='posible' || f.como==='manual') S.alias[normNombre(f.nombre)] = t.id;
       if(ROT.ponerNum && f.num && !t.num && !numRepe(f.num)){ t.num = f.num; nums++; } }
-    t.rot = t.rot || {}; t.rot[y] = f.dias.join(','); if(f.grupo) t.grupo = f.grupo; n++;
+    t.rot = t.rot || {}; t.rot[y] = f.dias.join(','); if(f.grupo) t.grupo = f.grupo;
+    if(ROT.negocio) t.negocio = ROT.negocio; if(ROT.depto) t.depto = ROT.depto; n++;
   });
   const dup = [...new Set(ROT.filas.filter(f=>f.num && ROT.filas.filter(g=>g.num===f.num).length>1).map(f=>f.num))];
   S.anio = y; guardar(); cerrarRot(); pintar();

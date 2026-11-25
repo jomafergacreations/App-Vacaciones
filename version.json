@@ -1,7 +1,7 @@
 {
-  "version": "10.15.1",
+  "version": "10.16.0",
   "fecha": "2026-11-25",
   "novedades": [
-    "Vacaciones: salen todos los trabajadores y avisa de quién no tiene rotación"
+    "Importar rotaciones pone el producto y el departamento del archivo"
   ]
 }
