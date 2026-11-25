@@ -1,9 +1,8 @@
 {
-  "version": "10.14.0",
+  "version": "10.15.0",
   "fecha": "2026-11-25",
   "novedades": [
-    "Nuevo módulo Vacaciones: departamento completo y calendario por trabajador",
-    "Inactividad de los fijos discontinuos marcada en el calendario",
-    "Grupos de rotación"
+    "Control de jornada por días de trabajo reales de la rotación, también las bajas",
+    "Vacaciones sin colocar descontadas de los días que quedan"
   ]
 }

@@ -421,9 +421,15 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
    Control Planning 10 — rehecha desde cero
    Datos en localStorage, con una clave nueva.
    ========================================================= */
-const APP_VERSION = '10.14.0';
+const APP_VERSION = '10.15.0';
 const CLAVE = 'control-planning-v10';
 const NOVEDADES = {
+  '10.15.0': [
+    { titulo:'Control de jornada con la rotación', donde:'Control de jornada',
+      texto:'Con la rotación importada, todo va por días de trabajo reales: lo que debería llevar, los días que le quedan y el plan para llegar. Ahora también las bajas: descuentan días de trabajo de su rotación, no días naturales.' },
+    { titulo:'Vacaciones sin colocar', donde:'Control de jornada y ficha',
+      texto:'Si la rotación no trae todas las vacaciones que le corresponden (los fijos discontinuos no las traen), las que faltan se restan de los días de trabajo que le quedan, y el plan se calcula sobre esos días. Lo verás como «≈» y «N de vacaciones sin colocar».' },
+  ],
   '10.14.0': [
     { titulo:'Nuevo módulo: Vacaciones', donde:'Inicio › Vacaciones',
       texto:'Un módulo nuevo con la rotación del año y las vacaciones, como el Excel de la base. Se llena con «Importar rotaciones».' },
@@ -701,10 +707,13 @@ function diasActivos(t, y, ini=`${y}-01-01`, fin=`${y}-12-31`){
 }
 const diasActividad = (t, y=S.anio) => diasActivos(t, y).size;
 /* días del año con los que se calcula su jornada: todo el año, o los de actividad si es fijo discontinuo */
-const diasJornada = (t, y=S.anio) => t.contrato==='discontinuo' ? diasActividad(t, y) : diasAnio(y);
+/* con rotación, la regla de tres de las bajas va por días de trabajo: los suyos del año y los de baja que caen en ellos */
+const diasJornada = (t, y=S.anio) => tieneRot(t, y) ? diasTrabajo(t, y, undefined, undefined, false).length : t.contrato==='discontinuo' ? diasActividad(t, y) : diasAnio(y);
 /* días de baja que caen en esos días */
 function diasBaja(t, y=S.anio){
-  const b = diasDe(t.bajas, y); if(t.contrato!=='discontinuo') return b.size;
+  const b = diasDe(t.bajas, y);
+  if(tieneRot(t, y)) return diasTrabajo(t, y, undefined, undefined, false).filter(d=>b.has(d)).length;
+  if(t.contrato!=='discontinuo') return b.size;
   const a = diasActivos(t, y); let n = 0; b.forEach(d=>{ if(a.has(d)) n++; }); return n;
 }
 /* ---------- rotación anual: un código por día; vacío = día de trabajo ---------- */
@@ -717,9 +726,9 @@ const tieneRot = (t, y=S.anio) => !!t.rot?.[y];
 const idxDia = d => Math.round((pd(d) - pd(d.slice(0,4)+'-01-01')) / 864e5);
 const codigoDia = (t, d) => { const a = rotDe(t, Number(d.slice(0,4))); return a ? (a[idxDia(d)] ?? '?') : null; };
 /* días de trabajo según la rotación, sin bajas y, en los fijos discontinuos, sin la inactividad (null si no hay rotación) */
-function diasTrabajo(t, y=S.anio, ini=`${y}-01-01`, fin=`${y}-12-31`){
+function diasTrabajo(t, y=S.anio, ini=`${y}-01-01`, fin=`${y}-12-31`, conBajas=true){
   if(!tieneRot(t, y)) return null;
-  const baja = diasDe(t.bajas, y, ini, fin), act = t.contrato==='discontinuo' ? diasActivos(t, y, ini, fin) : null, out = [];
+  const baja = conBajas ? diasDe(t.bajas, y, ini, fin) : new Set(), act = t.contrato==='discontinuo' ? diasActivos(t, y, ini, fin) : null, out = [];
   for(let d=ini; d<=fin; d=sumaDias(d,1)){ const c = codigoDia(t, d); if(c==null || NO_TRABAJO.has(c) || baja.has(d) || (act && !act.has(d))) continue; out.push(d); }
   return out;
 }
@@ -975,8 +984,8 @@ function recalcular(){
 function detallesHTML(e){
   const y = S.anio, r = seguimientoDe(e, y, corteDe(y)), d = [];
   if(r.estado==='inc') return '';
-  if(r.rot){ d.push(['Días de trabajo', `${r.diasTrab}`, `quedan ${r.diasResto} hasta el 31 dic`]);
-    d.push(['Vacaciones', `${r.vacRot} de ${vacDe(e)}`, 'en su rotación']);
+  if(r.rot){ d.push(['Días de trabajo', `${r.vacPend?'≈ ':''}${r.diasTrab}`, `quedan ${r.diasResto} hasta el 31 dic`]);
+    d.push(['Vacaciones', `${r.vacRot} de ${vacDe(e)}`, r.vacPend ? `${r.vacPend} sin colocar en la rotación` : 'en su rotación']);
     if(r.diasResto) d.push(['Plan para llegar', r.banda ? `${entre(r.hDiaMin, r.hDiaMax, '')} h/día` : `${nh(r.hDia)} h/día`, r.banda ? 'del mínimo al máximo' : `objetivo ${nh(r.objetivo)} h`]); }
   else d.push(['Vacaciones', `${vacDe(e)} días`, 'sin rotación importada']);
   if(r.semanas){ d.push(['Debería llevar', entre(r.espMin, r.espMax), `lleva ${nh(r.hechas)} h`]);
@@ -1014,7 +1023,7 @@ function bloqueBajas(e){
       <span class="dias">${p.desde&&p.hasta&&p.hasta>=p.desde?`${diasDe([p], S.anio).size} días en ${S.anio}`:''}</span>
       <button type="button" class="quitar" aria-label="Quitar baja" onclick="UI.edit.bajas.splice(${i},1);pintarFicha()">×</button></div>`).join('')}</div>
     <div class="fila" style="margin-top:8px"><button type="button" class="btn" onclick="UI.edit.bajas.push({desde:'',hasta:''});pintarFicha()">${ICO.mas} Añadir baja</button></div>
-    ${b ? `<p class="muted" style="margin:8px 0 0;font-size:13.5px">${b} día${b===1?'':'s'} de baja de ${x}${e.contrato==='discontinuo'?' de actividad':''}: su jornada de ${S.anio} se queda en ${x-b}/${x} partes.</p>` : ''}
+    ${b ? `<p class="muted" style="margin:8px 0 0;font-size:13.5px">${b} día${b===1?'':'s'} ${tieneRot(e)?'de trabajo ':''}de baja de ${x}${tieneRot(e)?' días de trabajo de su rotación':e.contrato==='discontinuo'?' de actividad':''}: su jornada de ${S.anio} se queda en ${x-b}/${x} partes.</p>` : ''}
   </div>`;
 }
 /* horas apuntadas por semana en el año elegido */
@@ -1249,10 +1258,15 @@ function seguimientoDe(t, y, corte){
     const dt = diasTrabajo(t, y), hoy = hoyIso();
     const desde = corte ? sumaDias(corte.hasta, 1) : (hoy > `${y}-01-01` ? hoy : `${y}-01-01`);
     const resto = dt.filter(d=>d>=desde);
-    r.rot = true; r.diasTrab = dt.length; r.diasResto = resto.length; r.resto = new Set(resto); r.vacRot = vacEnRot(t, y);
+    r.rot = true; r.resto = new Set(resto); r.vacRot = vacEnRot(t, y);
+    /* las vacaciones que le corresponden y no están en la rotación (los FD no las traen) se descuentan de los días que quedan */
+    r.vacPend = Math.max(0, vacDe(t) - r.vacRot);
+    r.diasTrab = Math.max(0, dt.length - r.vacPend); r.diasResto = Math.max(0, resto.length - r.vacPend);
     r.semResto = new Set(resto.map(lunesDe)).size;
-    if(!r.banda){ r.objetivo = r.rango.max - MARGEN_H; r.pend = Math.max(0, r.objetivo - r.hechas); r.hDia = resto.length ? r.pend / resto.length : null; }
-    else { r.hDiaMin = resto.length ? Math.max(0, r.rango.min - r.hechas) / resto.length : null; r.hDiaMax = resto.length ? Math.max(0, r.rango.max - r.hechas) / resto.length : null; }
+    const n = r.diasResto, rep = resto.length;
+    if(!r.banda){ r.objetivo = r.rango.max - MARGEN_H; r.pend = Math.max(0, r.objetivo - r.hechas); r.hDia = n ? r.pend / n : null; r.hRep = rep ? r.pend / rep : null; }
+    else { const pmin = Math.max(0, r.rango.min - r.hechas), pmax = Math.max(0, r.rango.max - r.hechas);
+      r.hDiaMin = n ? pmin / n : null; r.hDiaMax = n ? pmax / n : null; r.hRepMin = rep ? pmin / rep : null; r.hRepMax = rep ? pmax / rep : null; }
   }
   /* parciales sin garantía: semanas seguidas, hasta la última importada, por encima de lo que le toca a su máximo */
   r.seguidas = 0;
@@ -1293,7 +1307,7 @@ function vJornada(){
   const tiene = r => !r.rango ? '—' : entre(r.rango.min, r.rango.max);
   const avisoS = r => r.seguidas >= SEGUIDAS ? `<span class="aviso" title="Parcial sin jornada garantizada: cuidado con darle muchas horas seguidas">${r.seguidas} semanas seguidas por encima</span>` : '';
   const diasCelda = r => !r.rot ? '<span class="muted">—</span><div class="sub">sin rotación</div>'
-    : `<span class="hecha">${r.diasTrab} días</span><div class="sub">quedan ${r.diasResto} hasta el 31 dic</div><div class="sub">vacaciones ${r.vacRot} de ${vacDe(r.t)}</div>`;
+    : `<span class="hecha">${r.vacPend?'≈ ':''}${r.diasTrab} días</span><div class="sub">quedan ${r.diasResto} hasta el 31 dic</div><div class="sub">${r.vacPend ? `${r.vacPend} de vacaciones sin colocar` : `vacaciones ${r.vacRot} de ${vacDe(r.t)}`}</div>`;
   const planCelda = (r, corto) => {
     if(r.estado==='inc') return '—';
     if(r.rot){ if(!r.diasResto) return corto ? '' : '—<div class="sub">no le quedan días de trabajo</div>';
@@ -1340,7 +1354,7 @@ function vJornada(){
       ${!corte ? `<p class="muted" style="margin:4px 0 14px">Todavía no hay turnos de ${y}. Importa el archivo de una semana para empezar el seguimiento.</p>` : ''}
       ${rs.length ? `<div class="tabla-escritorio"><table class="plantilla jtab"><thead><tr><th>Trabajador</th><th class="num">Cómputo ${y}</th><th class="num">Días de trabajo</th><th class="num">Lleva</th><th class="num">Diferencia</th><th class="num">Previsión a fin de año</th><th class="num">Plan para llegar</th><th>Estado</th></tr></thead><tbody>${filas}</tbody></table></div>
         <div class="tarjetas-movil">${tarjetas}</div>` : '<p class="muted" style="margin:10px 0">Nadie coincide con el filtro.</p>'}
-      <p class="muted nota">«Debería llevar» reparte su cómputo por igual entre sus días de jornada hasta el ${corte?fmt(corte.hasta):'último turno importado'}, sin contar las bajas. Llega si va dentro de un ${nf(MARGEN*100)} % arriba o abajo. La previsión supone que sigue al mismo ritmo. Con rotación, todo se reparte por sus días de trabajo (sin vacaciones, descansos, festivos ni ajustes) y el plan apunta a sus horas menos ${MARGEN_H} h. Los parciales sin garantía y los fijos discontinuos van por banda, entre su mínimo y su máximo, sin margen.</p>
+      <p class="muted nota">«Debería llevar» reparte su cómputo por igual entre sus días de jornada hasta el ${corte?fmt(corte.hasta):'último turno importado'}, sin contar las bajas. Llega si va dentro de un ${nf(MARGEN*100)} % arriba o abajo. La previsión supone que sigue al mismo ritmo. Con rotación, todo se reparte por sus días de trabajo (sin vacaciones, descansos, festivos ni ajustes), las bajas descuentan días de trabajo y el plan apunta a sus horas menos ${MARGEN_H} h. Si la rotación no trae todas sus vacaciones (como en los fijos discontinuos), las que faltan se restan de los días que le quedan. Los parciales sin garantía y los fijos discontinuos van por banda, entre su mínimo y su máximo, sin margen.</p>
     </div>
     ${corte || hayRot ? seguimientoHTML(todos.filter(r=>rs.includes(r)), y, corte) : ''}`;
 }
@@ -1359,8 +1373,8 @@ function seguimientoHTML(rs, y, corte){
       if(!r.rot || r.estado==='inc') return `<td class="fut"></td>`;
       const dias = r.ef.filter(d=>d>=p.desde && d<=p.hasta && r.resto.has(d)).length;
       if(!dias) return `<td class="fut" title="Sin días de trabajo"></td>`;
-      if(r.banda) return `<td class="plan" title="${esc(p.cab)}: plan entre ${nh(dias*r.hDiaMin)} y ${nh(dias*r.hDiaMax)} h en ${dias} días de trabajo"><small>${nh(Math.round(dias*r.hDiaMin))}–${nh(Math.round(dias*r.hDiaMax))}</small></td>`;
-      return `<td class="plan" title="${esc(p.cab)}: plan de ${nh(dias*r.hDia)} h en ${dias} días de trabajo">${nh(Math.round(dias*r.hDia*10)/10)}</td>`; }
+      if(r.banda) return `<td class="plan" title="${esc(p.cab)}: plan entre ${nh(dias*r.hRepMin)} y ${nh(dias*r.hRepMax)} h en ${dias} días de su rotación"><small>${nh(Math.round(dias*r.hRepMin))}–${nh(Math.round(dias*r.hRepMax))}</small></td>`;
+      return `<td class="plan" title="${esc(p.cab)}: plan de ${nh(dias*r.hRep)} h en ${dias} días de su rotación${r.vacPend?' (con sus vacaciones sin colocar repartidas)':''}">${nh(Math.round(dias*r.hRep*10)/10)}</td>`; }
     if(r.estado==='inc') return `<td></td>`;
     const ls = Object.keys(r.t.horas||{}).filter(p.semanas);
     const dias = r.ef.filter(d=>d>=p.desde && d<=p.hasta).length, n = r.ef.length || 1;
