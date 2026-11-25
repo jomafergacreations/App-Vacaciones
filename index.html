@@ -168,6 +168,13 @@ table.plantilla{width:100%;border-collapse:collapse;font-variant-numeric:tabular
 /* importar turnos */
 .dlg.ancho{width:min(1000px,100%)}
 .fondo.quieto,.fondo.quieto .dlg{animation:none}
+.banda{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--senal-suave);border:1px solid #EBD27A;border-radius:14px;padding:12px 16px;margin-bottom:16px}
+.aviso-suave{margin:0;background:var(--senal-suave);border-radius:10px;padding:10px 12px;font-size:14px}
+.sep-lista{display:flex;flex-direction:column;border-top:2px solid var(--asfalto)}
+.sep-fila{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1.4fr);gap:10px;align-items:center;padding:7px 2px;border-bottom:1px solid var(--linea)}
+.sep-fila.tit{font-family:var(--cond);font-weight:700;color:var(--gris);font-size:15px}
+.sep-fila .sub{font-size:13.5px;color:var(--gris);font-weight:600;overflow-wrap:anywhere}
+.sep-fila input{padding:8px 10px;font-size:15px}
 .pla-lista{display:flex;flex-direction:column;border-top:2px solid var(--asfalto)}
 .pla-fila{flex-direction:row;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px solid var(--linea);color:var(--asfalto);font-size:15px;cursor:pointer;flex-wrap:wrap}
 .pla-fila input{width:18px;height:18px;margin:0;flex:0 0 auto}
@@ -272,6 +279,7 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
   .imp-fila select{grid-column:1/-1} .imp-fila .est{grid-column:1/-1}
   .imp-fila.tit{display:none}
   .semana{grid-template-columns:1fr 110px 40px}
+  .sep-fila{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr)} .sep-fila .sub{grid-column:1/-1} .sep-fila.tit{display:none}
   .resumen .cifra.filtra b{font-size:26px}
   .segj tbody th{max-width:130px}
   .barra-herr .buscar{max-width:none} .seg{overflow-x:auto;max-width:100%}
@@ -297,9 +305,15 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
    Control Planning 10 — rehecha desde cero
    Datos en localStorage, con una clave nueva.
    ========================================================= */
-const APP_VERSION = '10.6.0';
+const APP_VERSION = '10.7.0';
 const CLAVE = 'control-planning-v10';
 const NOVEDADES = {
+  '10.7.0': [
+    { titulo:'Nombre y apellidos por separado', donde:'Personal › ficha del trabajador',
+      texto:'La ficha tiene ahora dos casillas, Nombre y Apellidos. En la lista se ven como «APELLIDOS, NOMBRE» y se ordenan por apellidos.' },
+    { titulo:'Separar a los que venían juntos', donde:'Personal',
+      texto:'Los que entraron desde el Excel con todo junto salen avisados en una franja amarilla. Pulsa «Separarlos»: te propongo cómo separar a cada uno, corriges los nombres compuestos y guardas todos de una vez.' },
+  ],
   '10.6.0': [
     { titulo:'Añadir la plantilla desde Excel', donde:'Personal › Añadir desde Excel',
       texto:'«Pegar lista» ahora se llama «Añadir desde Excel» y admite el archivo entero (.xlsx o .csv), además de filas pegadas. Basta con una columna de nombres. Antes de añadir a nadie ves la lista: los que ya están en la app y las plazas ficticias salen sin marcar.' },
@@ -388,7 +402,21 @@ const CONTRATOS = {
 function anioInicial(){ const d = new Date(); return d.getFullYear() + (d.getMonth()>=9 ? 1 : 0); }   // de octubre en adelante, el año siguiente
 function estadoInicial(){ return { v:10, anio:anioInicial(), ajustes:{hSemana:40, hAnio:1700}, trabajadores:[], alias:{}, versionVista:'0' }; }
 /* un trabajador vacío, con todos sus campos */
-const nuevoTrabajador = (o={}) => ({ id:null, nombre:'', num:'', contrato:'completo', modo:'semana', valor:null, actividad:[], reducido:false, red:{modo:'semana', valor:null}, concretado:false, horario:{turno:'', desde:'', hasta:''}, bajas:[], horas:{}, ...o });
+/* nombre y apellidos: se guardan por separado (nom, ape) y «nombre» es el completo, «APELLIDOS, NOMBRE»,
+   que es el que se ve, se busca y se empareja. Sin separar, «nombre» es tal como vino. */
+const nombreCompleto = t => { const n = (t.nom||'').trim(), a = (t.ape||'').trim(); return n && a ? `${a}, ${n}` : (n || a || (t.nombre||'').trim()); };
+const sinSeparar = t => !(t.nom||'').trim() && !(t.ape||'').trim();
+const NOMBRES_DOBLES = new Set(['JOSE','JUAN','MARIA','Mª','MA','M','ANA','LUIS','JORGE','MIGUEL','ANTONIO','FRANCISCO','MANUEL','PEDRO','CARLOS','JESUS','MARI','ANGEL','JAVIER','RAFAEL','FERNANDO','JUAN','PABLO','DIEGO','ROSA','LUZ']);
+/* propuesta para separar un nombre que viene junto, como en los Excel: «APELLIDOS, NOMBRE» o «APELLIDOS NOMBRE» */
+function separarNombre(s){
+  s = String(s||'').replace(/\s+/g,' ').trim();
+  if(s.includes(',')){ const [a, ...n] = s.split(','); return { ape:a.trim(), nom:n.join(',').trim() }; }
+  const w = s.split(' '); if(w.length<2) return { ape:'', nom:s };
+  let k = w.length - 1;
+  if(w.length>=4 && NOMBRES_DOBLES.has(sinAcentos(w[k-1]).toUpperCase())) k--;
+  return { ape:w.slice(0,k).join(' '), nom:w.slice(k).join(' ') };
+}
+const nuevoTrabajador = (o={}) => ({ id:null, nombre:'', nom:'', ape:'', num:'', contrato:'completo', modo:'semana', valor:null, actividad:[], reducido:false, red:{modo:'semana', valor:null}, concretado:false, horario:{turno:'', desde:'', hasta:''}, bajas:[], horas:{}, ...o });
 function normalizar(d){
   const b = estadoInicial();
   d = Object.assign(b, d || {});
@@ -398,7 +426,11 @@ function normalizar(d){
     valor: t.valor ?? null, actividad: Array.isArray(t.actividad) ? t.actividad : [],
     reducido: t.reducido, red: t.red, concretado: t.concretado, horario: t.horario, conc: t.conc, bajas: t.bajas, horas: t.horas,
     ...(t.red===undefined && t.conc ? { reducido: !!t.concretado, red: t.conc, concretado: false } : {}),
+    nom: t.nom, ape: t.ape,
   })).map(t=>({ ...t,
+    ...(()=>{ let nom = String(t.nom||'').trim(), ape = String(t.ape||'').trim();
+      if(!nom && !ape && t.nombre.includes(',')) ({nom, ape} = separarNombre(t.nombre));
+      return { nom, ape, nombre: nombreCompleto({nom, ape, nombre:t.nombre}) }; })(),
     reducido: !!t.reducido, red: { modo: t.red?.modo==='pct' ? 'pct' : 'semana', valor: t.red?.valor ?? null },
     concretado: !!t.concretado, horario: { turno: t.horario?.turno || '', desde: t.horario?.desde || '', hasta: t.horario?.hasta || '' },
     bajas: Array.isArray(t.bajas) ? t.bajas.filter(b=>b && b.desde && b.hasta) : [],
@@ -535,6 +567,7 @@ function vPersonal(){
       <div class="cifra" style="--cc:var(--c-disc)"><b>${cuenta('discontinuo')}</b><span>fijos discontinuos</span></div>
       <div class="cifra" style="--cc:var(--senal)"><b>${nh(total)} h</b><span>jornada anual en ${S.anio}${totalHechas?`, ${nh(totalHechas)} h hechas`:''}</span></div>
     </div>
+    ${todos.filter(sinSeparar).length ? `<div class="banda anim" style="--i:2"><span><b>${todos.filter(sinSeparar).length} trabajador${todos.filter(sinSeparar).length===1?'':'es'}</b> tienen el nombre y los apellidos juntos.</span><button class="btn" onclick="abrirSeparar()">Separarlos</button></div>` : ''}
     <div class="tarjeta anim" style="--i:2">
       <div class="barra-herr">
         <input class="buscar" type="search" placeholder="Buscar por nombre o número" value="${esc(UI.buscar)}" aria-label="Buscar" oninput="UI.buscar=this.value;clearTimeout(window._b);window._b=setTimeout(()=>{pintar();const i=document.querySelector('.buscar');i.focus();i.setSelectionRange(i.value.length,i.value.length)},200)">
@@ -573,6 +606,7 @@ function quedanCelda(t, corto){
 function abrirFicha(id){
   const t = id ? S.trabajadores.find(x=>x.id===id) : null;
   UI.edit = t ? JSON.parse(JSON.stringify(t)) : nuevoTrabajador();
+  if(t && sinSeparar(t)){ Object.assign(UI.edit, separarNombre(t.nombre)); UI.edit._junto = t.nombre; }
   pintarFicha(true);
 }
 function pintarFicha(primera){
@@ -615,8 +649,10 @@ function pintarFicha(primera){
   $('#capa').innerHTML = `<div class="fondo${primera?'':' quieto'}" onclick="if(event.target===this)cerrarFicha()"><div class="dlg" role="dialog" aria-modal="true" aria-labelledby="fTit">
     <div class="dlg-cab"><h2 id="fTit">${e.id?esc(e.nombre||'Trabajador'):'Nuevo trabajador'}</h2><button class="cerrar" onclick="cerrarFicha()" aria-label="Cerrar">×</button></div>
     <div class="dlg-cuerpo">
-      <div class="fila"><label style="flex:3 1 260px">Nombre y apellidos<input id="fNombre" value="${esc(e.nombre)}" oninput="UI.edit.nombre=this.value" autocomplete="off"></label>
+      <div class="fila"><label style="flex:2 1 170px">Nombre<input id="fNombre" value="${esc(e.nom)}" oninput="UI.edit.nom=this.value" autocomplete="off"></label>
+        <label style="flex:3 1 240px">Apellidos<input id="fApe" value="${esc(e.ape)}" oninput="UI.edit.ape=this.value" autocomplete="off"></label>
         <label style="flex:1 1 120px">Nº de empleado<input value="${esc(e.num)}" oninput="UI.edit.num=this.value" autocomplete="off"></label></div>
+      ${e._junto ? `<p class="aviso-suave">Venía junto como «${esc(e._junto)}» y lo he separado yo. Revisa que el nombre y los apellidos estén bien antes de guardar.</p>` : ''}
       <div class="bloque"><h3>Contrato</h3><div class="contratos">${Object.keys(CONTRATOS).map(contratoBtn).join('')}</div></div>
       <div class="bloque"><h3>Jornada</h3>
         <div class="jornada">${campo('semana','Horas a la semana', sem, 'h')}${campo('pct','Porcentaje', pct, '%')}${campo('anio','Horas al año', pct==null?null:pct/100*A.hAnio, 'h')}</div>
@@ -710,8 +746,10 @@ function marcarRed(){ document.querySelectorAll('.jornada.red .jcampo').forEach(
 function cerrarFicha(){ UI.edit = null; $('#capa').innerHTML = ''; }
 function guardarFicha(){
   const e = UI.edit;
-  e.nombre = e.nombre.trim().replace(/\s+/g,' ');
-  if(!e.nombre){ toast('Escribe el nombre'); $('#fNombre')?.focus(); return; }
+  e.nom = (e.nom||'').trim().replace(/\s+/g,' '); e.ape = (e.ape||'').trim().replace(/\s+/g,' ');
+  if(!e.nom){ toast('Escribe el nombre'); $('#fNombre')?.focus(); return; }
+  if(!e.ape){ toast('Escribe los apellidos'); $('#fApe')?.focus(); return; }
+  e.nombre = nombreCompleto(e); delete e._junto;
   const p = pctDe(e);
   if(e.contrato!=='completo' && p!=null && (p<=0 || p>100)){ toast('La jornada tiene que estar entre 0 y un tiempo completo'); return; }
   if(e.concretado && !e.horario.turno){ toast('Elige su turno, o marca «No» en horario concretado'); return; }
@@ -822,7 +860,7 @@ function pintarPlantilla(primera){
 }
 function guardarPlantilla(){
   const fs = PLA.filas.filter(f=>f.si); if(!fs.length) return;
-  fs.forEach(f=>S.trabajadores.push(nuevoTrabajador({ id:uid(), nombre:f.nombre, contrato:f.contrato, valor: f.contrato==='completo' ? null : f.horas })));
+  fs.forEach(f=>S.trabajadores.push(nuevoTrabajador({ id:uid(), nombre:f.nombre, ...(f.nombre.includes(',') ? separarNombre(f.nombre) : {}), contrato:f.contrato, valor: f.contrato==='completo' ? null : f.horas })));
   guardar(); cerrarPegar(); pintar();
   const sin = fs.filter(f=>f.contrato!=='completo' && f.horas==null).length;
   toast(`${fs.length} trabajador${fs.length===1?'':'es'} añadido${fs.length===1?'':'s'}${sin?` · a ${sin} les falta la jornada`:''}`);
@@ -1245,7 +1283,7 @@ function guardarImport(){
   const suma = {};
   filas.forEach(f=>{
     let id = f.id;
-    if(id==='nuevo'){ const t = nuevoTrabajador({ id:uid(), nombre:f.nombre }); S.trabajadores.push(t); id = t.id; }
+    if(id==='nuevo'){ const t = nuevoTrabajador({ id:uid(), nombre:f.nombre, ...(f.nombre.includes(',') ? separarNombre(f.nombre) : {}) }); t.nombre = nombreCompleto(t); S.trabajadores.push(t); id = t.id; }
     else if(f.como==='posible' || f.como==='manual') S.alias[normNombre(f.nombre)] = id;   // la próxima vez se empareja solo
     suma[id] = (suma[id]||0) + f.horas;
   });
@@ -1254,6 +1292,30 @@ function guardarImport(){
   if(anioSemana(l)!==S.anio) S.anio = anioSemana(l);
   guardar(); cerrarImportar(); pintar();
   toast(`Semana ${numSemana(l)}: ${nh(total)} h apuntadas a ${n} trabajador${n===1?'':'es'}`);
+}
+
+/* ---------- separar nombre y apellidos de todos los que vienen juntos ---------- */
+function abrirSeparar(){
+  const ts = S.trabajadores.filter(sinSeparar).sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
+  if(!ts.length) return;
+  $('#capa').innerHTML = `<div class="fondo" onclick="if(event.target===this)$('#capa').innerHTML=''"><div class="dlg ancho" role="dialog" aria-modal="true" aria-labelledby="sTit">
+    <div class="dlg-cab"><h2 id="sTit">Separar nombre y apellidos</h2><button class="cerrar" onclick="$('#capa').innerHTML=''" aria-label="Cerrar">×</button></div>
+    <div class="dlg-cuerpo">
+      <p style="margin:0">Te propongo cómo separar a cada uno: casi siempre el nombre es la última palabra. Corrige los que no estén bien, sobre todo los nombres compuestos, y guarda.</p>
+      <div class="sep-lista"><div class="sep-fila tit"><span>Como venía</span><span>Nombre</span><span>Apellidos</span></div>
+      ${ts.map(t=>{ const p = separarNombre(t.nombre); return `<div class="sep-fila" data-id="${t.id}"><span class="sub">${esc(t.nombre)}</span>
+        <input class="s-nom" value="${esc(p.nom)}" aria-label="Nombre de ${esc(t.nombre)}"><input class="s-ape" value="${esc(p.ape)}" aria-label="Apellidos de ${esc(t.nombre)}"></div>`; }).join('')}</div>
+    </div>
+    <div class="dlg-pie"><button class="btn" onclick="$('#capa').innerHTML=''">Cancelar</button><button class="btn primario" onclick="guardarSeparar()">Guardar ${ts.length}</button></div></div></div>`;
+}
+function guardarSeparar(){
+  const filas = [...document.querySelectorAll('.sep-fila[data-id]')]; let n = 0, malos = 0;
+  filas.forEach(f=>{ const t = S.trabajadores.find(x=>x.id===f.dataset.id); if(!t) return;
+    const nom = f.querySelector('.s-nom').value.trim().replace(/\s+/g,' '), ape = f.querySelector('.s-ape').value.trim().replace(/\s+/g,' ');
+    if(!nom || !ape){ malos++; return; }
+    t.nom = nom; t.ape = ape; t.nombre = nombreCompleto(t); n++; });
+  guardar(); $('#capa').innerHTML = ''; pintar();
+  toast(`${n} separado${n===1?'':'s'}${malos?` · ${malos} sin guardar: les falta el nombre o los apellidos`:''}`);
 }
 
 /* ---------- año de cálculo ---------- */

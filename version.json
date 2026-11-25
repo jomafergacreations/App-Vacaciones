@@ -1,8 +1,8 @@
 {
-  "version": "10.6.0",
+  "version": "10.7.0",
   "fecha": "2026-11-25",
   "novedades": [
-    "Añadir desde Excel: carga la plantilla subiendo el archivo",
-    "Revisión antes de añadir: no duplica a nadie y deja fuera las plazas ficticias"
+    "Nombre y apellidos por separado en la ficha",
+    "Separar de una vez los nombres que venían juntos del Excel"
   ]
 }
