@@ -1,8 +1,7 @@
 {
-  "version": "10.9.0",
+  "version": "10.10.0",
   "fecha": "2026-11-25",
   "novedades": [
-    "Negocio (GroundHandling o RedBull) y departamento en la ficha",
-    "Fijos discontinuos: periodos de inactividad, mínimo 60 días al año"
+    "Horario concretado: nueva opción «Horario/rotación propia»"
   ]
 }
