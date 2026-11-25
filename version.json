@@ -1,8 +1,7 @@
 {
-  "version": "10.17.0",
+  "version": "10.17.1",
   "fecha": "2026-11-25",
   "novedades": [
-    "Vacaciones: buscador de trabajador por nombre",
-    "Filtros de contrato y producto más claros"
+    "Vacaciones por trabajador: filtros y cuentas a la izquierda, 12 meses en 3 filas de 4 a la derecha"
   ]
 }
