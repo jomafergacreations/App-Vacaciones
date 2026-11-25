@@ -1,10 +1,8 @@
 {
-  "version": "10.11.0",
+  "version": "10.12.0",
   "fecha": "2026-11-25",
   "novedades": [
-    "Fijos discontinuos por banda de 10 meses (708–1.275 h)",
-    "Filtros de producto y departamento (Pasaje, Ops)",
-    "Días de vacaciones en la ficha",
-    "Importar rotaciones: días de trabajo y plan semana a semana"
+    "La versión se ve arriba a la derecha; al pulsarla busca actualizaciones",
+    "La app usa todo el ancho de la pantalla"
   ]
 }

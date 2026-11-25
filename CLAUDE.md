@@ -18,7 +18,7 @@ Si `version.json` lleva una versión mayor que la de `index.html`, la app entra 
 
 ## Estructura actual
 
-- Cabecera: solo la marca (logo y «Control Planning»), que lleva al inicio.
+- Cabecera: la marca (logo y «Control Planning»), que lleva al inicio, y a la derecha la versión (`#verBtn`, `#verTxt`): al pulsarla, `buscarActualizacion()` mira `version.json` en ese momento. La app ocupa todo el ancho (sin `max-width` en `main` ni `.cab`).
 - Inicio (`vInicio`): dos burbujas, Personal y Control de jornada. No hay departamentos, productos ni ajustes: se irán añadiendo cuando el usuario lo pida.
 - Personal (vista `personal`): resumen por contrato, barra con búsqueda, filtro por contrato y año de cálculo (`S.anio`), tabla de trabajadores (tarjetas en móvil), ficha en diálogo (`abrirFicha`, `pintarFicha`, `guardarFicha`), «Importar turnos» y «Añadir desde Excel» (`abrirPegar` → `prepararPlantilla` → `guardarPlantilla`: archivo .xlsx/.csv o filas pegadas; detecta la columna de nombres y, si las hay, contrato y horas a la semana; revisión con casillas; salen sin marcar los que ya existen (`emparejar`), los repetidos y las plazas «FICTICIO»). La plantilla de Pasaje (67 personas) se cargó así: solo traía nombres; el nº de empleado lo pone el usuario a mano.
 - Nombre: `nom` y `ape` por separado; `nombre` = `nombreCompleto(t)` («APELLIDOS, NOMBRE»), que es el que se ve, se busca, ordena y empareja. Sin separar (`sinSeparar`), `nombre` es tal como vino: Personal muestra una franja y `abrirSeparar` propone la división con `separarNombre` (coma, o última palabra; `NOMBRES_DOBLES` para «JORGE LUIS»). La ficha propone la división y pide revisarla (`_junto`). Con coma se separa solo al cargar.
