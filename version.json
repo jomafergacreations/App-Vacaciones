@@ -1,7 +1,8 @@
 {
-  "version": "10.20.0",
+  "version": "10.21.0",
   "fecha": "2026-11-25",
   "novedades": [
-    "Desprogramaciones: mover un día de vacaciones a otra fecha, con contador de 3 al año"
+    "Guardar y cargar copias para pasar los datos entre el móvil y el ordenador",
+    "Fecha y hora de cada copia y registro"
   ]
 }

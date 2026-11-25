@@ -35,7 +35,10 @@ h1,h2,h3{font-family:var(--cond);font-weight:700;line-height:1.05;margin:0}
 /* cabecera */
 header{position:sticky;top:0;z-index:20;background:var(--asfalto);color:#fff}
 .cab{display:flex;align-items:center;gap:14px;padding:10px clamp(14px,2vw,32px)}
-.ver{margin-left:auto;border:1px solid #4A515E;background:#2E333D;color:#C9CED6;border-radius:999px;padding:5px 12px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:border-color .15s,color .15s}
+.cab-acc{margin-left:auto;display:flex;align-items:center;gap:8px}
+.cabtn{display:inline-flex;align-items:center;gap:6px;border:1px solid #4A515E;background:#2E333D;color:#fff;border-radius:999px;padding:6px 13px;font-size:13.5px;font-weight:700;cursor:pointer;transition:border-color .15s}
+.cabtn:hover{border-color:var(--senal)}
+.ver{border:1px solid #4A515E;background:#2E333D;color:#C9CED6;border-radius:999px;padding:5px 12px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:border-color .15s,color .15s}
 .ver:hover{border-color:var(--senal);color:#fff}
 .ver b{color:var(--senal);font-family:var(--cond);font-size:15px;margin-left:3px}
 .marca{display:flex;align-items:center;gap:10px;border:0;background:none;color:#fff;cursor:pointer;padding:0}
@@ -266,6 +269,26 @@ table.vgrid{border-collapse:separate;border-spacing:0;font-size:13px;font-varian
 .c-desp{background:var(--senal-suave);color:#7A5600}
 .tramo button{border:0;background:none;cursor:pointer;font-weight:700;color:inherit;padding:0 0 0 4px}
 .mdia-pie{margin:10px 0 0;font-size:12.5px;color:var(--gris);line-height:1.4}
+/* copias */
+.copias{width:min(760px,100%)}
+.cop-estado{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cop-estado>div{border:1px solid var(--linea);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.cop-estado small{color:var(--gris);font-weight:700;font-size:12.5px}
+.cop-estado b{font-family:var(--cond);font-size:19px}
+.cop-estado span{font-size:13px;color:var(--gris)}
+.cop-estado .cop-aviso{color:#7A5600;font-weight:700}
+.cop-botones{display:flex;gap:10px;flex-wrap:wrap}
+.cop-botones label.btn{flex-direction:row;cursor:pointer}
+.cop-prev{border:2px solid var(--asfalto);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.cop-prev-cab small{display:block;color:var(--gris);font-weight:700;font-size:12.5px}
+.cop-prev-cab b{display:block;font-family:var(--cond);font-size:26px}
+.cop-prev-cab span{font-size:13.5px;color:var(--gris);font-weight:600}
+.cop-num{display:flex;gap:16px;flex-wrap:wrap;font-size:14px}
+.cop-num b{font-family:var(--cond);font-size:22px}
+.cop-ok{margin:0;color:var(--ok);font-weight:700;font-size:14px}
+.cop-reg{display:flex;flex-direction:column;border-top:1px solid var(--linea)}
+.cop-reg>div{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:7px 0;border-bottom:1px solid var(--linea);font-size:14px}
+.cop-reg .muted{margin-left:auto;font-size:13px}
 .chip.singar{background:#F1F3F6;color:var(--gris)}
 .banda-j{border:2px dashed var(--linea);border-radius:12px;padding:12px 14px;background:#FAFBFC}
 .banda-j b{font-family:var(--cond);font-size:28px}
@@ -521,6 +544,7 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
   .semana{grid-template-columns:1fr 110px 40px}
   .ficha-cuerpo .calculo{position:static}
   .sep-fila{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr)}
+  .cabtn span,.verp{display:none} .ver{padding:5px 9px} .ver b{margin-left:0} .cab{gap:8px} .logo{width:30px;height:30px} .marca{gap:8px;min-width:0} .marca h1{font-size:19px} .cabtn{padding:7px 9px} .cab-acc{gap:6px} .marca h1{font-size:20px} .cop-estado{grid-template-columns:1fr}
   .mdia{width:calc(100vw - 16px);padding:10px} .vayuda{display:none}
   .mdia-ops{grid-template-columns:1fr 1fr 1fr;gap:5px} .mdia-ops button{flex-direction:column;align-items:center;text-align:center;gap:3px;padding:6px 4px;font-size:12px}
   .mdia-ops button small{display:none} .mdia-cab{margin-bottom:8px} .mdia-pie{font-size:12px;margin-top:8px}
@@ -543,7 +567,11 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
       <span class="logo"><svg viewBox="0 0 24 24" aria-hidden="true"><g transform="rotate(45 12 12)"><path fill="#22262E" d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></g></svg></span>
       <h1>Control Planning</h1>
     </button>
-    <button class="ver" id="verBtn" onclick="buscarActualizacion()" title="Buscar una versión nueva">Versión<b id="verTxt"></b></button>
+    <div class="cab-acc">
+    <button class="cabtn" onclick="guardarCopia()" title="Descargar una copia de todos los datos"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg><span>Guardar</span></button>
+    <button class="cabtn" onclick="abrirCopias()" title="Cargar una copia y ver el registro"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V4M7.5 8.5 12 4l4.5 4.5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg><span>Cargar</span></button>
+    <button class="ver" id="verBtn" onclick="buscarActualizacion()" title="Buscar una versión nueva"><span class="verp">Versión</span><b id="verTxt"></b></button>
+    </div>
   </div>
 </header>
 <main id="main"></main>
@@ -554,9 +582,15 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
    Control Planning 10 — rehecha desde cero
    Datos en localStorage, con una clave nueva.
    ========================================================= */
-const APP_VERSION = '10.20.0';
+const APP_VERSION = '10.21.0';
 const CLAVE = 'control-planning-v10';
 const NOVEDADES = {
+  '10.21.0': [
+    { titulo:'Guardar y cargar', donde:'Arriba a la derecha',
+      texto:'Los datos se guardan en cada dispositivo. Con «Guardar» descargas una copia de todo (en el móvil se abre el menú para guardarla en Archivos o enviártela). Con «Cargar» la abres en el otro dispositivo y tendrás los mismos datos.' },
+    { titulo:'Siempre sabes de cuándo es', donde:'Cargar',
+      texto:'El archivo lleva la fecha y la hora en el nombre. Antes de cargar, la app te dice de cuándo es la copia, desde qué dispositivo se guardó y si tus datos actuales son más nuevos. Además lleva un registro de las copias guardadas y cargadas, y si te equivocas puedes volver a los datos de antes de la última carga.' },
+  ],
   '10.20.0': [
     { titulo:'Desprogramaciones', donde:'Vacaciones',
       texto:'Cada trabajador tiene 3 desprogramaciones al año por convenio: quitar un día de vacaciones y ponerlo en otra fecha. Pincha un día de vacaciones, elige «Desprogramar» y luego pincha el día de trabajo al que pasa. Esc o «Cancelar» para dejarlo.' },
@@ -737,6 +771,7 @@ const ICO = {
   flecha:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
   personal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="17" cy="9" r="2.4"/><path d="M16 14.2c2.3.2 3.9 1.8 4.5 4.8"/></svg>',
   mas:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  bajar:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>',
   subir:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M7.5 8.5 12 4l4.5 4.5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>',
   calendario:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
   jornada:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 13l3.5-3.5M9.5 2.5h5M12 2.5v2.5"/></svg>',
@@ -771,7 +806,7 @@ const CONTRATOS = {
 
 /* ---------- estado ---------- */
 function anioInicial(){ const d = new Date(); return d.getFullYear() + (d.getMonth()>=9 ? 1 : 0); }   // de octubre en adelante, el año siguiente
-function estadoInicial(){ return { v:10, anio:anioInicial(), ajustes:{hSemana:40, hAnio:1700, pMin:50, pMax:90}, trabajadores:[], alias:{}, versionVista:'0' }; }
+function estadoInicial(){ return { v:10, anio:anioInicial(), ajustes:{hSemana:40, hAnio:1700, pMin:50, pMax:90}, trabajadores:[], alias:{}, versionVista:'0', modificado:null, registro:[] }; }
 /* un trabajador vacío, con todos sus campos */
 /* nombre y apellidos: se guardan por separado (nom, ape) y «nombre» es el completo, «APELLIDOS, NOMBRE»,
    que es el que se ve, se busca y se empareja. Sin separar, «nombre» es tal como vino. */
@@ -818,7 +853,8 @@ function normalizar(d){
 }
 let S;
 try { S = normalizar(JSON.parse(localStorage.getItem(CLAVE))); } catch(e){ S = estadoInicial(); }
-const guardar = () => { try { localStorage.setItem(CLAVE, JSON.stringify(S)); } catch(e){ toast('No se ha podido guardar en este navegador'); } };
+/* cada cambio apunta la hora (para comparar con las copias); guardar(false) guarda sin marcar */
+const guardar = (marca=true) => { if(marca) S.modificado = new Date().toISOString(); try { localStorage.setItem(CLAVE, JSON.stringify(S)); } catch(e){ toast('No se ha podido guardar en este navegador'); } };
 let UI = { vista:'inicio', buscar:'', filtro:'todos', filtroJ:'todos', segJ:'semana', fProd:'todos', fDep:'todos', vacTab:'dep', vacZoom:'mes', vacMes:null, vacTrab:null, vacQ:'', vacCon:'todos', vacProd:'todos', edit:null, fichaJ:null, fjVer:'semana' };
 try { const u = JSON.parse(sessionStorage.getItem('cp-ui')||'{}'); if(u.vista) UI.vista=u.vista; } catch(e){}
 
@@ -2126,6 +2162,119 @@ function deshacerDia(){
   if(u.antes==null) delete t.rot[u.y]; else t.rot[u.y] = u.antes;
   if(u.desprog!=null) t.desprog = JSON.parse(u.desprog);
   guardar(); cerrarMenuDia(); pintar(); toast('Cambio deshecho');
+}
+
+/* =========================================================
+   Copias: guardar y cargar
+   Los datos viven en cada navegador. «Guardar» descarga un
+   archivo .json con todo y con la fecha y hora de la copia;
+   «Cargar» lo lee en otro dispositivo y, antes de sustituir
+   nada, enseña de cuándo es y si es más nueva o más vieja que
+   lo que hay. Se lleva un registro de copias guardadas y
+   cargadas, y se puede volver a los datos de antes de la
+   última carga.
+   ========================================================= */
+const CLAVE_ANTES = CLAVE + '-antes-de-cargar';
+const fechaHora = iso => { if(!iso) return '—'; const d = new Date(iso);
+  return `${d.toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'})} a las ${d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}`; };
+const fechaCorta = iso => { const d = new Date(iso); return `${d.toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'})} ${d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}`; };
+function dispositivo(){
+  const u = navigator.userAgent;
+  const so = /iPhone/.test(u) ? 'iPhone' : /iPad/.test(u) ? 'iPad' : /Android/.test(u) ? 'Android' : /Windows/.test(u) ? 'Windows' : /Mac/.test(u) ? 'Mac' : /Linux/.test(u) ? 'Linux' : '';
+  const tipo = /Mobi|iPhone|Android.*Mobile/.test(u) ? 'Móvil' : /iPad|Tablet|Android/.test(u) ? 'Tableta' : 'Ordenador';
+  return so ? `${tipo} (${so})` : tipo;
+}
+function apuntarRegistro(tipo, copia){
+  S.registro = [{ tipo, el: new Date().toISOString(), copia, disp: dispositivo() }, ...(S.registro || [])].slice(0, 30);
+}
+const resumenDatos = d => {
+  const ts = d.trabajadores || [];
+  return { n: ts.length, rot: ts.filter(t=>t.rot && Object.keys(t.rot).length).length, sem: ts.reduce((a,t)=>a + Object.keys(t.horas||{}).length, 0) };
+};
+async function guardarCopia(){
+  const ahora = new Date(), iso = ahora.toISOString();
+  apuntarRegistro('guardada', iso);
+  S.ultimaCopia = { el: iso, disp: dispositivo() };
+  guardar(false);
+  const datos = { app:'Control Planning', version: APP_VERSION, guardada: iso, dispositivo: dispositivo(), datos: S };
+  const p = n => String(n).padStart(2,'0');
+  const nombre = `control-planning_${ahora.getFullYear()}-${p(ahora.getMonth()+1)}-${p(ahora.getDate())}_${p(ahora.getHours())}-${p(ahora.getMinutes())}.json`;
+  const archivo = new File([JSON.stringify(datos)], nombre, { type:'application/json' });
+  /* en el móvil se abre el menú de compartir (guardar en Archivos, enviarlo…); en el ordenador se descarga */
+  if(matchMedia('(pointer:coarse)').matches && navigator.canShare && navigator.canShare({ files:[archivo] })){
+    try { await navigator.share({ files:[archivo], title:'Copia de Control Planning' }); toast(`Copia del ${fechaCorta(iso)} lista`); pintar(); return; }
+    catch(e){ if(e.name==='AbortError'){ toast('No se ha guardado la copia'); return; } }
+  }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(archivo); a.download = nombre;
+  document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  toast(`Copia guardada: ${fechaCorta(iso)} · ${nombre}`);
+  if($('#capa .copias')) abrirCopias(); else pintar();
+}
+let CARGA = null;
+function abrirCopias(){
+  CARGA = null;
+  const r = resumenDatos(S), antes = localStorage.getItem(CLAVE_ANTES);
+  const reg = (S.registro || []).slice(0, 10);
+  $('#capa').innerHTML = `<div class="fondo" onclick="if(event.target===this)$('#capa').innerHTML=''"><div class="dlg copias" role="dialog" aria-modal="true" aria-labelledby="cTit">
+    <div class="dlg-cab"><h2 id="cTit">Guardar y cargar</h2><button class="cerrar" onclick="$('#capa').innerHTML=''" aria-label="Cerrar">×</button></div>
+    <div class="dlg-cuerpo">
+      <p style="margin:0">Los datos se guardan en cada dispositivo. Para tener lo mismo en el móvil y en el ordenador, guarda una copia en uno y cárgala en el otro.</p>
+      <div class="cop-estado">
+        <div><small>En este dispositivo</small><b>${dispositivo()}</b><span>${r.n} trabajadores · ${r.rot} con rotación · ${r.sem} semanas de horas</span></div>
+        <div><small>Último cambio</small><b>${fechaHora(S.modificado)}</b></div>
+        <div><small>Última copia guardada aquí</small><b>${S.ultimaCopia ? fechaHora(S.ultimaCopia.el) : 'Ninguna'}</b>${S.ultimaCopia && S.modificado > S.ultimaCopia.el ? '<span class="cop-aviso">Hay cambios después de esa copia</span>' : ''}</div>
+        <div><small>Datos cargados de la copia del</small><b>${S.cargada ? fechaHora(S.cargada.copia) : '—'}</b>${S.cargada ? `<span>${esc(S.cargada.disp||'')} · cargada el ${fechaCorta(S.cargada.el)}</span>` : ''}</div>
+      </div>
+      <div class="cop-botones">
+        <button class="btn primario" onclick="guardarCopia()">${ICO.bajar} Guardar copia ahora</button>
+        <label class="btn">${ICO.subir} Cargar una copia<input type="file" accept=".json,application/json" hidden onchange="leerCopia(this.files[0])"></label>
+      </div>
+      <div id="cargaPrev"></div>
+      ${reg.length ? `<div><h3 style="font-size:19px;margin:4px 0 8px">Registro</h3><div class="cop-reg">${reg.map(x=>`<div><span class="est ${x.tipo==='guardada'?'ok':'nuevo'}">${x.tipo==='guardada'?'Guardada':'Cargada'}</span>
+        <span>${x.tipo==='guardada' ? `Copia del ${fechaCorta(x.copia)}` : `Copia del ${fechaCorta(x.copia)}, cargada el ${fechaCorta(x.el)}`}</span><span class="muted">${esc(x.disp||'')}</span></div>`).join('')}</div></div>` : ''}
+      ${antes ? `<p class="muted" style="margin:0;font-size:13.5px">¿Te has equivocado al cargar? <button class="enlace" onclick="volverAntes()">Volver a los datos de antes de la última carga</button></p>` : ''}
+    </div></div></div>`;
+}
+async function leerCopia(f){
+  if(!f) return;
+  let j; try { j = JSON.parse(await f.text()); } catch(e){ return toast('Ese archivo no es una copia de Control Planning'); }
+  const d = j && j.datos && Array.isArray(j.datos.trabajadores) ? j.datos : (j && Array.isArray(j.trabajadores) ? j : null);
+  if(!d) return toast('Ese archivo no es una copia de Control Planning');
+  const cuando = j.guardada || d.ultimaCopia?.el || null, r = resumenDatos(d), ahora = resumenDatos(S);
+  const nueva = j.version && masNueva(j.version, APP_VERSION);
+  CARGA = { d, cuando, disp: j.dispositivo || d.ultimaCopia?.disp || '', version: j.version || '' };
+  const comp = !cuando || !S.modificado ? '' : S.modificado > cuando
+    ? `<p class="aviso" style="margin:0">Ojo: los datos de este dispositivo tienen cambios del ${fechaHora(S.modificado)}, <b>posteriores a la copia</b>. Si cargas, esos cambios se pierden (puedes volver atrás después).</p>`
+    : `<p class="cop-ok">La copia es más nueva que los datos de este dispositivo (último cambio: ${fechaHora(S.modificado)}).</p>`;
+  $('#cargaPrev').innerHTML = `<div class="cop-prev">
+    <div class="cop-prev-cab"><small>Copia elegida · ${esc(f.name)}</small><b>${cuando ? fechaHora(cuando) : 'Sin fecha'}</b><span>${esc(CARGA.disp)}${CARGA.version?` · versión ${esc(CARGA.version)}`:''}</span></div>
+    <div class="cop-num"><span><b>${r.n}</b> trabajadores</span><span><b>${r.rot}</b> con rotación</span><span><b>${r.sem}</b> semanas de horas</span></div>
+    <p class="muted" style="margin:0;font-size:13.5px">Ahora tienes ${ahora.n} trabajadores, ${ahora.rot} con rotación y ${ahora.sem} semanas de horas.</p>
+    ${comp}
+    ${nueva ? `<p class="aviso" style="margin:0">La copia es de una versión más nueva (${esc(j.version)}). Actualiza la app antes de cargarla.</p>` : ''}
+    <div class="fila" style="justify-content:flex-end"><button class="btn" onclick="CARGA=null;$('#cargaPrev').innerHTML=''">Cancelar</button><button class="btn primario" ${nueva?'disabled':''} onclick="cargarCopia()">Cargar esta copia</button></div>
+  </div>`;
+  $('#cargaPrev').scrollIntoView({block:'nearest', behavior:'smooth'});
+}
+function cargarCopia(){
+  if(!CARGA) return;
+  try { localStorage.setItem(CLAVE_ANTES, JSON.stringify(S)); } catch(e){}
+  const vista = S.versionVista, registro = S.registro || [], miCopia = S.ultimaCopia || null;
+  const nuevo = normalizar(JSON.parse(JSON.stringify(CARGA.d)));
+  nuevo.versionVista = vista;
+  nuevo.cargada = { copia: CARGA.cuando, disp: CARGA.disp, el: new Date().toISOString() };
+  nuevo.registro = registro; nuevo.ultimaCopia = miCopia; S = nuevo; apuntarRegistro('cargada', CARGA.cuando);
+  S.modificado = CARGA.d.modificado || CARGA.cuando || null; guardar(false);
+  const cuando = CARGA.cuando; CARGA = null; DESHACER.length = 0;
+  $('#capa').innerHTML = ''; pintar(true);
+  toast(`Cargada la copia del ${cuando ? fechaCorta(cuando) : 'archivo'}`);
+}
+function volverAntes(){
+  const t = localStorage.getItem(CLAVE_ANTES); if(!t) return;
+  if(!confirm('¿Volver a los datos que había antes de la última carga? Lo que tienes ahora se sustituye.')) return;
+  const vista = S.versionVista; S = normalizar(JSON.parse(t)); S.versionVista = vista;
+  localStorage.removeItem(CLAVE_ANTES); guardar(false);
+  DESHACER.length = 0; $('#capa').innerHTML = ''; pintar(true); toast('Has vuelto a los datos de antes de la carga');
 }
 
 /* =========================================================
