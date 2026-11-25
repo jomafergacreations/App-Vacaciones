@@ -1,7 +1,7 @@
 {
-  "version": "10.19.0",
+  "version": "10.19.1",
   "fecha": "2026-11-25",
   "novedades": [
-    "Control de jornada: al pinchar a un trabajador se abre su ficha de jornada, con la línea de lo que lleva y le queda, el gráfico acumulado y el detalle por semanas o meses"
+    "Empareja nombres con una letra distinta (Alexander Bezrukavy)"
   ]
 }

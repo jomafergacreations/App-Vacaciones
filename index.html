@@ -543,9 +543,13 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
    Control Planning 10 — rehecha desde cero
    Datos en localStorage, con una clave nueva.
    ========================================================= */
-const APP_VERSION = '10.19.0';
+const APP_VERSION = '10.19.1';
 const CLAVE = 'control-planning-v10';
 const NOVEDADES = {
+  '10.19.1': [
+    { titulo:'Nombres con una letra distinta', donde:'Importar rotaciones y turnos',
+      texto:'Si un apellido está escrito con una letra de más o de menos (como «BEZRUKAVY» y «BEZRUKAVYY»), la app ya lo empareja y te lo propone para que lo revises. Vuelve a importar la rotación para que Alexander tenga la suya.' },
+  ],
   '10.19.0': [
     { titulo:'Una ficha de jornada para cada uno', donde:'Control de jornada',
       texto:'Al pinchar en un trabajador ya no se abre su ficha de datos, sino su ficha de jornada: una línea con lo que lleva, lo que debería llevar, la previsión y su cómputo, y debajo cuánto le queda, la diferencia, el plan para llegar, su media semanal, días de trabajo, vacaciones y bajas.' },
@@ -2370,6 +2374,14 @@ function semanaDelArchivo(filas, primera){
   return null;
 }
 /* empareja un nombre del archivo con un trabajador */
+/* dos palabras casi iguales: de 5 letras o más y a una letra de distancia (una de más, de menos o cambiada) */
+function casiIgual(a, b){
+  if(a===b) return true; if(a.length<5 || b.length<5 || Math.abs(a.length-b.length)>1) return false;
+  let i = 0, j = 0, dif = 0;
+  while(i<a.length && j<b.length){ if(a[i]===b[j]){ i++; j++; continue; } if(++dif>1) return false;
+    if(a.length>b.length) i++; else if(b.length>a.length) j++; else { i++; j++; } }
+  return dif + (a.length-i) + (b.length-j) <= 1;
+}
 function emparejar(nombre, fila){
   const ts = S.trabajadores, k = normNombre(nombre);
   const al = S.alias[k]; if(al && ts.some(t=>t.id===al)) return {id:al, como:'guardado'};
@@ -2379,7 +2391,10 @@ function emparejar(nombre, fila){
   const fa = fichasDe(nombre), clave = [...fa].sort().join(' ');
   const or = ts.filter(t=>[...fichasDe(t.nombre)].sort().join(' ')===clave); if(or.length===1) return {id:or[0].id, como:'orden'};
   const A = new Set(fa);
-  const notas = ts.map(t=>{ const B = new Set(fichasDe(t.nombre)); let com = 0; A.forEach(x=>{ if(B.has(x)) com++; });
+  /* palabras que coinciden; con faltas pequeñas también («BEZRUKAVY» y «BEZRUKAVYY») */
+  const notas = ts.map(t=>{ const B = new Set(fichasDe(t.nombre)), usadas = new Set(); let com = 0;
+    A.forEach(x=>{ if(B.has(x) && !usadas.has(x)){ usadas.add(x); com++; return; }
+      const y = [...B].find(w=>!usadas.has(w) && !A.has(w) && casiIgual(x, w)); if(y){ usadas.add(y); com++; } });
     const sub = com>=2 && (com===A.size || com===B.size);
     return {t, j: com / (A.size + B.size - com || 1), sub}; });
   const subs = notas.filter(x=>x.sub); if(subs.length===1) return {id:subs[0].t.id, como:'posible'};
