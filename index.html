@@ -130,6 +130,77 @@ table.plantilla{width:100%;border-collapse:collapse;font-variant-numeric:tabular
 .rot-cods{display:flex;flex-wrap:wrap;gap:6px;font-size:13px}
 .rot-cods span{border-radius:999px;padding:3px 10px;background:#F1F3F6;font-weight:600}
 .rot-cods span.t{background:#DDF1E4;color:var(--ok)}
+/* vacaciones */
+.vbarra{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap;margin:0 0 12px}
+.vmes b{min-width:150px}
+.anio button:disabled{opacity:.35;cursor:default}
+.vgrid-scroll{overflow:auto;max-height:calc(100vh - 250px);border:1px solid var(--linea);border-radius:12px}
+table.vgrid{border-collapse:separate;border-spacing:0;font-size:13px;font-variant-numeric:tabular-nums}
+.vgrid.z-mes{width:100%}
+.vgrid th,.vgrid td{border-bottom:1px solid #E6E9EE;border-right:1px solid #EEF0F3;text-align:center;padding:0}
+.vgrid thead th{position:sticky;background:#F7F8FA;z-index:2;color:var(--asfalto)}
+.vgrid thead tr:first-child th{top:0;height:30px;font-family:var(--cond);font-size:16px}
+.vgrid thead tr:nth-child(2) th{top:30px;height:36px;font-weight:700}
+.vgrid th.dia small{display:block;font-size:10px;color:var(--gris);font-weight:600;line-height:1}
+.vgrid th.esq{left:0;z-index:4;min-width:230px;text-align:left;padding-left:12px;font-family:var(--cond);font-size:16px}
+.vgrid tbody th,.vgrid tfoot th{position:sticky;left:0;background:var(--papel);z-index:1;text-align:left;padding:4px 12px;min-width:230px;max-width:230px;cursor:pointer;border-right:1px solid #D5D9E0}
+.vgrid tbody th:hover .vn{color:var(--pista)}
+.vn{display:block;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13.5px}
+.vs{font-size:11.5px;color:var(--gris);font-weight:600}
+.vgrid.z-mes td,.vgrid.z-mes th.dia{min-width:34px;height:38px;font-weight:700}
+.vgrid.z-tri td,.vgrid.z-tri th.dia{min-width:22px;width:22px;height:32px;font-size:10.5px;font-weight:700}
+.vgrid.z-tri th.dia{font-size:11px}
+.vgrid.z-anio td,.vgrid.z-anio th.dia{min-width:8px;width:8px;height:26px}
+.vgrid.z-anio th.dia{height:8px}
+.vgrid tr.grp th{background:var(--asfalto);color:#fff;font-family:var(--cond);font-size:15px;padding:5px 12px;cursor:default}
+.vgrid tr.grp td{background:#3A404C}
+.vgrid tfoot th{font-family:var(--cond);font-size:15px;cursor:default;background:#F7F8FA}
+.vgrid tfoot td{background:#F7F8FA;font-weight:700;font-size:12px;height:28px}
+.vgrid td.cnt.cero{color:#C3C8D0}
+.vgrid th.dia.fin{background:#E6E9EE}
+.vgrid .m1{border-left:2px solid #B9BFC8}
+.vgrid th.hoy{box-shadow:inset 0 -4px 0 var(--senal)}
+.c-t{background:#fff}
+.vgrid td.fin.c-t,.vd.fin.c-t{background:#F1F3F6}
+.c-r{background:#E3E6EB;color:#5B6270}
+.c-h{background:#23864F;color:#fff;font-weight:700}
+.c-f{background:#DCE8FB;color:#1F5FBF;font-weight:700}
+.c-x{background:#EADFF7;color:#6B3FA0;font-weight:700}
+.c-aj{background:#FFF1C7;color:#7A5000;font-weight:700}
+.c-p{background:#FBE1EC;color:#A3285E;font-weight:700}
+.c-ina{background:repeating-linear-gradient(135deg,#F6D8B8 0 4px,#FCEEDF 4px 8px);color:#9A4F0A}
+.c-b{background:#FBE1DE;color:var(--mal);font-weight:700}
+.c-nd{background:#FAFAFB}
+.c-otro{background:#F1F3F6;font-weight:700}
+.leyv{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:12px;font-size:13px;font-weight:600;color:var(--gris)}
+.leyv span{display:inline-flex;align-items:center}
+.leyv i{display:inline-grid;place-items:center;min-width:24px;height:20px;border-radius:5px;margin-right:6px;font-style:normal;font-size:10.5px;border:1px solid #D5D9E0}
+.vsel{display:flex;gap:6px;align-items:center}
+.vsel select{min-width:300px;padding:10px 12px;font-weight:700}
+.vsel .btn{padding:10px 14px}
+.vquien{display:flex;gap:6px;align-items:center;flex-wrap:wrap;color:var(--gris);font-weight:600;font-size:14px}
+.vdatos{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:14px}
+.vdato{border:1px solid var(--linea);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:1px}
+.vdato small{color:var(--gris);font-weight:700;font-size:12.5px}
+.vdato b{font-family:var(--cond);font-size:26px;line-height:1.1}
+.vdato span{font-size:12.5px;color:var(--gris)}
+.vdato.ok-v{border-color:#9ED3B0;background:#F1FAF4}
+.vdato.aviso-v{border-color:#EBD27A;background:var(--senal-suave)}
+.vtramos{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.vtramos>div{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.vtramos b{font-family:var(--cond);font-size:17px;margin-right:6px}
+.tramo{border-radius:999px;padding:4px 11px;font-size:13.5px;font-weight:700}
+.tramo em{font-style:normal;opacity:.85;font-weight:600;margin-left:4px}
+.vmeses{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.vmesc{border:1px solid var(--linea);border-radius:12px;padding:10px 10px 12px}
+.vmes-cab{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.vmes-cab b{font-family:var(--cond);font-size:19px}
+.vmes-cab span{border-radius:999px;padding:1px 9px;font-size:12px}
+.vcal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.vcal .ds{font-size:11px;text-align:center;color:var(--gris);font-weight:700}
+.vd{position:relative;min-height:40px;border-radius:6px;display:grid;justify-items:center;align-content:end;padding-bottom:4px;font-size:12.5px;font-weight:700;border:1px solid #EEF0F3}
+.vd i{position:absolute;top:2px;left:4px;font-style:normal;font-size:10px;font-weight:600;opacity:.75}
+.vd.hoy{outline:2px solid var(--senal);outline-offset:-1px}
 .chip.singar{background:#F1F3F6;color:var(--gris)}
 .banda-j{border:2px dashed var(--linea);border-radius:12px;padding:12px 14px;background:#FAFBFC}
 .banda-j b{font-family:var(--cond);font-size:28px}
@@ -320,7 +391,10 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
   .imp-fila.tit{display:none}
   .semana{grid-template-columns:1fr 110px 40px}
   .ficha-cuerpo .calculo{position:static}
-  .sep-fila{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr)} .sep-fila .sub{grid-column:1/-1} .sep-fila.tit{display:none}
+  .sep-fila{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr)}
+  .vgrid th.esq,.vgrid tbody th,.vgrid tfoot th{min-width:140px;max-width:140px}
+  .vsel{flex:1 1 100%} .vsel select{min-width:0;flex:1}
+  .vmeses{grid-template-columns:1fr} .sep-fila .sub{grid-column:1/-1} .sep-fila.tit{display:none}
   .resumen .cifra.filtra b{font-size:26px}
   .segj tbody th{max-width:130px}
   .barra-herr .buscar{max-width:none} .seg{overflow-x:auto;max-width:100%}
@@ -347,9 +421,21 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
    Control Planning 10 — rehecha desde cero
    Datos en localStorage, con una clave nueva.
    ========================================================= */
-const APP_VERSION = '10.13.0';
+const APP_VERSION = '10.14.0';
 const CLAVE = 'control-planning-v10';
 const NOVEDADES = {
+  '10.14.0': [
+    { titulo:'Nuevo módulo: Vacaciones', donde:'Inicio › Vacaciones',
+      texto:'Un módulo nuevo con la rotación del año y las vacaciones, como el Excel de la base. Se llena con «Importar rotaciones».' },
+    { titulo:'Todo el departamento de un vistazo', donde:'Vacaciones › Departamento',
+      texto:'Todos los trabajadores por grupos y cada día del año con su código: vacaciones en verde, descansos en gris, festivos, ajustes, bajas… Puedes ver un mes, tres meses o el año entero, y abajo cuántos están de vacaciones y cuántos trabajan cada día.' },
+    { titulo:'Una persona y su año', donde:'Vacaciones › Por trabajador',
+      texto:'Elige a alguien en el desplegable y verás su calendario mes a mes, sus cuentas (días de trabajo, H, R, F, X, AJ, permisos), las horas a realizar y realizadas, y sus periodos de vacaciones.' },
+    { titulo:'La inactividad de los fijos discontinuos', donde:'Vacaciones',
+      texto:'Los periodos de inactividad de los fijos discontinuos salen rayados en naranja en los dos calendarios, y las bajas en rojo.' },
+    { titulo:'Grupos de rotación', donde:'Personal › ficha del trabajador',
+      texto:'Al importar la rotación se recoge el grupo de cada uno (Grupo 1, 2, 3…). También puedes ponerlo o cambiarlo en su ficha.' },
+  ],
   '10.13.0': [
     { titulo:'Ficha más grande y con más datos', donde:'Personal › ficha del trabajador',
       texto:'La ficha ocupa casi toda la pantalla y va en dos columnas: a la izquierda sus datos y su jornada; a la derecha el resumen del año, que se queda a la vista mientras bajas, con sus días de trabajo, vacaciones, plan para llegar, lo que debería llevar y la previsión. Debajo, inactividad, vacaciones, bajas y horas por semana. En el móvil sigue en una columna.' },
@@ -519,7 +605,7 @@ function separarNombre(s){
   return { ape:w.slice(0,k).join(' '), nom:w.slice(k).join(' ') };
 }
 const numPos = v => { const n = typeof v==='number' ? v : num(v); return n!=null && n>=0 ? n : null; };
-const nuevoTrabajador = (o={}) => ({ id:null, nombre:'', nom:'', ape:'', num:'', vac:null, meses:null, rot:{}, negocio:'', depto:'', contrato:'completo', garantizada:true, modo:'semana', valor:null, actividad:[], cese:[], reducido:false, red:{modo:'semana', valor:null}, concretado:false, horario:{turno:'', desde:'', hasta:''}, bajas:[], horas:{}, ...o });
+const nuevoTrabajador = (o={}) => ({ id:null, nombre:'', nom:'', ape:'', num:'', vac:null, meses:null, rot:{}, grupo:'', negocio:'', depto:'', contrato:'completo', garantizada:true, modo:'semana', valor:null, actividad:[], cese:[], reducido:false, red:{modo:'semana', valor:null}, concretado:false, horario:{turno:'', desde:'', hasta:''}, bajas:[], horas:{}, ...o });
 function normalizar(d){
   const b = estadoInicial();
   d = Object.assign(b, d || {});
@@ -532,7 +618,7 @@ function normalizar(d){
     nom: t.nom, ape: t.ape, garantizada: t.garantizada !== false,
     negocio: NEGOCIOS[t.negocio] ? t.negocio : '', depto: normDepto(t.depto),
     cese: Array.isArray(t.cese) && t.cese.length ? t.cese : inactividadDe(t.actividad),
-    vac: numPos(t.vac), meses: numPos(t.meses),
+    vac: numPos(t.vac), meses: numPos(t.meses), grupo: String(t.grupo||'').trim(),
     rot: Object.fromEntries(Object.entries(t.rot && typeof t.rot==='object' ? t.rot : {}).filter(([y,v])=>/^\d{4}$/.test(y) && typeof v==='string')),
   })).map(t=>({ ...t,
     ...(()=>{ let nom = String(t.nom||'').trim(), ape = String(t.ape||'').trim();
@@ -549,7 +635,7 @@ function normalizar(d){
 let S;
 try { S = normalizar(JSON.parse(localStorage.getItem(CLAVE))); } catch(e){ S = estadoInicial(); }
 const guardar = () => { try { localStorage.setItem(CLAVE, JSON.stringify(S)); } catch(e){ toast('No se ha podido guardar en este navegador'); } };
-let UI = { vista:'inicio', buscar:'', filtro:'todos', filtroJ:'todos', segJ:'semana', fProd:'todos', fDep:'todos', edit:null };
+let UI = { vista:'inicio', buscar:'', filtro:'todos', filtroJ:'todos', segJ:'semana', fProd:'todos', fDep:'todos', vacTab:'dep', vacZoom:'mes', vacMes:null, vacTrab:null, edit:null };
 try { const u = JSON.parse(sessionStorage.getItem('cp-ui')||'{}'); if(u.vista) UI.vista=u.vista; } catch(e){}
 
 /* =========================================================
@@ -673,7 +759,7 @@ function ir(v){ UI.vista = v; pintar(true); scrollTo(0,0); }
 const plantilla = () => S.trabajadores;
 
 function pintar(cambio){
-  const V = {inicio:vInicio, personal:vPersonal, jornada:vJornada};
+  const V = {inicio:vInicio, personal:vPersonal, jornada:vJornada, vacaciones:vVacaciones};
   if(!V[UI.vista]) UI.vista = 'inicio';
   const m = $('#main'); m.innerHTML = V[UI.vista]();
   if(cambio){ m.classList.remove('entrando'); void m.offsetWidth; m.classList.add('entrando'); clearTimeout(pintar._t); pintar._t = setTimeout(()=>m.classList.remove('entrando'), 800); }
@@ -691,6 +777,10 @@ function vInicio(){
       return `<button class="globo anim" style="--i:1;--ctx:#23864F" onclick="ir('jornada')"><span class="gi">${ICO.jornada}</span><span class="gt">Control de jornada</span>
       <span class="gp">Si cada trabajador va a llegar a su jornada anual, no va a llegar o se pasa.</span>
       <span class="gd">${c ? `<span>Semana ${numSemana(c.ultima)}</span>${k('falta')?`<span>${k('falta')} no llegan</span>`:''}${k('pasa')?`<span>${k('pasa')} se pasan</span>`:''}` : `<span>Sin turnos de ${S.anio}</span>`}</span></button>`; })()}
+    ${(()=>{ const rs = ts.filter(t=>tieneRot(t, S.anio)), h = rs.reduce((a,t)=>a+(vacEnRot(t, S.anio)||0),0);
+      return `<button class="globo anim" style="--i:2;--ctx:#C46A12" onclick="ir('vacaciones')"><span class="gi">${ICO.calendario}</span><span class="gt">Vacaciones</span>
+      <span class="gp">La rotación del año y las vacaciones de todo el departamento, o de cada persona con su calendario.</span>
+      <span class="gd">${rs.length ? `<span>${rs.length} con rotación de ${S.anio}</span><span>${h} días de vacaciones</span>` : `<span>Sin rotaciones de ${S.anio}</span>`}</span></button>`; })()}
   </div>`;
 }
 
@@ -833,7 +923,8 @@ function pintarFicha(primera){
       <div class="bloque"><h3>Producto y departamento</h3>
         <div class="fila" style="align-items:center;gap:14px 22px">
           <div class="negocios" role="group" aria-label="Producto">${Object.entries(NEGOCIOS).map(([k,n])=>`<button type="button" class="${e.negocio===k?'on':''}" style="--nc:${n.color}" onclick="UI.edit.negocio=UI.edit.negocio==='${k}'?'':'${k}';pintarFicha()">${n.nombre}</button>`).join('')}</div>
-          ${deptoBtns(e.depto, 'UI.edit.depto', 'pintarFicha')}</div></div>
+          ${deptoBtns(e.depto, 'UI.edit.depto', 'pintarFicha')}
+          <label style="flex:0 1 170px">Grupo de rotación<input value="${esc(e.grupo||'')}" placeholder="Por ejemplo, Grupo 1" oninput="UI.edit.grupo=this.value" autocomplete="off"></label></div></div>
       <div class="bloque"><h3>Contrato</h3><div class="contratos">${Object.keys(CONTRATOS).map(contratoBtn).join('')}</div></div>
       ${e.contrato==='parcial' ? `<div class="bloque"><h3>¿Tiene jornada garantizada?</h3>${siNo('garantizada', '')}</div>` : ''}
       ${conBanda(e) ? `<div class="bloque"><h3>Jornada</h3><div class="banda-j">Entre <b id="bjMin">${nh(bandaBase(e).min)} h</b> y <b id="bjMax">${nh(bandaBase(e).max)} h</b> al año
@@ -984,7 +1075,7 @@ function guardarFicha(){
   if(e.vac!=null && e.vac>60){ toast('Revisa los días de vacaciones: son más de 60'); return; }
   if(Object.values(e.horas).some(v=>v!=null && v<0)){ toast('Las horas de una semana no pueden ser negativas'); return; }
   e.actividad = []; e.cese = e.contrato==='discontinuo' ? e.cese.filter(x=>x.desde && x.hasta).sort((a,b)=>a.desde<b.desde?-1:1) : [];
-  e.depto = (e.depto||'').trim().replace(/\s+/g,' ');
+  e.depto = (e.depto||'').trim().replace(/\s+/g,' '); e.grupo = (e.grupo||'').trim().replace(/\s+/g,' ');
   e.bajas = e.bajas.filter(x=>x.desde && x.hasta);
   e.horas = Object.fromEntries(Object.entries(e.horas).filter(([,v])=>v!=null).map(([k,v])=>[k, r2(v)]));
   if(e.contrato==='completo'){ e.valor = null; e.modo = 'semana'; }
@@ -1292,6 +1383,158 @@ function seguimientoHTML(rs, y, corte){
 }
 
 /* =========================================================
+   Vacaciones
+   Dos vistas, como el Excel de la base:
+   · Departamento: todos los trabajadores y los días del año de un
+     vistazo (por mes, por trimestre o el año entero), con cuántos
+     están de vacaciones cada día.
+   · Por trabajador: se elige en un desplegable y se ve su rotación
+     anual mes a mes, con sus cuentas (D.T., R, H, F, X, AJ…).
+   Cada día sale de su rotación; encima van sus bajas y, en los fijos
+   discontinuos, su inactividad.
+   ========================================================= */
+const DIA_EST = {
+  T:{cls:'c-t', txt:'', nombre:'Trabaja'}, R:{cls:'c-r', txt:'R', nombre:'Descanso'}, H:{cls:'c-h', txt:'H', nombre:'Vacaciones'},
+  V:{cls:'c-h', txt:'V', nombre:'Vacaciones'}, VAC:{cls:'c-h', txt:'V', nombre:'Vacaciones'},
+  F:{cls:'c-f', txt:'F', nombre:'Festivo'}, X:{cls:'c-x', txt:'X', nombre:'Festivo de empresa'}, AJ:{cls:'c-aj', txt:'AJ', nombre:'Ajuste de jornada'},
+  PR:{cls:'c-p', txt:'PR', nombre:'Permiso retribuido'}, PNR:{cls:'c-p', txt:'PNR', nombre:'Permiso no retribuido'},
+  INA:{cls:'c-ina', txt:'', nombre:'Inactividad (fijo discontinuo)'}, B:{cls:'c-b', txt:'B', nombre:'Baja'}, '?':{cls:'c-nd', txt:'', nombre:'Sin dato'},
+};
+const LEYENDA_VAC = ['T','R','H','F','X','AJ','PR','INA','B'];
+const DIAS_SEM = ['L','M','X','J','V','S','D'];
+const MESES_L = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+/* qué tiene un trabajador un día: inactividad y baja mandan; si no, su rotación (null si no hay) */
+function diaDe(t, d){
+  if(t.contrato==='discontinuo' && (t.cese||[]).some(p=>p.desde<=d && d<=p.hasta)) return 'INA';
+  if((t.bajas||[]).some(p=>p.desde<=d && d<=p.hasta)) return 'B';
+  const c = codigoDia(t, d); if(c==null) return null;
+  return c==='' ? 'T' : c;
+}
+const estDia = c => DIA_EST[c] || {cls:'c-otro', txt:c.slice(0,3), nombre:c};
+const diasDelAnio = y => { const out = []; for(let d=`${y}-01-01`; d<=`${y}-12-31`; d=sumaDias(d,1)) out.push(d); return out; };
+const diaSem = d => (pd(d).getUTCDay()+6)%7;   // 0 = lunes
+/* cuentas del año, como el pie del cuadrante del Excel */
+function cuentasDe(t, y){
+  const n = {}; diasDelAnio(y).forEach(d=>{ const c = diaDe(t, d); if(c) n[c] = (n[c]||0) + 1; });
+  return n;
+}
+/* periodos seguidos de un mismo tipo de día (H, INA…) */
+function tramosDe(t, y, cods){
+  const out = []; let ini = null, ant = null;
+  diasDelAnio(y).forEach(d=>{ const si = cods.includes(diaDe(t, d));
+    if(si && !ini) ini = d; if(!si && ini){ out.push({desde:ini, hasta:ant}); ini = null; } ant = d; });
+  if(ini) out.push({desde:ini, hasta:ant});
+  return out;
+}
+/* periodos de vacaciones: se juntan los que solo separan descansos o festivos (6–14 jul con R en medio es un periodo) */
+function periodosVac(t, y){
+  const cods = ['H','V','VAC'], ps = tramosDe(t, y, cods), out = [];
+  ps.forEach(p=>{ const u = out[out.length-1];
+    if(u){ let d = sumaDias(u.hasta, 1), libre = true; while(d < p.desde){ if(!['R','F','X'].includes(diaDe(t, d))){ libre = false; break; } d = sumaDias(d, 1); }
+      if(libre){ u.hasta = p.hasta; return; } }
+    out.push({...p}); });
+  out.forEach(p=>{ let n = 0; for(let d=p.desde; d<=p.hasta; d=sumaDias(d,1)) if(cods.includes(diaDe(t, d))) n++; p.h = n; });
+  return out;
+}
+const tramoTxt = p => p.desde===p.hasta ? fCorto(p.desde) : `${fCorto(p.desde)} – ${fCorto(p.hasta)}`;
+const diasTramo = p => Math.round((pd(p.hasta)-pd(p.desde))/864e5) + 1;
+/* quién sale en el módulo: con rotación del año, o fijo discontinuo con inactividad */
+const enVacaciones = (t, y) => tieneRot(t, y) || (t.contrato==='discontinuo' && diasInactivo(t, y) > 0);
+const grupoTxt = t => t.grupo || 'Sin grupo';
+const ordenGrupo = (a, b) => (a==='Sin grupo') - (b==='Sin grupo') || a.localeCompare(b, 'es', {numeric:true});
+
+function vVacaciones(){
+  const y = S.anio, tab = UI.vacTab || 'dep';
+  const todos = S.trabajadores.filter(enOrg), ts = todos.filter(t=>enVacaciones(t, y));
+  const sinRot = todos.filter(t=>!enVacaciones(t, y)).length;
+  const cab = `<div class="portada anim"><button class="volver" onclick="ir('inicio')">‹ Inicio</button><h2>Vacaciones</h2>
+    <p>La rotación de ${y} y las vacaciones de cada uno: todo el departamento de un vistazo, o una persona con su calendario del año.</p></div>`;
+  const barra = `<div class="barra-herr">
+      <div class="seg" role="group" aria-label="Vista"><button class="${tab==='dep'?'on':''}" onclick="UI.vacTab='dep';pintar()">Departamento</button><button class="${tab==='trab'?'on':''}" onclick="UI.vacTab='trab';pintar()">Por trabajador</button></div>
+      <div class="anio" title="Año"><button onclick="cambiarAnio(-1)" aria-label="Año anterior">‹</button><b>${y}</b><button onclick="cambiarAnio(1)" aria-label="Año siguiente">›</button></div>
+      <span class="esp"></span>
+      <button class="btn" onclick="abrirRotaciones()">${ICO.calendario} Importar rotaciones</button>
+    </div>${filtrosOrg()}`;
+  const leyenda = `<div class="leyv">${LEYENDA_VAC.map(c=>`<span><i class="${DIA_EST[c].cls}">${DIA_EST[c].txt}</i>${DIA_EST[c].nombre}</span>`).join('')}</div>`;
+  if(!ts.length) return cab + `<div class="tarjeta anim" style="--i:1">${barra}
+    <div class="vacio"><h3>Todavía no hay rotaciones de ${y}</h3><p>Importa el Excel de la rotación anual y aquí verás el calendario de todos y las vacaciones de cada uno.</p>
+    <div class="fila" style="justify-content:center"><button class="btn primario" onclick="abrirRotaciones()">${ICO.calendario} Importar rotaciones</button></div></div></div>`;
+  const nota = sinRot ? `<p class="muted nota">${sinRot} trabajador${sinRot===1?'':'es'} no sale${sinRot===1?'':'n'} porque no tiene${sinRot===1?'':'n'} rotación de ${y}.</p>` : '';
+  return cab + `<div class="tarjeta anim" style="--i:1">${barra}${tab==='dep' ? vacDepartamento(ts, y) : vacTrabajador(ts, y)}${leyenda}${nota}</div>`;
+}
+
+/* ---------- departamento ---------- */
+function vacDepartamento(ts, y){
+  const zoom = UI.vacZoom || 'mes', m0 = Math.min(11, Math.max(0, UI.vacMes ?? (Number(hoyIso().slice(0,4))===y ? Number(hoyIso().slice(5,7))-1 : 0)));
+  const nm = zoom==='mes' ? 1 : zoom==='tri' ? 3 : 12, desdeM = zoom==='anio' ? 0 : Math.min(m0, 12-nm);
+  const ini = `${y}-${String(desdeM+1).padStart(2,'0')}-01`, fin = sumaDias(desdeM+nm>=12 ? `${y+1}-01-01` : `${y}-${String(desdeM+nm+1).padStart(2,'0')}-01`, -1);
+  const dias = diasDelAnio(y).filter(d=>d>=ini && d<=fin), hoy = hoyIso();
+  const grupos = {}; ts.forEach(t=>{ (grupos[grupoTxt(t)] = grupos[grupoTxt(t)] || []).push(t); });
+  const nombres = Object.keys(grupos).sort(ordenGrupo);
+  const conTexto = zoom!=='anio';
+  const cls = d => `${diaSem(d)>=5?' fin':''}${d===hoy?' hoy':''}${d.endsWith('-01')?' m1':''}`;
+  const meses = []; dias.forEach(d=>{ const m = Number(d.slice(5,7))-1; if(!meses.length || meses[meses.length-1].m!==m) meses.push({m, n:0}); meses[meses.length-1].n++; });
+  const celda = (t, d) => { const c = diaDe(t, d); if(c==null) return `<td class="c-nd${cls(d)}"></td>`; const e = estDia(c);
+    return `<td class="${e.cls}${cls(d)}"${conTexto?` title="${fCorto(d)}: ${e.nombre}"`:''}>${conTexto?e.txt:''}</td>`; };
+  const fila = t => { const n = cuentasDe(t, y), h = (n.H||0)+(n.V||0)+(n.VAC||0);
+    return `<tr><th scope="row" onclick="UI.vacTab='trab';UI.vacTrab='${t.id}';pintar()" title="Ver su calendario"><span class="vn">${esc(t.nombre)}</span>
+      <span class="vs">${t.contrato==='discontinuo'?'FD · ':''}H ${h} de ${vacDe(t)}</span></th>${dias.map(d=>celda(t, d)).join('')}</tr>`; };
+  const cuenta = (pred) => dias.map(d=>{ const k = ts.filter(t=>pred(diaDe(t, d))).length; return `<td class="cnt${cls(d)}${k?'':' cero'}">${conTexto||k?k:''}</td>`; }).join('');
+  const nav = zoom==='anio' ? '' : `<div class="anio vmes"><button onclick="UI.vacMes=${Math.max(0, desdeM-nm)};pintar()" aria-label="Anterior" ${desdeM===0?'disabled':''}>‹</button><b>${nm===1?MESES_L[desdeM]:`${MESES[desdeM]} – ${MESES[desdeM+nm-1]}`}</b><button onclick="UI.vacMes=${Math.min(12-nm, desdeM+nm)};pintar()" aria-label="Siguiente" ${desdeM+nm>=12?'disabled':''}>›</button></div>`;
+  setTimeout(()=>{ const c = document.querySelector('.vgrid-scroll'), h = c?.querySelector('th.hoy'); if(c && h && zoom==='anio') c.scrollLeft = Math.max(0, h.offsetLeft - c.clientWidth/2); }, 0);
+  return `<div class="vbarra"><div class="seg" role="group" aria-label="Cuánto se ve"><button class="${zoom==='mes'?'on':''}" onclick="UI.vacZoom='mes';UI.vacMes=${desdeM};pintar()">Un mes</button><button class="${zoom==='tri'?'on':''}" onclick="UI.vacZoom='tri';UI.vacMes=${desdeM};pintar()">Tres meses</button><button class="${zoom==='anio'?'on':''}" onclick="UI.vacZoom='anio';pintar()">El año</button></div>${nav}
+      <span class="muted" style="font-size:13.5px">${ts.length} trabajador${ts.length===1?'':'es'} · pulsa un nombre para ver su calendario</span></div>
+    <div class="vgrid-scroll"><table class="vgrid z-${zoom}">
+      <thead><tr><th class="esq" rowspan="2">Trabajador</th>${meses.map(x=>`<th class="mes" colspan="${x.n}">${zoom==='anio'&&x.n<20?MESES[x.m]:MESES_L[x.m]}</th>`).join('')}</tr>
+        <tr>${dias.map(d=>`<th class="dia${cls(d)}">${conTexto?`<small>${DIAS_SEM[diaSem(d)]}</small>${Number(d.slice(8))}`:''}</th>`).join('')}</tr></thead>
+      ${nombres.map(g=>`<tbody><tr class="grp"><th>${esc(g)}</th><td colspan="${dias.length}"></td></tr>${grupos[g].sort((a,b)=>a.nombre.localeCompare(b.nombre,'es')).map(fila).join('')}</tbody>`).join('')}
+      <tfoot><tr><th>De vacaciones</th>${cuenta(c=>c && COD_VAC.has(c))}</tr><tr><th>Trabajan</th>${cuenta(c=>c==='T')}</tr></tfoot>
+    </table></div>`;
+}
+
+/* ---------- por trabajador ---------- */
+function vacTrabajador(ts, y){
+  const lista = ts.slice().sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
+  let t = lista.find(x=>x.id===UI.vacTrab) || lista[0]; UI.vacTrab = t.id;
+  const i = lista.indexOf(t), hoy = hoyIso();
+  const n = cuentasDe(t, y), h = (n.H||0)+(n.V||0)+(n.VAC||0), r = rangoDe(t, y);
+  const vacs = periodosVac(t, y), inas = t.contrato==='discontinuo' ? tramosDe(t, y, ['INA']) : [];
+  const dato = (k, v, sub, extra='') => `<div class="vdato ${extra}"><small>${k}</small><b>${v}</b>${sub?`<span>${sub}</span>`:''}</div>`;
+  const mes = m => { const p = `${y}-${String(m+1).padStart(2,'0')}-01`, ult = sumaDias(m===11?`${y+1}-01-01`:`${y}-${String(m+2).padStart(2,'0')}-01`, -1);
+    const ds = diasDelAnio(y).filter(d=>d>=p && d<=ult), hm = ds.filter(d=>COD_VAC.has(diaDe(t, d)||'')).length;
+    return `<div class="vmesc"><div class="vmes-cab"><b>${MESES_L[m]}</b>${hm?`<span class="c-h">${hm} H</span>`:''}</div>
+      <div class="vcal">${DIAS_SEM.map(x=>`<span class="ds">${x}</span>`).join('')}${'<span></span>'.repeat(diaSem(p))}
+      ${ds.map(d=>{ const c = diaDe(t, d), e = c==null ? DIA_EST['?'] : estDia(c);
+        return `<span class="vd ${e.cls}${diaSem(d)>=5?' fin':''}${d===hoy?' hoy':''}" title="${fCorto(d)}: ${e.nombre}"><i>${Number(d.slice(8))}</i>${e.txt}</span>`; }).join('')}</div></div>`; };
+  return `<div class="vbarra">
+      <div class="vsel"><button class="btn" onclick="UI.vacTrab='${lista[(i-1+lista.length)%lista.length].id}';pintar()" aria-label="Anterior">‹</button>
+        <select aria-label="Trabajador" onchange="UI.vacTrab=this.value;pintar()">${lista.map(x=>`<option value="${x.id}" ${x.id===t.id?'selected':''}>${esc(x.nombre)}</option>`).join('')}</select>
+        <button class="btn" onclick="UI.vacTrab='${lista[(i+1)%lista.length].id}';pintar()" aria-label="Siguiente">›</button></div>
+      <span class="vquien"><span class="chip ${t.contrato}">${CONTRATOS[t.contrato].corto}</span> ${negocioChip(t)} ${t.depto?esc(t.depto):''}${t.grupo?` · ${esc(t.grupo)}`:''}${t.num?` · Nº ${esc(t.num)}`:''}</span>
+      <span class="esp"></span><button class="btn" onclick="abrirFicha('${t.id}')">Abrir ficha</button></div>
+    <div class="vdatos">
+      ${dato('Horas a realizar', r ? entre(r.min, r.max) : '—', diasBaja(t, y) ? `con ${diasBaja(t, y)} días de baja` : '')}
+      ${dato('Horas realizadas', nh(hechasDe(t, y))+' h', `${semanasDe(t, y).length} semanas importadas`)}
+      ${dato('D.T.', n.T||0, 'días de trabajo')}
+      ${dato('H', `${h} de ${vacDe(t)}`, 'días de vacaciones', h!==vacDe(t) ? 'aviso-v' : 'ok-v')}
+      ${dato('R', n.R||0, 'descansos')}
+      ${dato('F', n.F||0, 'festivos')}
+      ${dato('X', n.X||0, 'festivos de empresa')}
+      ${dato('AJ', n.AJ||0, 'ajustes de jornada')}
+      ${dato('PR · PNR', `${n.PR||0} · ${n.PNR||0}`, 'permisos')}
+      ${t.contrato==='discontinuo' ? dato('Inactividad', `${n.INA||0} días`, n.INA<MIN_INACTIVO ? `mínimo ${MIN_INACTIVO}` : '', n.INA<MIN_INACTIVO ? 'aviso-v' : '') : ''}
+      ${n.B ? dato('Baja', `${n.B} días`, '') : ''}
+    </div>
+    <div class="vtramos">
+      <div><b>Vacaciones asignadas</b>${vacs.length ? vacs.map(p=>`<span class="tramo c-h">${tramoTxt(p)} <em>${p.h} H</em></span>`).join('') : '<span class="muted">Ninguna en la rotación</span>'}</div>
+      ${t.contrato==='discontinuo' ? `<div><b>Inactividad</b>${inas.length ? inas.map(p=>`<span class="tramo c-ina">${tramoTxt(p)} <em>${diasTramo(p)} días</em></span>`).join('') : '<span class="muted">Sin periodos</span>'}</div>` : ''}
+    </div>
+    ${tieneRot(t, y) ? '' : `<p class="aviso-suave" style="margin:0 0 12px">No tiene rotación de ${y}: solo se ve su inactividad.</p>`}
+    <div class="vmeses">${MESES_L.map((_,m)=>mes(m)).join('')}</div>
+    <p class="muted nota">Los días libres están sujetos a modificaciones por necesidades de la operativa.</p>`;
+}
+
+/* =========================================================
    Importar rotaciones anuales
    Un Excel con una fila de fechas (un día por columna) y una
    fila por trabajador con los códigos de cada día. Las casillas
@@ -1341,6 +1584,10 @@ function prepararRot(hojas, archivo){
   let cn = -1, mx = 0;
   for(let c=0; c<ancho; c++){ if(fechas[c]) continue; const k = abajo.filter(f=>esNombre(f[c])).length; if(k>mx){ mx = k; cn = c; } }
   if(cn<0) return toast('No encuentro los nombres de los trabajadores');
+  let grupoAct = ''; const grupoDe = new Map();
+  abajo.forEach(f=>{ const v = String(f[cn] ?? '').trim(); const m = v.match(/^(grupo|equipo|turno)\s*(\w+)$/i);
+    if(m) grupoAct = m[1][0].toUpperCase() + m[1].slice(1).toLowerCase() + ' ' + m[2];
+    else if(esNombre(f[cn])) grupoDe.set(f, grupoAct); });
   const datos = abajo.filter(f=>esNombre(f[cn]));
   let ci = -1;
   for(let c=0; c<ancho; c++){ if(c===cn || fechas[c]) continue; const k = datos.filter(f=>/^\d{4,10}$/.test(String(f[c] ?? '').trim())).length; if(k && k>=datos.length*0.6){ ci = c; break; } }
@@ -1354,7 +1601,7 @@ function prepararRot(hojas, archivo){
     cols.forEach(c=>{ const v = f[c]; const cod = v==null || v==='' ? '' : String(v).trim().toUpperCase().replace(/,/g,' ');
       dias[idxDia(fechas[c])] = cod; codigos[cod] = (codigos[cod]||0) + 1; });
     const m = emparejar(nombre, num ? [num] : []);
-    return { nombre, num, dias, trab: dias.filter(c=>!NO_TRABAJO.has(c)).length, vac: dias.filter(c=>COD_VAC.has(c)).length, id:m.id, como:m.como, manual:false };
+    return { nombre, num, grupo: grupoDe.get(f) || '', dias, trab: dias.filter(c=>!NO_TRABAJO.has(c)).length, vac: dias.filter(c=>COD_VAC.has(c)).length, id:m.id, como:m.como, manual:false };
   }) };
   ROT.codigos = codigos;
   pintarRot(true);
@@ -1368,7 +1615,7 @@ function pintarRot(primera){
   const ya = ROT.filas.filter(f=>f.id && f.id!=='nuevo' && S.trabajadores.find(t=>t.id===f.id)?.rot?.[y]).length;
   const cods = Object.entries(ROT.codigos).sort((a,b)=>b[1]-a[1]).map(([c,n])=>`<span class="${NO_TRABAJO.has(c)?'':'t'}">${c===''?'Vacías':esc(c)}${COD_NOMBRE[c]&&c!==''?` (${COD_NOMBRE[c]})`:''}: ${n}</span>`).join('');
   const filasHTML = ROT.filas.map((f,i)=>{ const est = f.id==='nuevo' ? 'nuevo' : !f.id ? 'nada' : f.como; const [cls, txt] = ESTADOS[est];
-    return `<div class="imp-fila ${f.id?'':'ign'}"><span class="nf">${esc(f.nombre)}<span class="sub" style="display:block;font-weight:600">${f.num?`Nº ${esc(f.num)} · `:''}${f.trab} días de trabajo · ${f.vac} de vacaciones</span></span><span></span>
+    return `<div class="imp-fila ${f.id?'':'ign'}"><span class="nf">${esc(f.nombre)}<span class="sub" style="display:block;font-weight:600">${f.grupo?`${esc(f.grupo)} · `:''}${f.num?`Nº ${esc(f.num)} · `:''}${f.trab} días de trabajo · ${f.vac} de vacaciones</span></span><span></span>
       <select aria-label="Trabajador para ${esc(f.nombre)}" onchange="ROT.filas[${i}].id=this.value;ROT.filas[${i}].como='manual';pintarRot()">
         <option value="">No apuntar</option><option value="nuevo">Añadir como trabajador nuevo</option>${opciones}</select>
       <span class="est ${cls}">${f.id && f.id!=='nuevo' && usados[f.id]>1 ? 'Repetido: elige otro' : txt}</span></div>`; }).join('');
@@ -1400,7 +1647,7 @@ function guardarRot(){
     else { t = S.trabajadores.find(x=>x.id===f.id); if(!t) return;
       if(f.como==='posible' || f.como==='manual') S.alias[normNombre(f.nombre)] = t.id;
       if(ROT.ponerNum && f.num && !t.num && !numRepe(f.num)){ t.num = f.num; nums++; } }
-    t.rot = t.rot || {}; t.rot[y] = f.dias.join(','); n++;
+    t.rot = t.rot || {}; t.rot[y] = f.dias.join(','); if(f.grupo) t.grupo = f.grupo; n++;
   });
   const dup = [...new Set(ROT.filas.filter(f=>f.num && ROT.filas.filter(g=>g.num===f.num).length>1).map(f=>f.num))];
   S.anio = y; guardar(); cerrarRot(); pintar();

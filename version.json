@@ -1,7 +1,9 @@
 {
-  "version": "10.13.0",
+  "version": "10.14.0",
   "fecha": "2026-11-25",
   "novedades": [
-    "Ficha del trabajador más grande, en dos columnas y con resumen del año"
+    "Nuevo módulo Vacaciones: departamento completo y calendario por trabajador",
+    "Inactividad de los fijos discontinuos marcada en el calendario",
+    "Grupos de rotación"
   ]
 }
