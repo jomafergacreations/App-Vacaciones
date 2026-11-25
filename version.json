@@ -1,8 +1,7 @@
 {
-  "version": "10.12.0",
+  "version": "10.13.0",
   "fecha": "2026-11-25",
   "novedades": [
-    "La versión se ve arriba a la derecha; al pulsarla busca actualizaciones",
-    "La app usa todo el ancho de la pantalla"
+    "Ficha del trabajador más grande, en dos columnas y con resumen del año"
   ]
 }
