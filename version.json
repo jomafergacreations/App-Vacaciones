@@ -1,7 +1,8 @@
 {
-  "version": "10.16.0",
+  "version": "10.17.0",
   "fecha": "2026-11-25",
   "novedades": [
-    "Importar rotaciones pone el producto y el departamento del archivo"
+    "Vacaciones: buscador de trabajador por nombre",
+    "Filtros de contrato y producto más claros"
   ]
 }

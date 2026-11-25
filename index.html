@@ -176,8 +176,20 @@ table.vgrid{border-collapse:separate;border-spacing:0;font-size:13px;font-varian
 .leyv{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:12px;font-size:13px;font-weight:600;color:var(--gris)}
 .leyv span{display:inline-flex;align-items:center}
 .leyv i{display:inline-grid;place-items:center;min-width:24px;height:20px;border-radius:5px;margin-right:6px;font-style:normal;font-size:10.5px;border:1px solid #D5D9E0}
-.vsel{display:flex;gap:6px;align-items:center}
-.vsel select{min-width:300px;padding:10px 12px;font-weight:700}
+.vsel{display:flex;gap:10px;align-items:center}
+.vnombre{font-size:26px;margin:0 4px}
+.vfiltros{display:flex;align-items:center;gap:8px 10px;flex-wrap:wrap;margin:-2px 0 16px;padding:12px;background:#F4F5F8;border-radius:14px}
+.vfiltros .buscar{flex:0 1 340px;background:#fff}
+.vfiltros .flab{margin-left:8px}
+.combo{position:relative;flex:0 1 380px;min-width:260px}
+.combo input{width:100%;padding:11px 46px 11px 14px;font-weight:700;background:#fff}
+.combo-n{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:700;pointer-events:none}
+.combo-lista{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:30;background:var(--papel);border:1px solid var(--linea);border-radius:12px;box-shadow:0 20px 40px -16px rgba(0,0,0,.35);max-height:360px;overflow:auto;padding:6px}
+.combo-lista button{display:flex;align-items:center;gap:8px;width:100%;border:0;background:none;text-align:left;padding:8px 10px;border-radius:8px;cursor:pointer;flex-wrap:wrap}
+.combo-lista button b{flex:1 1 auto;font-size:14.5px}
+.combo-lista button .chip{padding:1px 8px;font-size:11.5px}
+.combo-lista button.on{background:var(--senal-suave)}
+.combo-lista button.sel b{color:var(--pista)}
 .vsel .btn{padding:10px 14px}
 .vquien{display:flex;gap:6px;align-items:center;flex-wrap:wrap;color:var(--gris);font-weight:600;font-size:14px}
 .vdatos{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:14px}
@@ -394,7 +406,8 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
   .ficha-cuerpo .calculo{position:static}
   .sep-fila{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr)}
   .vgrid th.esq,.vgrid tbody th,.vgrid tfoot th{min-width:140px;max-width:140px}
-  .vsel{flex:1 1 100%} .vsel select{min-width:0;flex:1}
+  .vsel{flex:1 1 100%} .vnombre{font-size:21px;flex:1;text-align:center}
+  .combo{flex:1 1 100%;min-width:0} .vfiltros .seg{flex-wrap:wrap;overflow:visible} .vfiltros .buscar{flex:1 1 100%} .vfiltros .flab{margin-left:0;flex:1 1 100%}
   .vmeses{grid-template-columns:1fr} .sep-fila .sub{grid-column:1/-1} .sep-fila.tit{display:none}
   .resumen .cifra.filtra b{font-size:26px}
   .segj tbody th{max-width:130px}
@@ -422,9 +435,15 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
    Control Planning 10 — rehecha desde cero
    Datos en localStorage, con una clave nueva.
    ========================================================= */
-const APP_VERSION = '10.16.0';
+const APP_VERSION = '10.17.0';
 const CLAVE = 'control-planning-v10';
 const NOVEDADES = {
+  '10.17.0': [
+    { titulo:'Buscar a alguien escribiendo', donde:'Vacaciones › Por trabajador',
+      texto:'El desplegable ahora es un buscador: escribe cualquier parte del nombre o del apellido y te salen solo los que coinciden. Elige con el ratón o con las flechas y Enter.' },
+    { titulo:'Filtros más claros', donde:'Vacaciones',
+      texto:'Debajo de la barra hay solo tres cosas: el buscador, el tipo de contrato y el producto. En Departamento, el buscador filtra las filas de la tabla por nombre.' },
+  ],
   '10.16.0': [
     { titulo:'Producto y departamento al importar rotaciones', donde:'Importar rotaciones',
       texto:'Al revisar la rotación eliges de qué producto y departamento es el archivo (si el nombre del archivo lo dice, ya viene marcado: «PAX_GH» es Pasaje GroundHandling). Se les pone a todos los que apuntes, y así los filtros de Vacaciones y Control de jornada enseñan solo a los de ese archivo.' },
@@ -650,7 +669,7 @@ function normalizar(d){
 let S;
 try { S = normalizar(JSON.parse(localStorage.getItem(CLAVE))); } catch(e){ S = estadoInicial(); }
 const guardar = () => { try { localStorage.setItem(CLAVE, JSON.stringify(S)); } catch(e){ toast('No se ha podido guardar en este navegador'); } };
-let UI = { vista:'inicio', buscar:'', filtro:'todos', filtroJ:'todos', segJ:'semana', fProd:'todos', fDep:'todos', vacTab:'dep', vacZoom:'mes', vacMes:null, vacTrab:null, edit:null };
+let UI = { vista:'inicio', buscar:'', filtro:'todos', filtroJ:'todos', segJ:'semana', fProd:'todos', fDep:'todos', vacTab:'dep', vacZoom:'mes', vacMes:null, vacTrab:null, vacQ:'', vacCon:'todos', vacProd:'todos', edit:null };
 try { const u = JSON.parse(sessionStorage.getItem('cp-ui')||'{}'); if(u.vista) UI.vista=u.vista; } catch(e){}
 
 /* =========================================================
@@ -1468,8 +1487,21 @@ const ordenGrupo = (a, b) => (a==='Sin grupo') - (b==='Sin grupo') || a.localeCo
 
 function vVacaciones(){
   const y = S.anio, tab = UI.vacTab || 'dep';
-  const todos = S.trabajadores.filter(enOrg), conRot = todos.filter(t=>enVacaciones(t, y)), ts = todos;
+  /* filtros propios del módulo: nombre, contrato y producto */
+  const con = UI.vacCon || 'todos', prod = UI.vacProd || 'todos';
+  const todos = S.trabajadores.filter(t=>(con==='todos' || t.contrato===con) && (prod==='todos' || t.negocio===prod));
+  const conRot = S.trabajadores.filter(t=>enVacaciones(t, y));
+  const ws = normNombre(UI.vacQ || '').split(' ').filter(Boolean);
+  const ts = tab==='dep' ? todos.filter(t=>{ const n = normNombre(t.nombre); return ws.every(w=>n.includes(w)); }) : todos;
   const sinRot = todos.filter(t=>!tieneRot(t, y)).length;
+  const lista = todos.slice().sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
+  const elegido = lista.find(x=>x.id===UI.vacTrab) || lista.find(x=>tieneRot(x, y)) || lista[0] || null; if(elegido) UI.vacTrab = elegido.id;
+  const segF = (campo, val, ops) => `<div class="seg" role="group">${ops.map(([k,txt])=>`<button class="${val===k?'on':''}" onclick="UI.${campo}='${k}';pintar()">${txt}</button>`).join('')}</div>`;
+  const filtros = `<div class="vfiltros">
+      ${tab==='trab' ? comboHTML(lista, elegido) : `<input class="buscar" type="search" placeholder="Buscar por nombre" value="${esc(UI.vacQ||'')}" aria-label="Buscar por nombre" oninput="UI.vacQ=this.value;clearTimeout(window._b);window._b=setTimeout(()=>{pintar();const i=document.querySelector('.vfiltros .buscar');i.focus();i.setSelectionRange(i.value.length,i.value.length)},200)">`}
+      <span class="flab">Contrato</span>${segF('vacCon', con, [['todos','Todos'],['completo','Completo'],['parcial','Parcial'],['discontinuo','Discontinuo']])}
+      <span class="flab">Producto</span>${segF('vacProd', prod, [['todos','Todos'], ...Object.entries(NEGOCIOS).map(([k,n])=>[k,n.nombre])])}
+    </div>`;
   const cab = `<div class="portada anim"><button class="volver" onclick="ir('inicio')">‹ Inicio</button><h2>Vacaciones</h2>
     <p>La rotación de ${y} y las vacaciones de cada uno: todo el departamento de un vistazo, o una persona con su calendario del año.</p></div>`;
   const barra = `<div class="barra-herr">
@@ -1477,14 +1509,43 @@ function vVacaciones(){
       <div class="anio" title="Año"><button onclick="cambiarAnio(-1)" aria-label="Año anterior">‹</button><b>${y}</b><button onclick="cambiarAnio(1)" aria-label="Año siguiente">›</button></div>
       <span class="esp"></span>
       <button class="btn" onclick="abrirRotaciones()">${ICO.calendario} Importar rotaciones</button>
-    </div>${filtrosOrg()}`;
+    </div>${filtros}`;
   const leyenda = `<div class="leyv">${LEYENDA_VAC.map(c=>`<span><i class="${DIA_EST[c].cls}">${DIA_EST[c].txt}</i>${DIA_EST[c].nombre}</span>`).join('')}</div>`;
   if(!conRot.length) return cab + `<div class="tarjeta anim" style="--i:1">${barra}
     <div class="vacio"><h3>Todavía no hay rotaciones de ${y}</h3><p>Importa el Excel de la rotación anual y aquí verás el calendario de todos y las vacaciones de cada uno.</p>
     <div class="fila" style="justify-content:center"><button class="btn primario" onclick="abrirRotaciones()">${ICO.calendario} Importar rotaciones</button></div></div></div>`;
   const aviso = sinRot ? `<div class="banda anim" style="--i:1"><span><b>${sinRot} de ${todos.length} trabajadores</b> no tienen rotación de ${y}: sus días salen en blanco. Importa el Excel de su rotación para ver sus vacaciones.</span><button class="btn" onclick="abrirRotaciones()">${ICO.calendario} Importar rotaciones</button></div>` : '';
-  return cab + aviso + `<div class="tarjeta anim" style="--i:2">${barra}${tab==='dep' ? vacDepartamento(ts, y) : vacTrabajador(ts, y)}${leyenda}</div>`;
+  const nadie = `<p class="muted" style="margin:14px 0">Nadie coincide con la búsqueda o los filtros.</p>`;
+  return cab + aviso + `<div class="tarjeta anim" style="--i:2">${barra}${tab==='dep' ? (ts.length ? vacDepartamento(ts, y) : nadie) : (elegido ? vacTrabajador(lista, elegido, y) : nadie)}${leyenda}</div>`;
 }
+
+/* ---------- buscador de trabajador: se escribe y sale la lista filtrada por nombre ---------- */
+let COMBO = { lista:[], vis:[], act:0 };
+function comboHTML(lista, t){
+  COMBO.lista = lista;
+  return `<div class="combo"><input id="comboIn" type="search" autocomplete="off" placeholder="Escribe un nombre" value="${esc(t?.nombre||'')}" aria-label="Buscar trabajador" aria-autocomplete="list" aria-controls="comboLista"
+      onfocus="this.select();comboFiltra('')" oninput="comboFiltra(this.value)" onkeydown="comboTecla(event)" onblur="setTimeout(comboCierra,150)">
+    <span class="combo-n muted">${lista.length}</span><div class="combo-lista" id="comboLista" role="listbox" hidden></div></div>`;
+}
+function comboFiltra(q){
+  const ws = normNombre(q).split(' ').filter(Boolean);
+  COMBO.vis = COMBO.lista.filter(t=>{ const n = normNombre(t.nombre); return ws.every(w=>n.includes(w)); }); COMBO.act = 0; comboPinta();
+}
+function comboPinta(){
+  const l = $('#comboLista'); if(!l) return; l.hidden = false;
+  l.innerHTML = COMBO.vis.length ? COMBO.vis.map((t,i)=>`<button type="button" role="option" class="${i===COMBO.act?'on':''}${t.id===UI.vacTrab?' sel':''}" onmousedown="event.preventDefault();comboElige('${t.id}')">
+      <b>${esc(t.nombre)}</b><span class="chip ${t.contrato}">${CONTRATOS[t.contrato].corto}</span>${negocioChip(t)}${tieneRot(t, S.anio)?'':'<small class="muted">sin rotación</small>'}</button>`).join('')
+    : '<p class="muted" style="margin:10px 12px">Nadie se llama así</p>';
+  l.querySelector('.on')?.scrollIntoView({block:'nearest'});
+}
+function comboTecla(e){
+  if(e.key==='ArrowDown' || e.key==='ArrowUp'){ e.preventDefault(); if(!COMBO.vis.length) return;
+    COMBO.act = (COMBO.act + (e.key==='ArrowDown'?1:-1) + COMBO.vis.length) % COMBO.vis.length; comboPinta(); }
+  else if(e.key==='Enter'){ e.preventDefault(); const t = COMBO.vis[COMBO.act]; if(t) comboElige(t.id); }
+  else if(e.key==='Escape'){ e.target.blur(); }
+}
+function comboCierra(){ const l = $('#comboLista'), i = $('#comboIn'); if(l) l.hidden = true; const t = S.trabajadores.find(x=>x.id===UI.vacTrab); if(i && t && document.activeElement!==i) i.value = t.nombre; }
+function comboElige(id){ UI.vacTrab = id; pintar(); }
 
 /* ---------- departamento ---------- */
 function vacDepartamento(ts, y){
@@ -1516,9 +1577,7 @@ function vacDepartamento(ts, y){
 }
 
 /* ---------- por trabajador ---------- */
-function vacTrabajador(ts, y){
-  const lista = ts.slice().sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
-  let t = lista.find(x=>x.id===UI.vacTrab) || lista[0]; UI.vacTrab = t.id;
+function vacTrabajador(lista, t, y){
   const i = lista.indexOf(t), hoy = hoyIso();
   const n = cuentasDe(t, y), h = (n.H||0)+(n.V||0)+(n.VAC||0), r = rangoDe(t, y);
   const vacs = periodosVac(t, y), inas = t.contrato==='discontinuo' ? tramosDe(t, y, ['INA']) : [];
@@ -1530,9 +1589,9 @@ function vacTrabajador(ts, y){
       ${ds.map(d=>{ const c = diaDe(t, d), e = c==null ? DIA_EST['?'] : estDia(c);
         return `<span class="vd ${e.cls}${diaSem(d)>=5?' fin':''}${d===hoy?' hoy':''}" title="${fCorto(d)}: ${e.nombre}"><i>${Number(d.slice(8))}</i>${e.txt}</span>`; }).join('')}</div></div>`; };
   return `<div class="vbarra">
-      <div class="vsel"><button class="btn" onclick="UI.vacTrab='${lista[(i-1+lista.length)%lista.length].id}';pintar()" aria-label="Anterior">‹</button>
-        <select aria-label="Trabajador" onchange="UI.vacTrab=this.value;pintar()">${lista.map(x=>`<option value="${x.id}" ${x.id===t.id?'selected':''}>${esc(x.nombre)}</option>`).join('')}</select>
-        <button class="btn" onclick="UI.vacTrab='${lista[(i+1)%lista.length].id}';pintar()" aria-label="Siguiente">›</button></div>
+      <div class="vsel"><button class="btn" onclick="UI.vacTrab='${lista[(i-1+lista.length)%lista.length].id}';pintar()" aria-label="Anterior" title="Anterior">‹</button>
+        <h3 class="vnombre">${esc(t.nombre)}</h3>
+        <button class="btn" onclick="UI.vacTrab='${lista[(i+1)%lista.length].id}';pintar()" aria-label="Siguiente" title="Siguiente">›</button></div>
       <span class="vquien"><span class="chip ${t.contrato}">${CONTRATOS[t.contrato].corto}</span> ${negocioChip(t)} ${t.depto?esc(t.depto):''}${t.grupo?` · ${esc(t.grupo)}`:''}${t.num?` · Nº ${esc(t.num)}`:''}</span>
       <span class="esp"></span><button class="btn" onclick="abrirFicha('${t.id}')">Abrir ficha</button></div>
     <div class="vdatos">
