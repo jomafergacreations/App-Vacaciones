@@ -421,9 +421,13 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
    Control Planning 10 — rehecha desde cero
    Datos en localStorage, con una clave nueva.
    ========================================================= */
-const APP_VERSION = '10.15.0';
+const APP_VERSION = '10.15.1';
 const CLAVE = 'control-planning-v10';
 const NOVEDADES = {
+  '10.15.1': [
+    { titulo:'Vacaciones: salen todos', donde:'Vacaciones',
+      texto:'Ahora salen todos los trabajadores, tengan rotación o no. Los que aún no la tienen aparecen en blanco con «sin rotación», y arriba un aviso te dice cuántos son y te deja importarla.' },
+  ],
   '10.15.0': [
     { titulo:'Control de jornada con la rotación', donde:'Control de jornada',
       texto:'Con la rotación importada, todo va por días de trabajo reales: lo que debería llevar, los días que le quedan y el plan para llegar. Ahora también las bajas: descuentan días de trabajo de su rotación, no días naturales.' },
@@ -1459,8 +1463,8 @@ const ordenGrupo = (a, b) => (a==='Sin grupo') - (b==='Sin grupo') || a.localeCo
 
 function vVacaciones(){
   const y = S.anio, tab = UI.vacTab || 'dep';
-  const todos = S.trabajadores.filter(enOrg), ts = todos.filter(t=>enVacaciones(t, y));
-  const sinRot = todos.filter(t=>!enVacaciones(t, y)).length;
+  const todos = S.trabajadores.filter(enOrg), conRot = todos.filter(t=>enVacaciones(t, y)), ts = todos;
+  const sinRot = todos.filter(t=>!tieneRot(t, y)).length;
   const cab = `<div class="portada anim"><button class="volver" onclick="ir('inicio')">‹ Inicio</button><h2>Vacaciones</h2>
     <p>La rotación de ${y} y las vacaciones de cada uno: todo el departamento de un vistazo, o una persona con su calendario del año.</p></div>`;
   const barra = `<div class="barra-herr">
@@ -1470,11 +1474,11 @@ function vVacaciones(){
       <button class="btn" onclick="abrirRotaciones()">${ICO.calendario} Importar rotaciones</button>
     </div>${filtrosOrg()}`;
   const leyenda = `<div class="leyv">${LEYENDA_VAC.map(c=>`<span><i class="${DIA_EST[c].cls}">${DIA_EST[c].txt}</i>${DIA_EST[c].nombre}</span>`).join('')}</div>`;
-  if(!ts.length) return cab + `<div class="tarjeta anim" style="--i:1">${barra}
+  if(!conRot.length) return cab + `<div class="tarjeta anim" style="--i:1">${barra}
     <div class="vacio"><h3>Todavía no hay rotaciones de ${y}</h3><p>Importa el Excel de la rotación anual y aquí verás el calendario de todos y las vacaciones de cada uno.</p>
     <div class="fila" style="justify-content:center"><button class="btn primario" onclick="abrirRotaciones()">${ICO.calendario} Importar rotaciones</button></div></div></div>`;
-  const nota = sinRot ? `<p class="muted nota">${sinRot} trabajador${sinRot===1?'':'es'} no sale${sinRot===1?'':'n'} porque no tiene${sinRot===1?'':'n'} rotación de ${y}.</p>` : '';
-  return cab + `<div class="tarjeta anim" style="--i:1">${barra}${tab==='dep' ? vacDepartamento(ts, y) : vacTrabajador(ts, y)}${leyenda}${nota}</div>`;
+  const aviso = sinRot ? `<div class="banda anim" style="--i:1"><span><b>${sinRot} de ${todos.length} trabajadores</b> no tienen rotación de ${y}: sus días salen en blanco. Importa el Excel de su rotación para ver sus vacaciones.</span><button class="btn" onclick="abrirRotaciones()">${ICO.calendario} Importar rotaciones</button></div>` : '';
+  return cab + aviso + `<div class="tarjeta anim" style="--i:2">${barra}${tab==='dep' ? vacDepartamento(ts, y) : vacTrabajador(ts, y)}${leyenda}</div>`;
 }
 
 /* ---------- departamento ---------- */
@@ -1492,7 +1496,7 @@ function vacDepartamento(ts, y){
     return `<td class="${e.cls}${cls(d)}"${conTexto?` title="${fCorto(d)}: ${e.nombre}"`:''}>${conTexto?e.txt:''}</td>`; };
   const fila = t => { const n = cuentasDe(t, y), h = (n.H||0)+(n.V||0)+(n.VAC||0);
     return `<tr><th scope="row" onclick="UI.vacTab='trab';UI.vacTrab='${t.id}';pintar()" title="Ver su calendario"><span class="vn">${esc(t.nombre)}</span>
-      <span class="vs">${t.contrato==='discontinuo'?'FD · ':''}H ${h} de ${vacDe(t)}</span></th>${dias.map(d=>celda(t, d)).join('')}</tr>`; };
+      <span class="vs">${t.contrato==='discontinuo'?'FD · ':''}${tieneRot(t, y) ? `H ${h} de ${vacDe(t)}` : 'sin rotación'}</span></th>${dias.map(d=>celda(t, d)).join('')}</tr>`; };
   const cuenta = (pred) => dias.map(d=>{ const k = ts.filter(t=>pred(diaDe(t, d))).length; return `<td class="cnt${cls(d)}${k?'':' cero'}">${conTexto||k?k:''}</td>`; }).join('');
   const nav = zoom==='anio' ? '' : `<div class="anio vmes"><button onclick="UI.vacMes=${Math.max(0, desdeM-nm)};pintar()" aria-label="Anterior" ${desdeM===0?'disabled':''}>‹</button><b>${nm===1?MESES_L[desdeM]:`${MESES[desdeM]} – ${MESES[desdeM+nm-1]}`}</b><button onclick="UI.vacMes=${Math.min(12-nm, desdeM+nm)};pintar()" aria-label="Siguiente" ${desdeM+nm>=12?'disabled':''}>›</button></div>`;
   setTimeout(()=>{ const c = document.querySelector('.vgrid-scroll'), h = c?.querySelector('th.hoy'); if(c && h && zoom==='anio') c.scrollLeft = Math.max(0, h.offsetLeft - c.clientWidth/2); }, 0);
@@ -1543,7 +1547,7 @@ function vacTrabajador(ts, y){
       <div><b>Vacaciones asignadas</b>${vacs.length ? vacs.map(p=>`<span class="tramo c-h">${tramoTxt(p)} <em>${p.h} H</em></span>`).join('') : '<span class="muted">Ninguna en la rotación</span>'}</div>
       ${t.contrato==='discontinuo' ? `<div><b>Inactividad</b>${inas.length ? inas.map(p=>`<span class="tramo c-ina">${tramoTxt(p)} <em>${diasTramo(p)} días</em></span>`).join('') : '<span class="muted">Sin periodos</span>'}</div>` : ''}
     </div>
-    ${tieneRot(t, y) ? '' : `<p class="aviso-suave" style="margin:0 0 12px">No tiene rotación de ${y}: solo se ve su inactividad.</p>`}
+    ${tieneRot(t, y) ? '' : `<p class="aviso-suave" style="margin:0 0 12px">No tiene rotación de ${y}${t.contrato==='discontinuo'?': solo se ve su inactividad':''}. Impórtala con «Importar rotaciones» para ver sus días y sus vacaciones.</p>`}
     <div class="vmeses">${MESES_L.map((_,m)=>mes(m)).join('')}</div>
     <p class="muted nota">Los días libres están sujetos a modificaciones por necesidades de la operativa.</p>`;
 }

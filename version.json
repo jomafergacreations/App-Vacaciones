@@ -1,8 +1,7 @@
 {
-  "version": "10.15.0",
+  "version": "10.15.1",
   "fecha": "2026-11-25",
   "novedades": [
-    "Control de jornada por días de trabajo reales de la rotación, también las bajas",
-    "Vacaciones sin colocar descontadas de los días que quedan"
+    "Vacaciones: salen todos los trabajadores y avisa de quién no tiene rotación"
   ]
 }
