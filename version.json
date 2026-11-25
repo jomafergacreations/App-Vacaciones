@@ -1,9 +1,9 @@
 {
-  "version": "10.4.0",
-  "fecha": "2026-11-24",
+  "version": "10.5.0",
+  "fecha": "2026-11-25",
   "novedades": [
-    "Importar turnos: sube el Excel de una semana y se apuntan las horas de cada trabajador",
-    "Horas hechas y horas que quedan en la lista de Personal",
-    "Bajas en la ficha: la jornada anual se recalcula sola"
+    "Nuevo módulo: Control de jornada (llega, no llega o se pasa)",
+    "Seguimiento por semanas o por meses",
+    "Arreglo: las horas importadas y las bajas ya no se pierden al volver a abrir la app"
   ]
 }
