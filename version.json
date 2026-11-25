@@ -1,8 +1,8 @@
 {
-  "version": "10.7.0",
+  "version": "10.8.0",
   "fecha": "2026-11-25",
   "novedades": [
-    "Nombre y apellidos por separado en la ficha",
-    "Separar de una vez los nombres que venían juntos del Excel"
+    "Tiempos parciales con o sin jornada garantizada",
+    "Sin garantía: banda de 850 h a 1.530 h al año, también en Control de jornada"
   ]
 }

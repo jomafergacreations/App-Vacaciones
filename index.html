@@ -109,6 +109,10 @@ table.plantilla{width:100%;border-collapse:collapse;font-variant-numeric:tabular
 .chip.parcial{background:#EEE6F7;color:var(--c-parcial)}
 .chip.discontinuo{background:#FBEBDC;color:var(--c-disc)}
 .chip.reducida{background:var(--senal-suave);color:#7A5600}
+.chip.singar{background:#F1F3F6;color:var(--gris)}
+.banda-j{border:2px dashed var(--linea);border-radius:12px;padding:12px 14px;background:#FAFBFC}
+.banda-j b{font-family:var(--cond);font-size:28px}
+.banda-j small{display:block;color:var(--gris);font-size:13.5px;font-weight:600;margin-top:2px}
 .chip.concretada{background:#DDF1EE;color:#0E6F66}
 .seg.turnos button{padding:9px 16px}
 .jcampo.fijo{background:#F4F5F8;border-style:dashed}
@@ -305,9 +309,15 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
    Control Planning 10 — rehecha desde cero
    Datos en localStorage, con una clave nueva.
    ========================================================= */
-const APP_VERSION = '10.7.0';
+const APP_VERSION = '10.8.0';
 const CLAVE = 'control-planning-v10';
 const NOVEDADES = {
+  '10.8.0': [
+    { titulo:'Tiempo parcial: ¿jornada garantizada?', donde:'Personal › ficha del trabajador',
+      texto:'En los tiempos parciales hay una pregunta nueva. Si tiene jornada garantizada, escríbela en horas o en % de un tiempo completo y la app calcula sus horas (por ejemplo, 60 % = 1.020 h al año). Si no la tiene, su jornada es una banda: entre 850 h y 1.530 h al año, del 50 % al 90 % de un tiempo completo.' },
+    { titulo:'La banda en las cuentas', donde:'Personal y Control de jornada',
+      texto:'Para los parciales sin garantía verás lo que les queda al mínimo y al máximo. En Control de jornada salen «Dentro de su banda», «No va a llegar» (al mínimo) o «Se va a pasar» (del máximo), y las bajas recortan la banda igual que la jornada de los demás.' },
+  ],
   '10.7.0': [
     { titulo:'Nombre y apellidos por separado', donde:'Personal › ficha del trabajador',
       texto:'La ficha tiene ahora dos casillas, Nombre y Apellidos. En la lista se ven como «APELLIDOS, NOMBRE» y se ordenan por apellidos.' },
@@ -400,7 +410,7 @@ const CONTRATOS = {
 
 /* ---------- estado ---------- */
 function anioInicial(){ const d = new Date(); return d.getFullYear() + (d.getMonth()>=9 ? 1 : 0); }   // de octubre en adelante, el año siguiente
-function estadoInicial(){ return { v:10, anio:anioInicial(), ajustes:{hSemana:40, hAnio:1700}, trabajadores:[], alias:{}, versionVista:'0' }; }
+function estadoInicial(){ return { v:10, anio:anioInicial(), ajustes:{hSemana:40, hAnio:1700, pMin:50, pMax:90}, trabajadores:[], alias:{}, versionVista:'0' }; }
 /* un trabajador vacío, con todos sus campos */
 /* nombre y apellidos: se guardan por separado (nom, ape) y «nombre» es el completo, «APELLIDOS, NOMBRE»,
    que es el que se ve, se busca y se empareja. Sin separar, «nombre» es tal como vino. */
@@ -416,7 +426,7 @@ function separarNombre(s){
   if(w.length>=4 && NOMBRES_DOBLES.has(sinAcentos(w[k-1]).toUpperCase())) k--;
   return { ape:w.slice(0,k).join(' '), nom:w.slice(k).join(' ') };
 }
-const nuevoTrabajador = (o={}) => ({ id:null, nombre:'', nom:'', ape:'', num:'', contrato:'completo', modo:'semana', valor:null, actividad:[], reducido:false, red:{modo:'semana', valor:null}, concretado:false, horario:{turno:'', desde:'', hasta:''}, bajas:[], horas:{}, ...o });
+const nuevoTrabajador = (o={}) => ({ id:null, nombre:'', nom:'', ape:'', num:'', contrato:'completo', garantizada:true, modo:'semana', valor:null, actividad:[], reducido:false, red:{modo:'semana', valor:null}, concretado:false, horario:{turno:'', desde:'', hasta:''}, bajas:[], horas:{}, ...o });
 function normalizar(d){
   const b = estadoInicial();
   d = Object.assign(b, d || {});
@@ -426,7 +436,7 @@ function normalizar(d){
     valor: t.valor ?? null, actividad: Array.isArray(t.actividad) ? t.actividad : [],
     reducido: t.reducido, red: t.red, concretado: t.concretado, horario: t.horario, conc: t.conc, bajas: t.bajas, horas: t.horas,
     ...(t.red===undefined && t.conc ? { reducido: !!t.concretado, red: t.conc, concretado: false } : {}),
-    nom: t.nom, ape: t.ape,
+    nom: t.nom, ape: t.ape, garantizada: t.garantizada !== false,
   })).map(t=>({ ...t,
     ...(()=>{ let nom = String(t.nom||'').trim(), ape = String(t.ape||'').trim();
       if(!nom && !ape && t.nombre.includes(',')) ({nom, ape} = separarNombre(t.nombre));
@@ -452,8 +462,12 @@ try { const u = JSON.parse(sessionStorage.getItem('cp-ui')||'{}'); if(u.vista) U
    La jornada de cada persona se guarda tal como la escribiste
    (modo + valor) y se convierte a las otras dos unidades.
    ========================================================= */
+/* tiempo parcial sin jornada garantizada: no tiene una jornada fija, sino una banda
+   entre el pMin y el pMax % de un tiempo completo (850 h y 1.530 h al año) */
+const sinGarantia = t => t.contrato==='parcial' && t.garantizada===false;
 function pctDe(t){
   if(t.contrato==='completo') return 100;
+  if(sinGarantia(t)) return null;
   const v = num(t.valor); if(v==null) return null;
   const A = S.ajustes;
   return t.modo==='pct' ? v : t.modo==='semana' ? v / A.hSemana * 100 : v / A.hAnio * 100;
@@ -499,10 +513,19 @@ function computoDe(t, y=S.anio){
   const x = diasJornada(t, y); if(!x) return 0;
   return a * (x - Math.min(x, diasBaja(t, y))) / x;
 }
+/* lo que tiene que hacer en el año: una cifra (min = max) o la banda de los parciales sin garantía; con bajas */
+function rangoDe(t, y=S.anio){
+  if(!sinGarantia(t)){ const c = computoDe(t, y); return c==null ? null : {min:c, max:c}; }
+  const A = S.ajustes, x = diasJornada(t, y), f = x ? (x - Math.min(x, diasBaja(t, y))) / x : 0;
+  return { min: A.pMin/100*A.hAnio*f, max: A.pMax/100*A.hAnio*f };
+}
+const entre = (a, b, ud=' h') => Math.abs(a-b)<0.005 ? nh(a)+ud : `${nh(a)}–${nh(b)}${ud}`;
+const bandaSemana = () => entre(S.ajustes.pMin/100*S.ajustes.hSemana, S.ajustes.pMax/100*S.ajustes.hSemana);
+const bandaPct = () => entre(S.ajustes.pMin, S.ajustes.pMax, ' %');
 const semanasDe = (t, y=S.anio) => Object.keys(t.horas||{}).filter(l=>anioSemana(l)===y).sort();
 const hechasDe = (t, y=S.anio) => semanasDe(t, y).reduce((a,l)=>a+(num(t.horas[l])||0), 0);
 const quedanDe = (t, y=S.anio) => { const c = computoDe(t, y); return c==null ? null : c - hechasDe(t, y); };
-const faltaJornada = t => (t.contrato!=='completo' && pctDe(t)==null) || (t.reducido && pctEf(t)==null);
+const faltaJornada = t => !sinGarantia(t) && (t.contrato!=='completo' && pctDe(t)==null) || (t.reducido && pctEf(t)==null);
 const faltaActividad = t => t.contrato==='discontinuo' && diasActividad(t)===0;
 
 /* =========================================================
@@ -540,7 +563,7 @@ function vPersonal(){
   if(!todos.length) return cab + `<div class="tarjeta vacio anim" style="--i:1"><h3>Todavía no hay nadie</h3><p>Añade a los trabajadores uno a uno o pega la lista desde tu Excel.</p>
     <div class="fila" style="justify-content:center"><button class="btn primario" onclick="abrirFicha()">${ICO.mas} Añadir trabajador</button><button class="btn" onclick="abrirPegar()">${ICO.pegar} Añadir desde Excel</button></div></div>`;
   const cuenta = c => todos.filter(t=>t.contrato===c).length;
-  const total = todos.reduce((a,t)=>a+(computoDe(t)||0),0);
+  const total = todos.reduce((a,t)=>a+(computoDe(t)||0),0), nSinG = todos.filter(sinGarantia).length;
   const totalHechas = todos.reduce((a,t)=>a+hechasDe(t),0);
   const q = UI.buscar.trim().toLowerCase();
   const ts = todos.filter(t=>(UI.filtro==='todos'||t.contrato===UI.filtro) && (!q || t.nombre.toLowerCase().includes(q) || String(t.num).includes(q)))
@@ -549,15 +572,16 @@ function vPersonal(){
   const filas = ts.map(t=>{ const c = CONTRATOS[t.contrato];
     return `<tr onclick="abrirFicha('${t.id}')">
       <td><div class="nombre">${esc(t.nombre)}</div>${t.num?`<div class="sub">Nº ${esc(t.num)}</div>`:''}</td>
-      <td><span class="chip ${t.contrato}">${c.nombre}</span>${t.reducido?' <span class="chip reducida">Reducida</span>':''}${t.concretado?` <span class="chip concretada">${esc(horarioTxt(t))}</span>`:''}</td>
-      <td class="num">${semanaEf(t)==null?'—':nh(semanaEf(t))+' h'}${t.reducido&&semanaDe(t)!=null?`<div class="sub">de ${nh(semanaDe(t))} h</div>`:''}</td>
-      <td class="num">${pctEf(t)==null?'—':nh(pctEf(t))+' %'}</td>
+      <td><span class="chip ${t.contrato}">${c.nombre}</span>${sinGarantia(t)?' <span class="chip singar">Sin garantía</span>':''}${t.reducido?' <span class="chip reducida">Reducida</span>':''}${t.concretado?` <span class="chip concretada">${esc(horarioTxt(t))}</span>`:''}</td>
+      <td class="num">${sinGarantia(t)?bandaSemana():semanaEf(t)==null?'—':nh(semanaEf(t))+' h'}${t.reducido&&semanaDe(t)!=null?`<div class="sub">de ${nh(semanaDe(t))} h</div>`:''}</td>
+      <td class="num">${sinGarantia(t)?bandaPct():pctEf(t)==null?'—':nh(pctEf(t))+' %'}</td>
       <td class="num">${t.contrato==='discontinuo'?`${diasActividad(t)} días`:'<span class="muted">Todo el año</span>'}</td>
-      <td class="num">${avisos(t) || `<span class="anual">${nh(computoDe(t))} h</span>${diasBaja(t)?`<div class="sub">de ${nh(anualDe(t))} h · ${diasBaja(t)} días de baja</div>`:''}`}</td>
+      <td class="num">${avisos(t) || (sinGarantia(t) ? `<span class="anual">${entre(rangoDe(t).min, rangoDe(t).max)}</span><div class="sub">sin jornada garantizada${diasBaja(t)?` · ${diasBaja(t)} días de baja`:''}</div>`
+        : `<span class="anual">${nh(computoDe(t))} h</span>${diasBaja(t)?`<div class="sub">de ${nh(anualDe(t))} h · ${diasBaja(t)} días de baja</div>`:''}`)}</td>
       <td class="num">${horasCelda(t)}</td>
       <td class="num">${quedanCelda(t)}</td></tr>`; }).join('');
   const tarjetas = ts.map(t=>`<button class="tm" onclick="abrirFicha('${t.id}')"><div class="l1"><b>${esc(t.nombre)}</b><span class="chip ${t.contrato}">${CONTRATOS[t.contrato].corto}</span></div>
-      <div class="l2"><span>${semanaEf(t)==null?'—':nh(semanaEf(t))+' h/sem'} · ${pctEf(t)==null?'—':nh(pctEf(t))+' %'}${t.reducido?' · reducida':''}${t.concretado?' · '+esc(horarioTxt(t)):''}</span>${avisos(t) || `<b>${nh(computoDe(t))} h</b>`}</div>
+      <div class="l2"><span>${sinGarantia(t)?'Sin garantía · '+bandaPct():`${semanaEf(t)==null?'—':nh(semanaEf(t))+' h/sem'} · ${pctEf(t)==null?'—':nh(pctEf(t))+' %'}`}${t.reducido?' · reducida':''}${t.concretado?' · '+esc(horarioTxt(t)):''}</span>${avisos(t) || `<b>${sinGarantia(t)?entre(rangoDe(t).min, rangoDe(t).max):nh(computoDe(t))+' h'}</b>`}</div>
       ${faltaJornada(t)||faltaActividad(t) ? '' : `<div class="l3"><span>Hechas <b>${nh(hechasDe(t))} h</b></span><span>${quedanCelda(t, true)}</span></div>${barra(t)}`}</button>`).join('');
   const fb = (k,t) => `<button class="${UI.filtro===k?'on':''}" onclick="UI.filtro='${k}';pintar()">${t}</button>`;
   return cab + `<div class="resumen anim" style="--i:1">
@@ -565,7 +589,7 @@ function vPersonal(){
       <div class="cifra" style="--cc:var(--c-completo)"><b>${cuenta('completo')}</b><span>tiempo completo</span></div>
       <div class="cifra" style="--cc:var(--c-parcial)"><b>${cuenta('parcial')}</b><span>tiempo parcial</span></div>
       <div class="cifra" style="--cc:var(--c-disc)"><b>${cuenta('discontinuo')}</b><span>fijos discontinuos</span></div>
-      <div class="cifra" style="--cc:var(--senal)"><b>${nh(total)} h</b><span>jornada anual en ${S.anio}${totalHechas?`, ${nh(totalHechas)} h hechas`:''}</span></div>
+      <div class="cifra" style="--cc:var(--senal)"><b>${nh(total)} h</b><span>jornada anual en ${S.anio}${nSinG?` (sin ${nSinG===1?'el parcial':`los ${nSinG} parciales`} sin garantía)`:''}${totalHechas?`, ${nh(totalHechas)} h hechas`:''}</span></div>
     </div>
     ${todos.filter(sinSeparar).length ? `<div class="banda anim" style="--i:2"><span><b>${todos.filter(sinSeparar).length} trabajador${todos.filter(sinSeparar).length===1?'':'es'}</b> tienen el nombre y los apellidos juntos.</span><button class="btn" onclick="abrirSeparar()">Separarlos</button></div>` : ''}
     <div class="tarjeta anim" style="--i:2">
@@ -585,9 +609,9 @@ function vPersonal(){
 
 /* hechas y quedan, en la lista */
 function barra(t){
-  const c = computoDe(t), h = hechasDe(t); if(c==null || faltaJornada(t) || faltaActividad(t)) return '';
-  const p = c>0 ? Math.min(100, h/c*100) : (h>0?100:0);
-  return `<div class="prog ${h>c+0.005?'pasa':''}" title="${nh(c>0?h/c*100:0)} % hecho"><i style="width:${p}%"></i></div>`;
+  const r = rangoDe(t), h = hechasDe(t); if(!r || faltaJornada(t) || faltaActividad(t)) return '';
+  const c = r.min, p = c>0 ? Math.min(100, h/c*100) : (h>0?100:0);
+  return `<div class="prog ${h>r.max+0.005?'pasa':''}" title="${nh(c>0?h/c*100:0)} % ${sinGarantia(t)?'del mínimo':'hecho'}"><i style="width:${p}%"></i></div>`;
 }
 function horasCelda(t){
   const n = semanasDe(t).length;
@@ -595,6 +619,10 @@ function horasCelda(t){
   return `<span class="hecha">${nh(hechasDe(t))} h</span>${barra(t)}<div class="sub">${n ? `${n} semana${n===1?'':'s'}` : 'Sin semanas'}</div>`;
 }
 function quedanCelda(t, corto){
+  if(sinGarantia(t)){ const r = rangoDe(t), h = hechasDe(t); if(!r || faltaActividad(t)) return corto ? '' : '<span class="muted">—</span>';
+    if(h > r.max + 0.005) return `<span class="de-mas">${nh(h-r.max)} h de más</span>`;
+    if(h >= r.min - 0.005) return corto ? `Mínimo hecho · <b>${nh(r.max-h)} h</b> al máximo` : `<span class="hecha">Mínimo hecho</span><div class="sub">${nh(r.max-h)} h hasta el máximo</div>`;
+    return corto ? `Al mínimo <b>${nh(r.min-h)} h</b>` : `<span class="hecha">${nh(r.min-h)} h</span><div class="sub">al mínimo · ${nh(r.max-h)} h al máximo</div>`; }
   const q = quedanDe(t); if(q==null || faltaJornada(t) || faltaActividad(t)) return corto ? '' : '<span class="muted">—</span>';
   if(q < -0.005) return `<span class="de-mas">${nh(-q)} h de más</span>`;
   return corto ? `Quedan <b>${nh(q)} h</b>` : `<span class="hecha">${nh(q)} h</span>`;
@@ -654,11 +682,14 @@ function pintarFicha(primera){
         <label style="flex:1 1 120px">Nº de empleado<input value="${esc(e.num)}" oninput="UI.edit.num=this.value" autocomplete="off"></label></div>
       ${e._junto ? `<p class="aviso-suave">Venía junto como «${esc(e._junto)}» y lo he separado yo. Revisa que el nombre y los apellidos estén bien antes de guardar.</p>` : ''}
       <div class="bloque"><h3>Contrato</h3><div class="contratos">${Object.keys(CONTRATOS).map(contratoBtn).join('')}</div></div>
-      <div class="bloque"><h3>Jornada</h3>
-        <div class="jornada">${campo('semana','Horas a la semana', sem, 'h')}${campo('pct','Porcentaje', pct, '%')}${campo('anio','Horas al año', pct==null?null:pct/100*A.hAnio, 'h')}</div>
-        ${e.contrato!=='completo'?'<p class="muted" style="margin:8px 0 0;font-size:13.5px">Escribe en la casilla que tengas; las otras dos se calculan solas.</p>':''}</div>
+      ${e.contrato==='parcial' ? `<div class="bloque"><h3>¿Tiene jornada garantizada?</h3>${siNo('garantizada', '')}</div>` : ''}
+      ${sinGarantia(e) ? `<div class="bloque"><h3>Jornada</h3><div class="banda-j">Entre <b>${nh(A.pMin/100*A.hAnio)} h</b> y <b>${nh(A.pMax/100*A.hAnio)} h</b> al año
+          <small>Sin jornada garantizada: del ${nh(A.pMin)} % al ${nh(A.pMax)} % de un tiempo completo (${bandaSemana()} a la semana).</small></div></div>`
+      : `<div class="bloque"><h3>${e.contrato==='parcial'?'Jornada garantizada':'Jornada'}</h3>
+        <div class="jornada">${campo('semana','Horas a la semana', sem, 'h')}${campo('pct', e.contrato==='completo'?'Porcentaje':'% de un tiempo completo', pct, '%')}${campo('anio','Horas al año', pct==null?null:pct/100*A.hAnio, 'h')}</div>
+        ${e.contrato!=='completo'?`<p class="muted" style="margin:8px 0 0;font-size:13.5px">Escribe en la casilla que tengas; las otras dos se calculan solas. El porcentaje es siempre sobre un tiempo completo (${nh(A.hSemana)} h a la semana, ${nh(A.hAnio)} h al año).</p>`:''}</div>`}
       ${bConcretado}
-      ${bReducido}
+      ${sinGarantia(e) ? '' : bReducido}
       ${periodos}
       ${bloqueBajas(e)}
       ${bloqueHoras(e)}
@@ -691,6 +722,10 @@ function recalcular(){
 }
 /* caja oscura del final de la ficha: jornada con bajas, hechas y quedan */
 function calculoHTML(e){
+  if(sinGarantia(e)){ const r = rangoDe(e), h = hechasDe(e), ok = r && !faltaActividad(e);
+    return `<span>Jornada anual ${S.anio}</span><b>${r?entre(r.min, r.max):'—'}</b>
+      ${ok ? `<span class="hq"><span>Hechas<em>${nh(h)} h</em></span>${h>r.max+0.005?`<span>De más<em>${nh(h-r.max)} h</em></span>`:`<span>Al mínimo<em>${nh(Math.max(0,r.min-h))} h</em></span><span>Al máximo<em>${nh(r.max-h)} h</em></span>`}</span>` : ''}
+      <span class="f">${esc(formulaDe(e))}</span>`; }
   const c = computoDe(e), ok = c!=null && !faltaActividad(e);
   const q = ok ? c - hechasDe(e) : null;
   return `<span>Jornada anual ${S.anio}</span><b>${c==null?'—':nh(c)+' h'}</b>
@@ -730,6 +765,8 @@ function anadirSemana(v){
 /* explicación del cálculo de la jornada anual */
 function formulaDe(e){
   const A = S.ajustes, pc = pctDe(e), pe = pctEf(e);
+  if(sinGarantia(e)){ const b = diasBaja(e), x = diasJornada(e), r = rangoDe(e);
+    return `Sin jornada garantizada: del ${nh(A.pMin)} % (${nh(A.pMin/100*A.hAnio)} h) al ${nh(A.pMax)} % (${nh(A.pMax/100*A.hAnio)} h) de ${nh(A.hAnio)} h` + (b && x ? `. Con ${b} día${b===1?'':'s'} de baja, × ${x-Math.min(b,x)} / ${x} días: ${entre(r.min, r.max)}` : '') + '.'; }
   if(pc==null) return 'Escribe su jornada en cualquiera de las tres casillas.';
   if(e.reducido && pe==null) return 'Escribe su jornada reducida.';
   const base = pe/100*A.hAnio;
@@ -765,6 +802,8 @@ function guardarFicha(){
   e.bajas = e.bajas.filter(x=>x.desde && x.hasta);
   e.horas = Object.fromEntries(Object.entries(e.horas).filter(([,v])=>v!=null).map(([k,v])=>[k, r2(v)]));
   if(e.contrato==='completo'){ e.valor = null; e.modo = 'semana'; }
+  if(e.contrato!=='parcial') e.garantizada = true;
+  if(sinGarantia(e)){ e.valor = null; e.reducido = false; }
   if(!e.concretado) e.horario = {turno:'', desde:'', hasta:''};
   delete e.conc;
   if(!e.reducido) e.red = {modo:'semana', valor:null};
@@ -878,7 +917,7 @@ function guardarPlantilla(){
 const MARGEN = 0.02;   // ±2 % sobre lo que debería llevar: dentro, «va a llegar»
 const ESTADO_J = {
   pasado: {txt:'Se ha pasado', cls:'pasa'}, pasa: {txt:'Se va a pasar', cls:'pasa'},
-  bien: {txt:'Va a llegar', cls:'bien'}, falta: {txt:'No va a llegar', cls:'falta'},
+  bien: {txt:'Va a llegar', cls:'bien'}, dentro: {txt:'Dentro de su banda', cls:'bien'}, falta: {txt:'No va a llegar', cls:'falta'},
   sin: {txt:'Sin horas', cls:'sin'}, inc: {txt:'Falta la jornada', cls:'sin'},
 };
 const FILTRO_J = { todos:'Todos', pasa:'Se pasan', bien:'Llegan', falta:'No llegan', sin:'Sin horas' };
@@ -899,29 +938,33 @@ function corteDe(y=S.anio){
   const fin = sumaDias(ls[ls.length-1], 6);
   return { primera: ls[0], ultima: ls[ls.length-1], hasta: fin };
 }
+/* todo va con una banda [min, max]: con jornada fija min = max; sin garantía, del pMin al pMax % */
 function seguimientoDe(t, y, corte){
-  const r = { t, pct: pctEf(t), garant: anualBase(t), computo: computoDe(t, y), hechas: hechasDe(t, y), semanas: semanasDe(t, y).length };
-  if(r.computo==null || faltaJornada(t)){ r.estado = 'inc'; return r; }
+  const r = { t, sinG: sinGarantia(t), pct: pctEf(t), garant: anualBase(t), rango: rangoDe(t, y), hechas: hechasDe(t, y), semanas: semanasDe(t, y).length };
+  r.computo = r.rango ? r.rango.max : null;
+  if(!r.rango || faltaJornada(t)){ r.estado = 'inc'; return r; }
   const ef = diasEf(t, y); r.ef = ef;
-  const porDia = ef.length ? r.computo / ef.length : 0;
-  const hastaN = corte ? ef.filter(d=>d<=corte.hasta).length : 0;
-  r.esperadas = porDia * hastaN;
-  r.dif = r.hechas - r.esperadas;
-  r.quedan = r.computo - r.hechas;
+  const hastaN = corte ? ef.filter(d=>d<=corte.hasta).length : 0, fr = ef.length ? hastaN / ef.length : 0;
+  r.espMin = r.rango.min * fr; r.espMax = r.rango.max * fr; r.esperadas = r.espMin;
+  r.dif = r.hechas < r.espMin ? r.hechas - r.espMin : r.hechas > r.espMax ? r.hechas - r.espMax : 0;
+  r.quedan = r.rango.min - r.hechas;
   const restantes = ef.length - hastaN;
-  r.necesita = restantes > 0 ? Math.max(0, r.quedan) / (restantes/7) : null;
-  r.prevision = r.esperadas > 0 ? r.hechas / r.esperadas * r.computo : (r.hechas || null);
+  r.necesita = restantes > 0 ? Math.max(0, r.rango.min - r.hechas) / (restantes/7) : null;
+  r.necesitaMax = restantes > 0 ? Math.max(0, r.rango.max - r.hechas) / (restantes/7) : null;
+  r.prevision = fr > 0 ? r.hechas / fr : (r.hechas || null);
   /* semanas sin horas entre la primera y la última importadas en las que tenía jornada */
   r.faltan = 0;
   if(corte){ const s = new Set(ef); for(let l=corte.primera; l<=corte.ultima; l=sumaDias(l,7)){
     if(t.horas?.[l]===undefined && [0,1,2,3,4,5,6].some(k=>s.has(sumaDias(l,k)))) r.faltan++; } }
   if(!r.semanas) r.estado = 'sin';
-  else if(r.hechas > r.computo + 0.005) r.estado = 'pasado';
-  else if(r.esperadas <= 0) r.estado = 'bien';
-  else { const k = r.hechas / r.esperadas; r.estado = k > 1 + MARGEN ? 'pasa' : k < 1 - MARGEN ? 'falta' : 'bien'; }
+  else if(r.hechas > r.rango.max + 0.005) r.estado = 'pasado';
+  else if(r.espMax <= 0) r.estado = r.sinG ? 'dentro' : 'bien';
+  else r.estado = r.hechas > r.espMax*(1+MARGEN) ? 'pasa' : r.hechas < r.espMin*(1-MARGEN) ? 'falta' : r.sinG ? 'dentro' : 'bien';
   return r;
 }
-const grupoJ = e => e==='pasado' || e==='pasa' ? 'pasa' : e==='inc' ? 'sin' : e;
+const grupoJ = e => e==='pasado' || e==='pasa' ? 'pasa' : e==='inc' ? 'sin' : e==='dentro' ? 'bien' : e;
+/* diferencia de la previsión con lo que tiene que hacer */
+const difPrev = r => !r.sinG ? conSigno(r.prevision - r.rango.max) : r.prevision < r.rango.min ? conSigno(r.prevision - r.rango.min)+' al mínimo' : r.prevision > r.rango.max ? conSigno(r.prevision - r.rango.max)+' al máximo' : 'dentro de su banda';
 const difCls = r => ({pasado:'mas', pasa:'mas', falta:'menos'})[r.estado] || '';
 const conSigno = n => (n > 0.005 ? '+' : n < -0.005 ? '−' : '') + nh(Math.abs(n)) + ' h';
 
@@ -938,24 +981,25 @@ function vJornada(){
   const n = k => todos.filter(r=>grupoJ(r.estado)===k).length;
   const faltan = todos.filter(r=>r.faltan).length;
   const chip = r => `<span class="estj ${ESTADO_J[r.estado].cls}">${ESTADO_J[r.estado].txt}</span>`;
-  const garant = r => r.pct==null ? '—' : `${nh(r.pct)} %`;
+  const garant = r => r.sinG ? 'Sin garantía' : r.pct==null ? '—' : `${nh(r.pct)} %`;
+  const tiene = r => !r.rango ? '—' : entre(r.rango.min, r.rango.max);
   const avisoF = r => r.faltan ? `<span class="aviso" title="Hay semanas importadas en las que no sale">Faltan ${r.faltan} semana${r.faltan===1?'':'s'}</span>` : '';
   const filas = rs.map(r=>{ const t = r.t, inc = r.estado==='inc';
     return `<tr onclick="abrirFicha('${t.id}')">
       <td><div class="nombre">${esc(t.nombre)}</div><div class="sub"><span class="chip ${t.contrato}" style="padding:1px 8px;font-size:12px">${CONTRATOS[t.contrato].corto}</span>${t.reducido?' reducida':''}</div></td>
-      <td class="num"><span class="hecha">${garant(r)}</span><div class="sub">${r.garant==null?'':nh(r.garant)+' h'}</div></td>
-      <td class="num"><span class="anual">${r.computo==null?'—':nh(r.computo)+' h'}</span>${!inc && r.garant!=null && Math.abs(r.computo-r.garant)>0.005?`<div class="sub">${t.contrato==='discontinuo'?'por actividad':''}${t.contrato==='discontinuo'&&diasBaja(t,y)?' y ':''}${diasBaja(t,y)?`${diasBaja(t,y)} días de baja`:''}</div>`:''}</td>
+      <td class="num"><span class="hecha">${garant(r)}</span><div class="sub">${r.sinG?bandaPct()+' de un completo':r.garant==null?'':nh(r.garant)+' h'}</div></td>
+      <td class="num"><span class="anual">${tiene(r)}</span>${r.sinG?(diasBaja(t,y)?`<div class="sub">${diasBaja(t,y)} días de baja</div>`:''):!inc && r.garant!=null && Math.abs(r.computo-r.garant)>0.005?`<div class="sub">${t.contrato==='discontinuo'?'por actividad':''}${t.contrato==='discontinuo'&&diasBaja(t,y)?' y ':''}${diasBaja(t,y)?`${diasBaja(t,y)} días de baja`:''}</div>`:''}</td>
       <td class="num"><span class="hecha">${nh(r.hechas)} h</span><div class="sub">${r.semanas} semana${r.semanas===1?'':'s'}</div></td>
-      <td class="num">${inc||!corte?'—':nh(r.esperadas)+' h'}</td>
+      <td class="num">${inc||!corte?'—':entre(r.espMin, r.espMax)}</td>
       <td class="num">${inc||!corte||!r.semanas?'—':`<b class="dif ${difCls(r)}">${conSigno(r.dif)}</b>`}</td>
-      <td class="num">${inc||!r.semanas||r.prevision==null?'—':`${nh(Math.round(r.prevision))} h<div class="sub">${conSigno(r.prevision-r.computo)}</div>`}</td>
-      <td class="num">${inc||r.necesita==null?'—':`${nh(r.necesita)} h<div class="sub">su jornada: ${nh(semanaEf(t))} h</div>`}</td>
+      <td class="num">${inc||!r.semanas||r.prevision==null?'—':`${nh(Math.round(r.prevision))} h<div class="sub">${difPrev(r)}</div>`}</td>
+      <td class="num">${inc||r.necesita==null?'—':r.sinG?`${entre(r.necesita, r.necesitaMax)}<div class="sub">del mínimo al máximo</div>`:`${nh(r.necesita)} h<div class="sub">su jornada: ${nh(semanaEf(t))} h</div>`}</td>
       <td>${chip(r)}${avisoF(r)?'<br>'+avisoF(r):''}</td></tr>`; }).join('');
   const tarjetas = rs.map(r=>{ const t = r.t, inc = r.estado==='inc';
     return `<button class="tm" onclick="abrirFicha('${t.id}')"><div class="l1"><b>${esc(t.nombre)}</b>${chip(r)}</div>
-      <div class="l2"><span>${garant(r)} · cómputo ${r.computo==null?'—':nh(r.computo)+' h'}</span><b>${nh(r.hechas)} h</b></div>
-      ${inc||!corte ? '' : `<div class="l3"><span>Debería llevar <b>${nh(r.esperadas)} h</b></span><span>${r.semanas?`<b class="dif ${difCls(r)}">${conSigno(r.dif)}</b>`:''}</span></div>
-      <div class="l3"><span>Previsión <b>${r.semanas&&r.prevision!=null?nh(Math.round(r.prevision))+' h':'—'}</b></span><span>${r.necesita==null?'':`Necesita <b>${nh(r.necesita)} h/sem</b>`}</span></div>`}
+      <div class="l2"><span>${garant(r)} · ${r.sinG?'entre':'cómputo'} ${tiene(r)}</span><b>${nh(r.hechas)} h</b></div>
+      ${inc||!corte ? '' : `<div class="l3"><span>Debería llevar <b>${entre(r.espMin, r.espMax)}</b></span><span>${r.semanas?`<b class="dif ${difCls(r)}">${conSigno(r.dif)}</b>`:''}</span></div>
+      <div class="l3"><span>Previsión <b>${r.semanas&&r.prevision!=null?nh(Math.round(r.prevision))+' h':'—'}</b></span><span>${r.necesita==null?'':`Necesita <b>${r.sinG?entre(r.necesita, r.necesitaMax, ''):nh(r.necesita)} h/sem</b>`}</span></div>`}
       ${avisoF(r)?`<div style="margin-top:6px">${avisoF(r)}</div>`:''}</button>`; }).join('');
   const fb = k => `<button class="${fj===k?'on':''}" onclick="UI.filtroJ='${k}';pintar()">${FILTRO_J[k]}</button>`;
   const cifra = (k, txt, cc) => `<button class="cifra filtra ${fj===k?'on':''}" style="--cc:${cc}" onclick="UI.filtroJ=UI.filtroJ==='${k}'?'todos':'${k}';pintar()"><b>${n(k)}</b><span>${txt}</span></button>`;
@@ -974,7 +1018,7 @@ function vJornada(){
       ${!corte ? `<p class="muted" style="margin:4px 0 14px">Todavía no hay turnos de ${y}. Importa el archivo de una semana para empezar el seguimiento.</p>` : ''}
       ${rs.length ? `<div class="tabla-escritorio"><table class="plantilla jtab"><thead><tr><th>Trabajador</th><th class="num">Jornada garantizada</th><th class="num">Cómputo ${y}</th><th class="num">Lleva</th><th class="num">Debería llevar</th><th class="num">Diferencia</th><th class="num">Previsión a fin de año</th><th class="num">Necesita a la semana</th><th>Estado</th></tr></thead><tbody>${filas}</tbody></table></div>
         <div class="tarjetas-movil">${tarjetas}</div>` : '<p class="muted" style="margin:10px 0">Nadie coincide con el filtro.</p>'}
-      <p class="muted nota">«Debería llevar» reparte su cómputo por igual entre sus días de jornada hasta el ${corte?fmt(corte.hasta):'último turno importado'}, sin contar las bajas. Llega si va dentro de un ${nf(MARGEN*100)} % arriba o abajo. La previsión supone que sigue al mismo ritmo.</p>
+      <p class="muted nota">«Debería llevar» reparte su cómputo por igual entre sus días de jornada hasta el ${corte?fmt(corte.hasta):'último turno importado'}, sin contar las bajas. Llega si va dentro de un ${nf(MARGEN*100)} % arriba o abajo. La previsión supone que sigue al mismo ritmo. En los parciales sin jornada garantizada todo va por banda, entre su mínimo y su máximo.</p>
     </div>
     ${corte ? seguimientoHTML(todos.filter(r=>rs.includes(r)), y, corte) : ''}`;
 }
@@ -991,11 +1035,12 @@ function seguimientoHTML(rs, y, corte){
     if(p.desde > corte.hasta) return `<td class="fut"></td>`;
     if(r.estado==='inc') return `<td></td>`;
     const ls = Object.keys(r.t.horas||{}).filter(p.semanas);
-    const toca = r.ef.filter(d=>d>=p.desde && d<=p.hasta).length * (r.ef.length ? r.computo / r.ef.length : 0);
-    if(!ls.length) return `<td class="${toca>0.005?'vacia':''}" title="${toca>0.005?'Sin horas importadas':'Sin jornada'}">${toca>0.005?'·':''}</td>`;
-    const h = ls.reduce((a,l)=>a+(num(r.t.horas[l])||0),0), k = toca>0 ? h/toca : (h>0?2:1);
-    const cls = k > 1.1 ? 'alto' : k < 0.9 ? 'bajo' : 'ok';
-    return `<td class="${cls}" title="${esc(p.cab)}: ${nh(h)} h de ${nh(toca)} h que le tocaban">${nh(h)}</td>`; }).join('');
+    const dias = r.ef.filter(d=>d>=p.desde && d<=p.hasta).length, n = r.ef.length || 1;
+    const tMin = dias * r.rango.min / n, tMax = dias * r.rango.max / n;
+    if(!ls.length) return `<td class="${tMax>0.005?'vacia':''}" title="${tMax>0.005?'Sin horas importadas':'Sin jornada'}">${tMax>0.005?'·':''}</td>`;
+    const h = ls.reduce((a,l)=>a+(num(r.t.horas[l])||0),0);
+    const cls = tMax<=0.005 ? (h>0?'alto':'ok') : h > tMax*1.1 ? 'alto' : h < tMin*0.9 ? 'bajo' : 'ok';
+    return `<td class="${cls}" title="${esc(p.cab)}: ${nh(h)} h; le tocaban ${entre(tMin, tMax)}">${nh(h)}</td>`; }).join('');
   const fila = r => `<tr><th scope="row" onclick="abrirFicha('${r.t.id}')">${esc(r.t.nombre)}</th>${celdas(r)}<td class="tot">${nh(r.hechas)}</td></tr>`;
   setTimeout(()=>{ const c = document.querySelector('.seg-scroll'), f = c?.querySelector('th.ult'); if(c && f) c.scrollLeft = Math.max(0, f.offsetLeft - c.clientWidth + 160); }, 0);
   return `<div class="tarjeta anim" style="--i:3">
