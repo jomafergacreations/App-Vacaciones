@@ -566,34 +566,30 @@ header{background:var(--panel);box-shadow:inset 0 -4px 0 var(--senal)}
 
 
 
-/* inicio: pantalla de salidas con letras de paletas */
-.tablero{min-height:calc(100vh - 150px);background:#0B0C0F;border-radius:8px;padding:clamp(16px,2.4vw,30px);color:#fff;box-shadow:0 20px 50px -30px rgba(0,0,0,.8);--t:clamp(14px,calc((100vw - 150px) / 57),28px)}
-.tab-cab{display:flex;align-items:center;gap:14px;margin-bottom:clamp(14px,2vw,24px)}
-.tab-cab .logo{width:calc(var(--t)*1.7);height:calc(var(--t)*1.7)}
-.tab-cab .logo svg{width:70%;height:70%}
-.tab-cab h2{font-size:calc(var(--t)*1.8);color:var(--senal);letter-spacing:.01em}
-.tab-cab .hora{margin-left:auto;font-family:var(--cond);font-weight:700;font-size:calc(var(--t)*1.1);color:#fff;font-variant-numeric:tabular-nums;letter-spacing:.06em}
-.vuelos{display:grid;grid-template-columns:auto auto auto auto;column-gap:calc(var(--t)*.9);row-gap:calc(var(--t)*.32);justify-content:start}
-.vuelos .tit{font-family:var(--cond);font-weight:700;font-size:calc(var(--t)*.62);letter-spacing:.08em;color:#fff;padding-bottom:4px}
-.vuelo{display:grid;grid-column:1/-1;grid-template-columns:subgrid;row-gap:inherit;cursor:pointer;color:inherit;text-decoration:none;border-radius:4px}
-.vuelo>span{display:flex;gap:2px;align-items:center;padding:3px 0;border-radius:3px;transition:background .15s}
-.vuelo:hover{background:#1C2028;box-shadow:0 0 0 6px #1C2028}
-.vuelo:focus-visible{outline:3px solid var(--senal);outline-offset:5px}
+/* inicio: un panel de pantalla de aeropuerto por módulo, con letras de paletas */
+.paneles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;align-items:stretch}
+.modulo{--t:clamp(13px,calc((100vw - 260px) / 66),26px);display:flex;flex-direction:column;background:#0B0C0F;border-radius:8px;padding:clamp(16px,1.6vw,26px);color:#fff;text-decoration:none;
+  box-shadow:0 20px 50px -30px rgba(0,0,0,.8);transition:transform .15s,box-shadow .15s}
+.modulo:hover{transform:translateY(-3px);box-shadow:0 0 0 3px var(--senal),0 24px 50px -30px rgba(0,0,0,.9)}
+.modulo:focus-visible{outline:3px solid var(--senal);outline-offset:4px}
+.mod-cab{display:flex;align-items:center;gap:12px;margin-bottom:calc(var(--t)*1.1)}
+.mod-cab .pict{display:grid;place-items:center;width:calc(var(--t)*1.9);height:calc(var(--t)*1.9);border-radius:4px;background:var(--senal);color:var(--panel);flex-shrink:0}
+.mod-cab .pict svg{width:62%;height:62%;stroke-width:2.2}
+.mod-cab h2{font-size:calc(var(--t)*1.5);min-width:0;color:var(--senal);letter-spacing:.01em;line-height:1}
+.mod-cab .anio-m{margin-left:auto;font-family:var(--cond);font-weight:700;font-size:calc(var(--t)*1.05);color:#fff;font-variant-numeric:tabular-nums;letter-spacing:.06em}
+.mod-filas{display:grid;grid-template-columns:auto auto;column-gap:calc(var(--t)*.8);row-gap:calc(var(--t)*.34);justify-content:start}
+.mod-filas .tit{font-family:var(--cond);font-weight:700;font-size:calc(var(--t)*.62);letter-spacing:.08em;color:#fff;padding-bottom:3px}
+.mod-filas>span:not(.tit){display:flex;gap:2px}
 .fl{display:inline-grid;place-items:center;font-style:normal;width:var(--t);height:calc(var(--t)*1.3);font-family:var(--cond);font-weight:600;font-size:calc(var(--t)*1.02);line-height:1;color:#fff;
   background:linear-gradient(#262A32 0 49%,#0B0C0F 49% 51%,#1E2128 51% 100%);border-radius:2px;font-variant-numeric:tabular-nums}
-.v-des .fl{color:var(--senal)}
-.v-est.v-aviso .fl{color:var(--ambar)}
-.v-est.v-mal .fl{color:#FF6B5E}
-.tab-pie{margin:clamp(14px,2vw,22px) 0 0;color:#8D95A3;font-size:14px}
-.tab-pie b{color:#fff}
-@media (max-width:760px){
-  .tablero{--t:calc((100vw - 96px) / 22.6);padding:14px}
-  .vuelos{grid-template-columns:auto auto;row-gap:2px} .tablero{min-height:calc(100vh - 120px)}
-  .vuelos .tit.t-dat,.vuelos .tit.t-est{display:none}
-  .vuelo>.v-dat,.vuelo>.v-est{grid-column:2;--t:calc((100vw - 96px) / 24)}
-  .vuelo>.v-est{margin-bottom:calc(var(--t)*.9)}
-  .vuelo>.v-dat .fl,.vuelo>.v-est .fl{width:var(--t);height:calc(var(--t)*1.3);font-size:var(--t)}
-}
+.m-val .fl{color:var(--senal)}
+.m-val.v-aviso .fl{color:var(--ambar)} .m-lab.v-aviso .fl{color:var(--ambar)}
+.m-val.v-mal .fl,.m-lab.v-mal .fl{color:#FF6B5E}
+.mod-pie{margin-top:auto;padding-top:calc(var(--t)*1.1);display:flex;align-items:center;justify-content:space-between;gap:10px;color:#8D95A3;font-size:14px}
+.mod-pie b{display:inline-flex;align-items:center;gap:6px;background:var(--senal);color:var(--panel);border-radius:4px;padding:5px 12px;font-family:var(--cond);font-size:17px}
+.mod-pie b svg{width:18px;height:18px}
+@media (max-width:1200px){ .paneles{grid-template-columns:1fr} .modulo{--t:clamp(13px,calc((100vw - 160px) / 24),26px)} }
+@media (max-width:760px){ .modulo{--t:calc((100vw - 100px) / 21.5);padding:14px} .paneles{gap:12px} }
 
 /* cifras: panel de información */
 .cifra{background:var(--panel);border:0;border-radius:6px;color:#fff;padding:14px 16px 13px}
@@ -726,12 +722,12 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
    Control Planning 10 — rehecha desde cero
    Datos en localStorage, con una clave nueva.
    ========================================================= */
-const APP_VERSION = '10.27.0';
+const APP_VERSION = '10.28.0';
 const CLAVE = 'control-planning-v10';
 const NOVEDADES = {
-  '10.27.0': [
-    { titulo:'El inicio es una pantalla de salidas', donde:'Inicio',
-      texto:'Los tres módulos salen como vuelos en un panel de salidas, con letras de paletas que giran al entrar: puerta (P01, J02, V03), destino, datos del año y estado. El estado avisa en amarillo de lo que falta (por ejemplo, «17 se pasan» o «47 sin rotación») y dice «En hora» cuando todo está al día. Pulsa un destino para entrar.' },
+  '10.28.0': [
+    { titulo:'Un panel por módulo', donde:'Inicio',
+      texto:'Cada módulo tiene ahora su propia pantalla, como los paneles del aeropuerto, con su nombre arriba y sus cifras del año en letras de paletas: Personal (plantilla y contratos), Control de jornada (semana, quién llega, quién no y quién se pasa) y Vacaciones (rotaciones, días de vacaciones y desprogramaciones). Lo que necesita atención sale en amarillo, o en rojo si alguien no llega. Pulsa el panel para entrar.' },
   ],
   '10.26.0': [
     { titulo:'Como en la terminal', donde:'Toda la app',
@@ -1186,40 +1182,42 @@ function pintar(cambio){
   try { sessionStorage.setItem('cp-ui', JSON.stringify({vista:UI.vista})); } catch(e){}
 }
 
-/* inicio: pantalla de salidas; cada módulo es un vuelo */
-const TAB_ANCHO = { pue:3, des:18, dat:13, est:15 };
+/* inicio: cada módulo es un panel como los de las pantallas del aeropuerto */
+const MOD_ANCHO = { lab:14, val:5 };
 /* texto en casillas de paletas, rellenado hasta el ancho de su columna */
-const paletas = (txt, n) => { const c = [...String(txt).toUpperCase().slice(0, n)]; while(c.length < n) c.push(' ');
+const paletas = (txt, n, dcha) => { const c = [...String(txt).toUpperCase().slice(0, n)]; while(c.length < n) dcha ? c.unshift(' ') : c.push(' ');
   return c.map(x=>`<i class="fl" data-c="${x===' '?'':esc(x)}">${x===' '?'':esc(x)}</i>`).join(''); };
+function panelModulo({ ir:dest, nombre, ico, cols, filas, pie='' }){
+  const flecha = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+  return `<a class="modulo anim" href="#" onclick="event.preventDefault();ir('${dest}')" aria-label="${esc(nombre)}: ${filas.map(f=>`${f[0]} ${f[1]}`).join(', ')}">
+    <div class="mod-cab"><span class="pict" aria-hidden="true">${ico}</span><h2>${esc(nombre)}</h2><span class="anio-m" aria-hidden="true">${S.anio}</span></div>
+    <div class="mod-filas" aria-hidden="true"><span class="tit">${cols[0]}</span><span class="tit">${cols[1]}</span>
+      ${filas.map(([lab, val, cls=''])=>`<span class="m-lab ${cls}">${paletas(lab, MOD_ANCHO.lab)}</span><span class="m-val ${cls}">${paletas(val, MOD_ANCHO.val, true)}</span>`).join('')}</div>
+    <div class="mod-pie" aria-hidden="true"><span>${pie}</span><b>Entrar ${flecha}</b></div></a>`;
+}
 function vInicio(){
-  const ts = S.trabajadores, y = S.anio, pend = ts.filter(t=>faltaJornada(t)||faltaActividad(t)).length;
+  const ts = S.trabajadores, y = S.anio, n = x => String(x);
+  const pend = ts.filter(t=>faltaJornada(t)||faltaActividad(t)).length, cont = c => ts.filter(t=>t.contrato===c).length;
   const c = corteDe(y), rs = c ? ts.map(t=>seguimientoDe(t, y, c)) : [], k = e => rs.filter(r=>grupoJ(r.estado)===e).length;
-  const conRot = ts.filter(t=>tieneRot(t, y)).length, sinRot = ts.length - conRot;
-  const vuelos = [
-    { ir:'personal', pue:'P01', des:'Personal', dat: ts.length ? `${ts.length} personas` : 'sin personal',
-      est: !ts.length ? ['Sin datos','v-aviso'] : pend ? [`${pend} incompletos`,'v-aviso'] : ['En hora',''] },
-    { ir:'jornada', pue:'J02', des:'Control de jornada', dat: c ? `semana ${numSemana(c.ultima)}` : 'sin turnos',
-      est: !c ? ['Sin turnos','v-aviso'] : k('falta') ? [`${k('falta')} no llegan`,'v-mal'] : k('pasa') ? [`${k('pasa')} se pasan`,'v-aviso'] : ['En hora',''] },
-    { ir:'vacaciones', pue:'V03', des:'Vacaciones', dat: conRot ? `${conRot} rotaciones` : 'sin rotación',
-      est: !ts.length ? ['Sin datos','v-aviso'] : sinRot ? [`${sinRot} sin rotación`,'v-aviso'] : ['En hora',''] },
-  ];
-  const ahora = new Date(), hh = `${String(ahora.getHours()).padStart(2,'0')}:${String(ahora.getMinutes()).padStart(2,'0')}`;
-  return `<section class="tablero anim" aria-label="Módulos de la app">
-    <div class="tab-cab"><span class="logo"><svg viewBox="0 0 24 24" aria-hidden="true"><g transform="rotate(45 12 12)"><path fill="#22262E" d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></g></svg></span><h2>Salidas</h2><span class="hora" id="tabHora">${hh}</span></div>
-    <div class="vuelos" role="list">
-      <span class="tit">PUERTA</span><span class="tit">DESTINO</span><span class="tit t-dat">DATOS ${y}</span><span class="tit t-est">ESTADO</span>
-      ${vuelos.map(v=>`<a class="vuelo" role="listitem" href="#" onclick="event.preventDefault();ir('${v.ir}')" aria-label="${esc(v.des)}: ${esc(v.dat)}, ${esc(v.est[0])}">
-        <span class="v-pue" aria-hidden="true">${paletas(v.pue, TAB_ANCHO.pue)}</span><span class="v-des" aria-hidden="true">${paletas(v.des, TAB_ANCHO.des)}</span>
-        <span class="v-dat" aria-hidden="true">${paletas(v.dat, TAB_ANCHO.dat)}</span><span class="v-est ${v.est[1]}" aria-hidden="true">${paletas(v.est[0], TAB_ANCHO.est)}</span></a>`).join('')}
-    </div>
-    <p class="tab-pie">Pulsa un destino para entrar.</p>
-  </section>`;
+  const conRot = ts.filter(t=>tieneRot(t, y)), diasH = conRot.reduce((a,t)=>a+(vacEnRot(t, y)||0),0), desp = ts.reduce((a,t)=>a+desprogDe(t, y).length,0);
+  const aviso = (x, cls='v-aviso') => x ? cls : '';
+  return `<div class="paneles">
+    ${panelModulo({ ir:'personal', nombre:'Personal', ico:ICO.personal, cols:['CONTRATO','Nº'], filas:[
+      ['Plantilla', n(ts.length)], ['Completo', n(cont('completo'))], ['Parcial', n(cont('parcial'))], ['Fijo discont.', n(cont('discontinuo'))],
+      ['Incompletos', n(pend), aviso(pend)] ], pie:'Fichas, contratos y jornada' })}
+    ${panelModulo({ ir:'jornada', nombre:'Control de jornada', ico:ICO.jornada, cols:['SITUACIÓN','Nº'], filas: c ? [
+      ['Semana', n(numSemana(c.ultima))], ['Llegan', n(k('bien'))], ['No llegan', n(k('falta')), aviso(k('falta'),'v-mal')], ['Se pasan', n(k('pasa')), aviso(k('pasa'))],
+      ['Sin horas', n(k('sin')), aviso(k('sin'))] ] : [['Sin turnos', '—', 'v-aviso'], ['Semana', '—'], ['Llegan', '—'], ['No llegan', '—'], ['Se pasan', '—']], pie:'Si cada uno llega a su jornada' })}
+    ${panelModulo({ ir:'vacaciones', nombre:'Vacaciones', ico:ICO.calendario, cols:['CONCEPTO','Nº'], filas:[
+      ['Con rotación', n(conRot.length)], ['Sin rotación', n(ts.length - conRot.length), aviso(ts.length - conRot.length)], ['Días de vacac.', n(diasH)],
+      ['Desprogramadas', n(desp)], ['Fijo discont.', n(cont('discontinuo'))] ], pie:'Rotaciones y calendarios' })}
+  </div>`;
 }
 /* al llegar al inicio, las paletas giran un momento hasta quedarse en su letra */
 function girarPaletas(){
   if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const abc = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', fls = [...document.querySelectorAll('.tablero .fl')], t0 = performance.now();
-  fls.forEach((el, i)=>{ el._fin = 180 + (i % 18) * 28 + Math.floor(i / 18) * 60 + Math.random()*140; });
+  const abc = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', fls = [...document.querySelectorAll('.paneles .fl')], t0 = performance.now();
+  fls.forEach((el, i)=>{ el._fin = 180 + (i % 19) * 26 + Math.floor(i / 19) * 45 + Math.random()*140; });
   const paso = now => { let quedan = false;
     fls.forEach(el=>{ if(!el.isConnected) return; const fin = el._fin, c = el.dataset.c;
       if(now - t0 < fin){ quedan = true; if(c || Math.random()<.35) el.textContent = abc[Math.floor(Math.random()*abc.length)]; }
@@ -3100,7 +3098,6 @@ puntoNovedades();
 comprobarVersion(); setInterval(comprobarVersion, 60*1000);
 /* la hora en la cabecera, como en las pantallas del aeropuerto */
 function reloj(){ const el = $('#reloj'); if(!el) return; const d = new Date();
-  const th = $('#tabHora'); if(th) th.textContent = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
   el.innerHTML = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}<small>${['dom','lun','mar','mié','jue','vie','sáb'][d.getDay()]} ${d.getDate()} ${MESES[d.getMonth()].toLowerCase()}</small>`; }
 reloj(); setInterval(reloj, 15*1000);
 if(/[?&]v=/.test(location.search)) history.replaceState(null, '', location.pathname);

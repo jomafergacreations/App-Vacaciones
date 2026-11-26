@@ -1,7 +1,7 @@
 {
-  "version": "10.27.0",
+  "version": "10.28.0",
   "fecha": "2026-11-26",
   "novedades": [
-    "El inicio pasa a ser una pantalla de salidas del aeropuerto"
+    "Inicio: un panel de aeropuerto para cada módulo, con su nombre y sus cifras"
   ]
 }
