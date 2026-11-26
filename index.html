@@ -82,16 +82,6 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--asfalto)
 .volver{border:0;background:none;color:var(--pista);font-weight:600;cursor:pointer;padding:0;margin-bottom:8px;font-size:15px}
    
 /* globos del menú */
-.globos{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
-.globo{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:10px;text-align:left;border:1px solid var(--linea);background:var(--papel);border-radius:26px;padding:26px;min-height:250px;cursor:pointer;transition:transform .2s,box-shadow .2s,border-color .2s}
-.globo:hover{transform:translateY(-4px);box-shadow:0 18px 36px -22px rgba(34,38,46,.55);border-color:color-mix(in srgb,var(--ctx) 40%,var(--linea))}
-.globo .gi{width:68px;height:68px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--ctx) 12%,#fff);color:var(--ctx);transition:background .2s,color .2s}
-.globo .gi svg{width:34px;height:34px}
-.globo:hover .gi{background:var(--ctx);color:#fff}
-.globo .gt{font-family:var(--cond);font-weight:700;font-size:38px;line-height:1}
-.globo .gp{color:var(--gris);font-size:15px;max-width:36ch}
-.globo .gd{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto}
-.globo .gd span{background:#F1F3F6;border-radius:999px;padding:4px 11px;font-size:13px;font-weight:600}
 
 /* Personal */
 .tarjeta{background:var(--papel);border:1px solid var(--linea);border-radius:7px;padding:18px 20px;margin-bottom:16px}
@@ -575,18 +565,36 @@ header{background:var(--panel);box-shadow:inset 0 -4px 0 var(--senal)}
 .cartel .pict svg{width:36px;height:36px;stroke-width:2.2}
 .portada p{margin-top:12px}
 
-/* inicio: carteles de dirección */
-.globos{gap:14px}
-.globo{background:var(--panel);color:#fff;border:0;border-radius:6px;padding:22px 22px 20px;min-height:230px;box-shadow:inset 0 -4px 0 var(--ctx)}
-.globo:hover{transform:translateY(-3px);box-shadow:inset 0 -4px 0 var(--ctx),0 18px 30px -20px rgba(0,0,0,.7)}
-.globo .gi{width:64px;height:64px;border-radius:4px;background:var(--senal);color:var(--panel)}
-.globo:hover .gi{background:var(--senal);color:var(--panel)}
-.globo .gt{font-size:40px}
-.globo .gp{color:#AEB5C0}
-.globo .gd span{background:var(--panel2);color:var(--ambar);border-radius:3px;font-family:var(--cond);font-size:14.5px;letter-spacing:.02em}
-.globo .gfl{position:absolute;top:22px;right:22px;width:46px;height:46px;border-radius:4px;border:2px solid var(--senal);color:var(--senal);display:grid;place-items:center;transition:background .15s,color .15s}
-.globo .gfl svg{width:26px;height:26px}
-.globo:hover .gfl{background:var(--senal);color:var(--panel)}
+
+
+/* inicio: pantalla de salidas con letras de paletas */
+.tablero{min-height:calc(100vh - 150px);background:#0B0C0F;border-radius:8px;padding:clamp(16px,2.4vw,30px);color:#fff;box-shadow:0 20px 50px -30px rgba(0,0,0,.8);--t:clamp(14px,calc((100vw - 150px) / 57),28px)}
+.tab-cab{display:flex;align-items:center;gap:14px;margin-bottom:clamp(14px,2vw,24px)}
+.tab-cab .logo{width:calc(var(--t)*1.7);height:calc(var(--t)*1.7)}
+.tab-cab .logo svg{width:70%;height:70%}
+.tab-cab h2{font-size:calc(var(--t)*1.8);color:var(--senal);letter-spacing:.01em}
+.tab-cab .hora{margin-left:auto;font-family:var(--cond);font-weight:700;font-size:calc(var(--t)*1.1);color:#fff;font-variant-numeric:tabular-nums;letter-spacing:.06em}
+.vuelos{display:grid;grid-template-columns:auto auto auto auto;column-gap:calc(var(--t)*.9);row-gap:calc(var(--t)*.32);justify-content:start}
+.vuelos .tit{font-family:var(--cond);font-weight:700;font-size:calc(var(--t)*.62);letter-spacing:.08em;color:#fff;padding-bottom:4px}
+.vuelo{display:grid;grid-column:1/-1;grid-template-columns:subgrid;row-gap:inherit;cursor:pointer;color:inherit;text-decoration:none;border-radius:4px}
+.vuelo>span{display:flex;gap:2px;align-items:center;padding:3px 0;border-radius:3px;transition:background .15s}
+.vuelo:hover{background:#1C2028;box-shadow:0 0 0 6px #1C2028}
+.vuelo:focus-visible{outline:3px solid var(--senal);outline-offset:5px}
+.fl{display:inline-grid;place-items:center;font-style:normal;width:var(--t);height:calc(var(--t)*1.3);font-family:var(--cond);font-weight:600;font-size:calc(var(--t)*1.02);line-height:1;color:#fff;
+  background:linear-gradient(#262A32 0 49%,#0B0C0F 49% 51%,#1E2128 51% 100%);border-radius:2px;font-variant-numeric:tabular-nums}
+.v-des .fl{color:var(--senal)}
+.v-est.v-aviso .fl{color:var(--ambar)}
+.v-est.v-mal .fl{color:#FF6B5E}
+.tab-pie{margin:clamp(14px,2vw,22px) 0 0;color:#8D95A3;font-size:14px}
+.tab-pie b{color:#fff}
+@media (max-width:760px){
+  .tablero{--t:calc((100vw - 96px) / 22.6);padding:14px}
+  .vuelos{grid-template-columns:auto auto;row-gap:2px} .tablero{min-height:calc(100vh - 120px)}
+  .vuelos .tit.t-dat,.vuelos .tit.t-est{display:none}
+  .vuelo>.v-dat,.vuelo>.v-est{grid-column:2;--t:calc((100vw - 96px) / 24)}
+  .vuelo>.v-est{margin-bottom:calc(var(--t)*.9)}
+  .vuelo>.v-dat .fl,.vuelo>.v-est .fl{width:var(--t);height:calc(var(--t)*1.3);font-size:var(--t)}
+}
 
 /* cifras: panel de información */
 .cifra{background:var(--panel);border:0;border-radius:6px;color:#fff;padding:14px 16px 13px}
@@ -660,7 +668,7 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
   .cifra b{font-size:26px}
   .barra-herr .btn{flex:1 1 auto}
   main{padding:18px 12px 50px}
-  .portada h2{font-size:38px} .globos{grid-template-columns:1fr}
+  .portada h2{font-size:38px}
   .resumen{grid-template-columns:repeat(2,minmax(0,1fr))} .resumen .cifra:first-child{grid-column:1/-1}
   .tabla-escritorio{display:none} .tarjetas-movil{display:flex;flex-direction:column;gap:10px}
   .tm{background:var(--papel);border:1px solid var(--linea);border-radius:7px;padding:14px;text-align:left;width:100%;cursor:pointer}
@@ -689,7 +697,7 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
   .barra-herr .buscar{max-width:none} .barra-herr .combo{flex:1 1 100%;min-width:0} .seg{overflow-x:auto;max-width:100%}
   .dlg{border-radius:10px}
   .portada h2.cartel{font-size:30px;gap:12px;padding:8px 16px 8px 8px} .cartel .pict{width:44px;height:44px} .cartel .pict svg{width:28px;height:28px}
-  .reloj{display:none} .globo{min-height:0} .globo .gt{font-size:34px} .globo .gfl{width:40px;height:40px;top:18px;right:18px}
+  .reloj{display:none}
   .tm{border-radius:6px;border-left:4px solid var(--panel)}
 }
 @media print{header,.barra-herr,.btn{display:none}}
@@ -719,9 +727,13 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
    Control Planning 10 — rehecha desde cero
    Datos en localStorage, con una clave nueva.
    ========================================================= */
-const APP_VERSION = '10.26.0';
+const APP_VERSION = '10.27.0';
 const CLAVE = 'control-planning-v10';
 const NOVEDADES = {
+  '10.27.0': [
+    { titulo:'El inicio es una pantalla de salidas', donde:'Inicio',
+      texto:'Los tres módulos salen como vuelos en un panel de salidas, con letras de paletas que giran al entrar: puerta (P01, J02, V03), destino, datos del año y estado. El estado avisa en amarillo de lo que falta (por ejemplo, «17 se pasan» o «47 sin rotación») y dice «En hora» cuando todo está al día. Pulsa un destino para entrar.' },
+  ],
   '10.26.0': [
     { titulo:'Como en la terminal', donde:'Toda la app',
       texto:'La app se parece ahora a los carteles y pantallas del aeropuerto: cabecera negra con canto amarillo y la hora, títulos como señales con su pictograma, y el inicio como carteles de dirección.' },
@@ -1170,26 +1182,51 @@ function pintar(cambio){
   const V = {inicio:vInicio, personal:vPersonal, jornada:vJornada, vacaciones:vVacaciones};
   if(!V[UI.vista]) UI.vista = 'inicio';
   const m = $('#main'); m.innerHTML = V[UI.vista]();
-  if(cambio){ m.classList.remove('entrando'); void m.offsetWidth; m.classList.add('entrando'); clearTimeout(pintar._t); pintar._t = setTimeout(()=>m.classList.remove('entrando'), 800); }
+  if(cambio){ m.classList.remove('entrando'); void m.offsetWidth; m.classList.add('entrando'); clearTimeout(pintar._t); pintar._t = setTimeout(()=>m.classList.remove('entrando'), 800);
+    if(UI.vista==='inicio') girarPaletas(); }
   try { sessionStorage.setItem('cp-ui', JSON.stringify({vista:UI.vista})); } catch(e){}
 }
 
-/* inicio: una sola burbuja */
+/* inicio: pantalla de salidas; cada módulo es un vuelo */
+const TAB_ANCHO = { pue:3, des:18, dat:13, est:15 };
+/* texto en casillas de paletas, rellenado hasta el ancho de su columna */
+const paletas = (txt, n) => { const c = [...String(txt).toUpperCase().slice(0, n)]; while(c.length < n) c.push(' ');
+  return c.map(x=>`<i class="fl" data-c="${x===' '?'':esc(x)}">${x===' '?'':esc(x)}</i>`).join(''); };
 function vInicio(){
-  const ts = S.trabajadores, pend = ts.filter(t=>faltaJornada(t)||faltaActividad(t)).length;
-  return `<div class="globos">
-    <button class="globo anim" style="--i:0" onclick="ir('personal')"><span class="gi">${ICO.personal}</span><span class="gfl" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span><span class="gt">Personal</span>
-      <span class="gp">Los trabajadores, su contrato, su jornada y las horas que llevan.</span>
-      <span class="gd">${ts.length?`<span>${ts.length} trabajador${ts.length===1?'':'es'}</span>`:'<span>Sin trabajadores todavía</span>'}${pend?`<span>${pend} por completar</span>`:''}</span></button>
-    ${(()=>{ const c = corteDe(S.anio), rs = c ? ts.map(t=>seguimientoDe(t, S.anio, c)) : [], k = e => rs.filter(r=>grupoJ(r.estado)===e).length;
-      return `<button class="globo anim" style="--i:1;--ctx:#23864F" onclick="ir('jornada')"><span class="gi">${ICO.jornada}</span><span class="gfl" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span><span class="gt">Control de jornada</span>
-      <span class="gp">Si cada trabajador va a llegar a su jornada anual, no va a llegar o se pasa.</span>
-      <span class="gd">${c ? `<span>Semana ${numSemana(c.ultima)}</span>${k('falta')?`<span>${k('falta')} no llegan</span>`:''}${k('pasa')?`<span>${k('pasa')} se pasan</span>`:''}` : `<span>Sin turnos de ${S.anio}</span>`}</span></button>`; })()}
-    ${(()=>{ const rs = ts.filter(t=>tieneRot(t, S.anio)), h = rs.reduce((a,t)=>a+(vacEnRot(t, S.anio)||0),0);
-      return `<button class="globo anim" style="--i:2;--ctx:#C46A12" onclick="ir('vacaciones')"><span class="gi">${ICO.calendario}</span><span class="gfl" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span><span class="gt">Vacaciones</span>
-      <span class="gp">La rotación del año y las vacaciones de todo el departamento, o de cada persona con su calendario.</span>
-      <span class="gd">${rs.length ? `<span>${rs.length} con rotación de ${S.anio}</span><span>${h} días de vacaciones</span>` : `<span>Sin rotaciones de ${S.anio}</span>`}</span></button>`; })()}
-  </div>`;
+  const ts = S.trabajadores, y = S.anio, pend = ts.filter(t=>faltaJornada(t)||faltaActividad(t)).length;
+  const c = corteDe(y), rs = c ? ts.map(t=>seguimientoDe(t, y, c)) : [], k = e => rs.filter(r=>grupoJ(r.estado)===e).length;
+  const conRot = ts.filter(t=>tieneRot(t, y)).length, sinRot = ts.length - conRot;
+  const vuelos = [
+    { ir:'personal', pue:'P01', des:'Personal', dat: ts.length ? `${ts.length} personas` : 'sin personal',
+      est: !ts.length ? ['Sin datos','v-aviso'] : pend ? [`${pend} incompletos`,'v-aviso'] : ['En hora',''] },
+    { ir:'jornada', pue:'J02', des:'Control de jornada', dat: c ? `semana ${numSemana(c.ultima)}` : 'sin turnos',
+      est: !c ? ['Sin turnos','v-aviso'] : k('falta') ? [`${k('falta')} no llegan`,'v-mal'] : k('pasa') ? [`${k('pasa')} se pasan`,'v-aviso'] : ['En hora',''] },
+    { ir:'vacaciones', pue:'V03', des:'Vacaciones', dat: conRot ? `${conRot} rotaciones` : 'sin rotación',
+      est: !ts.length ? ['Sin datos','v-aviso'] : sinRot ? [`${sinRot} sin rotación`,'v-aviso'] : ['En hora',''] },
+  ];
+  const ahora = new Date(), hh = `${String(ahora.getHours()).padStart(2,'0')}:${String(ahora.getMinutes()).padStart(2,'0')}`;
+  return `<section class="tablero anim" aria-label="Módulos de la app">
+    <div class="tab-cab"><span class="logo"><svg viewBox="0 0 24 24" aria-hidden="true"><g transform="rotate(45 12 12)"><path fill="#22262E" d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></g></svg></span><h2>Salidas</h2><span class="hora" id="tabHora">${hh}</span></div>
+    <div class="vuelos" role="list">
+      <span class="tit">PUERTA</span><span class="tit">DESTINO</span><span class="tit t-dat">DATOS ${y}</span><span class="tit t-est">ESTADO</span>
+      ${vuelos.map(v=>`<a class="vuelo" role="listitem" href="#" onclick="event.preventDefault();ir('${v.ir}')" aria-label="${esc(v.des)}: ${esc(v.dat)}, ${esc(v.est[0])}">
+        <span class="v-pue" aria-hidden="true">${paletas(v.pue, TAB_ANCHO.pue)}</span><span class="v-des" aria-hidden="true">${paletas(v.des, TAB_ANCHO.des)}</span>
+        <span class="v-dat" aria-hidden="true">${paletas(v.dat, TAB_ANCHO.dat)}</span><span class="v-est ${v.est[1]}" aria-hidden="true">${paletas(v.est[0], TAB_ANCHO.est)}</span></a>`).join('')}
+    </div>
+    <p class="tab-pie">Pulsa un destino para entrar.</p>
+  </section>`;
+}
+/* al llegar al inicio, las paletas giran un momento hasta quedarse en su letra */
+function girarPaletas(){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const abc = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', fls = [...document.querySelectorAll('.tablero .fl')], t0 = performance.now();
+  fls.forEach((el, i)=>{ el._fin = 180 + (i % 18) * 28 + Math.floor(i / 18) * 60 + Math.random()*140; });
+  const paso = now => { let quedan = false;
+    fls.forEach(el=>{ if(!el.isConnected) return; const fin = el._fin, c = el.dataset.c;
+      if(now - t0 < fin){ quedan = true; if(c || Math.random()<.35) el.textContent = abc[Math.floor(Math.random()*abc.length)]; }
+      else if(el.textContent !== c) el.textContent = c; });
+    if(quedan) requestAnimationFrame(paso); };
+  requestAnimationFrame(paso);
 }
 
 function vPersonal(){
@@ -3064,6 +3101,7 @@ puntoNovedades();
 comprobarVersion(); setInterval(comprobarVersion, 60*1000);
 /* la hora en la cabecera, como en las pantallas del aeropuerto */
 function reloj(){ const el = $('#reloj'); if(!el) return; const d = new Date();
+  const th = $('#tabHora'); if(th) th.textContent = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
   el.innerHTML = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}<small>${['dom','lun','mar','mié','jue','vie','sáb'][d.getDay()]} ${d.getDate()} ${MESES[d.getMonth()].toLowerCase()}</small>`; }
 reloj(); setInterval(reloj, 15*1000);
 if(/[?&]v=/.test(location.search)) history.replaceState(null, '', location.pathname);
