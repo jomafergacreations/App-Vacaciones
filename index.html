@@ -277,6 +277,16 @@ table.vgrid{border-collapse:separate;border-spacing:0;font-size:13px;font-varian
 .c-desp{background:var(--senal-suave);color:#7A5600}
 .tramo button{border:0;background:none;cursor:pointer;font-weight:700;color:inherit;padding:0 0 0 4px}
 .mdia-pie{margin:10px 0 0;font-size:12.5px;color:var(--gris);line-height:1.4}
+.mdia-ina{display:flex;flex-direction:column;gap:10px}
+.mdia-ina .btn{justify-content:center}
+.mdia-ina-p{margin:0;display:flex;align-items:center;gap:8px;font-size:14px}
+.mdia-ina-p i{width:18px;height:18px;border-radius:5px;flex-shrink:0}
+.mdia-fechas{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mdia-fechas label{display:flex;flex-direction:column;gap:3px;font-size:12.5px;font-weight:700;color:var(--gris)}
+.mdia-fechas input{font:inherit;font-size:14px;color:var(--asfalto);border:1px solid var(--linea);border-radius:8px;padding:7px 8px;min-width:0}
+.mdia-ina-info{margin:0;font-size:13px;line-height:1.4;color:var(--gris)}
+.mdia-ina-info.mal{color:#B3261E;background:#FDECEA;border-radius:8px;padding:7px 9px}
+.mdia-ina-bot{display:grid;grid-template-columns:1fr 1.4fr;gap:8px}
 /* copias */
 .copias{width:min(760px,100%)}
 .cop-estado{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -591,9 +601,15 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
    Control Planning 10 — rehecha desde cero
    Datos en localStorage, con una clave nueva.
    ========================================================= */
-const APP_VERSION = '10.22.1';
+const APP_VERSION = '10.23.0';
 const CLAVE = 'control-planning-v10';
 const NOVEDADES = {
+  '10.23.0': [
+    { titulo:'La inactividad no se toca, solo se mueve', donde:'Vacaciones, al pinchar un día de inactividad',
+      texto:'En el periodo de inactividad de un fijo discontinuo ya no se puede poner nada: ni vacaciones, ni descansos, ni festivos. Al pincharlo sale una sola opción, «Cambiar fechas del periodo de inactividad», para mover el inicio o el final.' },
+    { titulo:'Aviso de los 60 días', donde:'Al cambiar las fechas',
+      texto:'Mientras cambias las fechas ves cuántos días para en el año. Si se queda por debajo de 60 sale el aviso en rojo y, al guardar, te pide confirmación. Si arrastras desde la inactividad hasta días de fuera, te propone alargar el periodo hasta ahí. Se puede deshacer como el resto de cambios.' },
+  ],
   '10.22.1': [
     { titulo:'Sin vacaciones en la inactividad', donde:'Vacaciones',
       texto:'A un fijo discontinuo ya no se le pueden poner vacaciones en su periodo de inactividad, igual que en descansos y festivos. Si eliges solo esos días, «Vacaciones» sale desactivado; si eliges un tramo que los cruza, solo se ponen en sus días de trabajo. Tampoco se puede desprogramar un día hacia la inactividad.' },
@@ -2079,7 +2095,10 @@ function abrirMenuDia(){
   const h = vacEnRot(t, S.anio) || 0;
   const m = $('#menuDia') || Object.assign(document.createElement('div'), { id:'menuDia', className:'mdia' });
   m.setAttribute('role','dialog'); m.setAttribute('aria-label','Cambiar días');
-  m.innerHTML = `<div class="mdia-cab"><div><b>${esc(t.nombre)}</b><span>${a===b ? fmt(a) : `${fCorto(a)} – ${fmt(b)}`} · ${n} día${n===1?'':'s'}</span></div><button class="cerrar" onclick="cerrarMenuDia()" aria-label="Cerrar">×</button></div>
+  /* en la inactividad de un FD solo se cambian las fechas del periodo */
+  const k = (t.cese||[]).findIndex(p=>p.desde<=b && a<=p.hasta);
+  if(t.contrato==='discontinuo' && k>=0) m.innerHTML = menuCese(t, k, a, b, n);
+  else m.innerHTML = `<div class="mdia-cab"><div><b>${esc(t.nombre)}</b><span>${a===b ? fmt(a) : `${fCorto(a)} – ${fmt(b)}`} · ${n} día${n===1?'':'s'}</span></div><button class="cerrar" onclick="cerrarMenuDia()" aria-label="Cerrar">×</button></div>
     ${a===b && COD_VAC.has(codigoDia(t, a)||'') ? `<button type="button" class="mdia-desp" onclick="empezarDesprog()"><b>Desprogramar</b>: pasar este día de vacaciones a otra fecha <small>${desprogDe(t, Number(a.slice(0,4))).length} de ${DESPROG} usadas</small></button>` : ''}
     <div class="mdia-ops">${OPS_DIA.map(([k,txt,cls],i)=>`<button type="button" class="${i<2?'grande':''}" onclick="aplicarDia('${k}')"${k==='H'&&!trab?' disabled title="Ningún día de trabajo en lo elegido"':''}><i class="${cls}">${k==='-H'?'—':k==='T'?'':k}</i>${txt}${k==='H'&&trab<n?` <small>${trab ? `${trab} día${trab===1?'':'s'}` : 'no se puede'}</small>`:''}</button>`).join('')}</div>
     <p class="mdia-pie">Lleva <b>${h} de ${vacDe(t)}</b> días de vacaciones. Las vacaciones solo van en días de trabajo: ni descansos, ni festivos${t.contrato==='discontinuo'?', ni inactividad':''}. ${SEL.tactil?'Toca':'Pincha'} otro día suyo para alargar${SEL.tactil?'':', o arrastra'}.</p>`;
@@ -2090,7 +2109,59 @@ function abrirMenuDia(){
   /* en el móvil el menú va abajo: que el día elegido quede a la vista por encima */
   if(innerWidth < 760){ const el = document.querySelector(`[data-t="${SEL.t}"][data-d="${SEL.b}"]`), r = el?.getBoundingClientRect();
     if(r && r.bottom > innerHeight - m.offsetHeight - 12){ scrollBy(0, r.bottom - (innerHeight - m.offsetHeight - 24)); } }
-  m.querySelector('button.grande')?.focus({preventScroll:true});
+  m.querySelector('button.grande, .mdia-ina button.btn')?.focus({preventScroll:true});
+}
+/* ---------- inactividad de los FD: desde el calendario solo se cambian sus fechas ---------- */
+function menuCese(t, k, a, b, n){
+  const p = t.cese[k], y = Number(a.slice(0,4));
+  const cab = `<div class="mdia-cab"><div><b>${esc(t.nombre)}</b><span>${a===b ? fmt(a) : `${fCorto(a)} – ${fmt(b)}`} · ${n} día${n===1?'':'s'}</span></div><button class="cerrar" onclick="cerrarMenuDia()" aria-label="Cerrar">×</button></div>`;
+  if(!SEL.cese) return cab + `<div class="mdia-ina">
+      <p class="mdia-ina-p"><i class="c-ina"></i><span>Periodo de inactividad: <b>${fCorto(p.desde)} – ${fmt(p.hasta)}</b></span></p>
+      <button type="button" class="btn primario" onclick="editarCese(${k})">Cambiar fechas del periodo de inactividad</button></div>
+    <p class="mdia-pie">Mientras está inactivo no se le puede poner nada: ni vacaciones, ni descansos, ni festivos. Solo se pueden mover las fechas del periodo.</p>`;
+  return cab + `<div class="mdia-ina">
+      <p class="mdia-ina-p"><i class="c-ina"></i><span>Antes: ${fCorto(p.desde)} – ${fmt(p.hasta)}</span></p>
+      <div class="mdia-fechas"><label>Desde<input type="date" id="ceDesde" value="${SEL.cese.desde}" oninput="calcCese()"></label><label>Hasta<input type="date" id="ceHasta" value="${SEL.cese.hasta}" oninput="calcCese()"></label></div>
+      <p id="ceInfo" class="mdia-ina-info"></p>
+      <div class="mdia-ina-bot"><button type="button" class="btn" onclick="SEL.cese=null;abrirMenuDia()">Cancelar</button><button type="button" class="btn primario" id="ceOk" onclick="guardarCese()">Guardar fechas</button></div></div>`;
+}
+function editarCese(k){
+  const t = S.trabajadores.find(x=>x.id===SEL.t), p = t.cese[k], [a, b] = rangoSel();
+  /* si lo elegido sale del periodo, se propone alargarlo hasta ahí */
+  SEL.cese = { k, desde: a < p.desde ? a : p.desde, hasta: b > p.hasta ? b : p.hasta };
+  abrirMenuDia(); calcCese();
+}
+/* cuenta en vivo cuántos días para en el año con las fechas nuevas */
+function cesePropuesto(){
+  const t = S.trabajadores.find(x=>x.id===SEL.t), d = $('#ceDesde')?.value, h = $('#ceHasta')?.value;
+  const cese = (t.cese||[]).map((p,i)=> i===SEL.cese.k ? { desde:d, hasta:h } : p);
+  const y = Number(SEL.a.slice(0,4));
+  let error = '';
+  if(!d || !h) error = 'Pon las dos fechas.';
+  else if(h < d) error = '«Hasta» no puede ir antes que «Desde».';
+  else if(cese.some((p,i)=> i!==SEL.cese.k && p.desde<=h && d<=p.hasta)) error = 'Se solapa con otro periodo de inactividad suyo.';
+  const dias = error ? 0 : diasInactivo({ ...t, cese }, y), largo = error ? 0 : Math.round((pd(h)-pd(d))/864e5) + 1;
+  return { t, cese, y, error, dias, largo, corto: !error && dias < MIN_INACTIVO };
+}
+function calcCese(){
+  if(!SEL?.cese || !$('#ceInfo')) return;
+  const r = cesePropuesto(), info = $('#ceInfo');
+  info.className = 'mdia-ina-info' + (r.error || r.corto ? ' mal' : '');
+  info.innerHTML = r.error ? r.error
+    : r.corto ? `<b>Ojo: solo ${r.dias} días de inactividad en ${r.y}.</b> Un fijo discontinuo tiene que parar al menos ${MIN_INACTIVO} días al año.`
+    : `Este periodo: <b>${r.largo} días</b>. En ${r.y} para <b>${r.dias} días</b> (mínimo ${MIN_INACTIVO}).`;
+  $('#ceOk').disabled = !!r.error;
+  colocarMenu();
+}
+function guardarCese(){
+  const r = cesePropuesto(); if(r.error){ calcCese(); return; }
+  if(r.corto && !confirm(`Con estas fechas ${r.t.nombre} solo para ${r.dias} días en ${r.y}, y un fijo discontinuo tiene que parar al menos ${MIN_INACTIVO} días al año.\n\n¿Guardarlas igualmente?`)) return;
+  const t = r.t, nuevo = r.cese[SEL.cese.k];
+  DESHACER.push({ id:t.id, y:r.y, antes: t.rot?.[r.y] ?? null, cese: JSON.stringify(t.cese || []) });
+  if(DESHACER.length > 50) DESHACER.shift();
+  t.cese = r.cese.sort((x,z)=>x.desde<z.desde?-1:1);
+  guardar(); cerrarMenuDia(); pintar();
+  toast(`Inactividad del ${fCorto(nuevo.desde)} al ${fmt(nuevo.hasta)} · para ${r.dias} días en ${r.y}${r.corto?` (mínimo ${MIN_INACTIVO})`:''}`);
 }
 function colocarMenu(){
   const m = $('#menuDia'); if(!m || !SEL) return;
@@ -2109,6 +2180,7 @@ function aplicarDia(cod){
   if(!SEL) return;
   const t = S.trabajadores.find(x=>x.id===SEL.t); if(!t) return cerrarMenuDia();
   const [a, b] = rangoSel(), y = Number(a.slice(0,4));
+  if((t.cese||[]).some(p=>p.desde<=b && a<=p.hasta) && t.contrato==='discontinuo'){ toast('En su periodo de inactividad solo se pueden cambiar las fechas del periodo'); return; }
   t.rot = t.rot || {};
   const antes = t.rot[y] ?? null;
   const arr = antes ? antes.split(',') : Array(diasAnio(y)).fill('?');
@@ -2187,6 +2259,7 @@ function deshacerDia(){
   const t = S.trabajadores.find(x=>x.id===u.id); if(!t) return;
   if(u.antes==null) delete t.rot[u.y]; else t.rot[u.y] = u.antes;
   if(u.desprog!=null) t.desprog = JSON.parse(u.desprog);
+  if(u.cese!=null) t.cese = JSON.parse(u.cese);
   guardar(); cerrarMenuDia(); pintar(); toast('Cambio deshecho');
 }
 
