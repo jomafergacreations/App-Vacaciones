@@ -44,6 +44,6 @@ Si `version.json` lleva una versión mayor que la de `index.html`, la app entra 
 ## Convenciones
 
 - Todo el texto de la interfaz en español, en tono claro y directo.
-- Identidad visual: señalética de aeropuerto (asfalto `#22262E`, hormigón `#ECEEF1`, amarillo señal `#F6C300`, azul pista `#1F5FBF`; Barlow y Barlow Condensed). Contratos: completo azul, parcial morado, discontinuo naranja.
+- Identidad visual: carteles y pantallas de aeropuerto (bloque CSS «Tema: carteles y pantallas de aeropuerto», antes del de móvil). Placa negra `--panel` #15181D, `--panel2` #262B34, amarillo señal `#F6C300`, ámbar de pantalla `--ambar` #FFC933, fondo #E4E7EB, azul pista `#1F5FBF`; Barlow y Barlow Condensed. Cabecera negra con canto amarillo y reloj (`#reloj`, `reloj()`); títulos de módulo como señal (`h2.cartel` con `.pict` amarilla; «‹ Inicio» en placa amarilla); inicio como carteles de dirección (`.globo` negro, `.gfl` flecha); cifras y cabeceras de tabla y de calendario como pantalla de vuelos (negro, letra ámbar, mayúsculas solo ahí y en los estados `.estj`); `.seg` elegido en negro y amarillo; año como letrero de paletas (`.anio b`); botón primario amarillo; esquinas de 3–8 px. Contratos: completo azul, parcial morado, discontinuo naranja.
 - Animación: solo una entrada escalonada al cambiar de pantalla (`main.entrando` + `.anim` con `--i`) y respuestas a lo que se toca; respetar `prefers-reduced-motion`.
 - Probar en móvil (390 px) y escritorio antes de publicar.
