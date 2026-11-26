@@ -1,7 +1,8 @@
 {
-  "version": "10.23.0",
+  "version": "10.24.0",
   "fecha": "2026-11-26",
   "novedades": [
-    "En la inactividad de los FD solo se pueden cambiar las fechas del periodo, con aviso si para menos de 60 días"
+    "Departamento de Rampa: Pasaje, Rampa y Operaciones en los tres módulos",
+    "El buscador de trabajador de Vacaciones, en la barra de arriba"
   ]
 }

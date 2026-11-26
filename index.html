@@ -106,6 +106,8 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--asfalto)
 .seg button{border:0;background:none;border-radius:8px;padding:8px 13px;font-weight:600;font-size:14.5px;cursor:pointer;color:var(--gris);white-space:nowrap}
 .seg button.on{background:var(--papel);color:var(--asfalto);box-shadow:0 1px 2px rgba(0,0,0,.12)}
 .barra-herr .esp{flex:1}
+.barra-herr .combo{flex:1 1 280px;max-width:440px;min-width:240px}
+@media (max-width:1300px){ .barra-herr .combo~.esp{display:none} .barra-herr:has(.combo) .vayuda{display:none} }
 
 table.plantilla{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
 .plantilla th{font-family:var(--cond);font-size:15px;font-weight:700;text-align:left;color:var(--gris);padding:10px 12px;border-bottom:2px solid var(--asfalto);white-space:nowrap}
@@ -165,6 +167,7 @@ table.vgrid{border-collapse:separate;border-spacing:0;font-size:13px;font-varian
 .vgrid.z-anio th.dia{height:8px}
 .vgrid tr.grp th{background:var(--asfalto);color:#fff;font-family:var(--cond);font-size:15px;padding:5px 12px;cursor:default}
 .vgrid tr.grp td{background:#3A404C}
+.vg-org{color:var(--senal);margin-right:6px}
 .vgrid tfoot th{font-family:var(--cond);font-size:15px;cursor:default;background:#F7F8FA}
 .vgrid tfoot td{background:#F7F8FA;font-weight:700;font-size:12px;height:28px}
 .vgrid td.cnt.cero{color:#C3C8D0}
@@ -191,6 +194,9 @@ table.vgrid{border-collapse:separate;border-spacing:0;font-size:13px;font-varian
 .vfiltros{display:flex;align-items:center;gap:8px 10px;flex-wrap:wrap;margin:-2px 0 16px;padding:12px;background:#F4F5F8;border-radius:14px}
 .vfiltros .buscar{flex:0 1 340px;background:#fff}
 .vfiltros .flab{margin-left:8px}
+.vfiltros .fpar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.vlado .vfiltros .fpar{display:contents}
+.vgrid tr.grp th{white-space:nowrap;overflow:visible;z-index:2}
 .combo{position:relative;flex:0 1 380px;min-width:260px}
 .combo input{width:100%;padding:11px 46px 11px 14px;font-weight:700;background:#fff}
 .combo-n{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:700;pointer-events:none}
@@ -221,7 +227,7 @@ table.vgrid{border-collapse:separate;border-spacing:0;font-size:13px;font-varian
 .vlado .vfiltros{flex-direction:column;align-items:stretch;margin:0;gap:6px}
 .vlado .vfiltros .seg{width:100%;flex-wrap:wrap}
 .vlado .vfiltros .seg button{flex:1 1 auto}
-.vlado .vfiltros .seg.s-vacCon{display:grid;grid-template-columns:1fr 1fr}
+.vlado .vfiltros .seg.s-vacCon,.vlado .vfiltros .seg.s-vacDep{display:grid;grid-template-columns:1fr 1fr}
 .vlado .vfiltros .flab{margin:6px 0 0}
 .vlado .combo{flex:none;min-width:0}
 .vlado .vcab{flex-direction:column;align-items:stretch;margin:0;gap:8px}
@@ -568,11 +574,11 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
   .mdia-ops button small{display:none} .mdia-cab{margin-bottom:8px} .mdia-pie{font-size:12px;margin-top:8px}
   .vgrid th.esq,.vgrid tbody th,.vgrid tfoot th{min-width:140px;max-width:140px}
   .vsel{flex:1 1 100%} .vnombre{font-size:21px;flex:1;text-align:center}
-  .combo{flex:1 1 100%;min-width:0} .vfiltros .seg{flex-wrap:wrap;overflow:visible} .vfiltros .buscar{flex:1 1 100%} .vfiltros .flab{margin-left:0;flex:1 1 100%}
+  .combo{flex:1 1 100%;min-width:0} .vfiltros .seg{flex-wrap:wrap;overflow:visible} .vfiltros .buscar{flex:1 1 100%} .vfiltros .flab{margin-left:0;flex:1 1 100%} .vfiltros .fpar{flex:1 1 100%}
   .vmeses,.vder .vmeses{grid-template-columns:1fr} .sep-fila .sub{grid-column:1/-1} .sep-fila.tit{display:none}
   .resumen .cifra.filtra b{font-size:26px}
   .segj tbody th{max-width:130px}
-  .barra-herr .buscar{max-width:none} .seg{overflow-x:auto;max-width:100%}
+  .barra-herr .buscar{max-width:none} .barra-herr .combo{flex:1 1 100%;min-width:0} .seg{overflow-x:auto;max-width:100%}
   .dlg{border-radius:16px}
 }
 @media print{header,.barra-herr,.btn{display:none}}
@@ -601,9 +607,19 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
    Control Planning 10 — rehecha desde cero
    Datos en localStorage, con una clave nueva.
    ========================================================= */
-const APP_VERSION = '10.23.0';
+const APP_VERSION = '10.24.0';
 const CLAVE = 'control-planning-v10';
 const NOVEDADES = {
+  '10.24.0': [
+    { titulo:'Llega Rampa', donde:'Personal, Control de jornada y Vacaciones',
+      texto:'Ya están los tres departamentos: Pasaje, Rampa y Operaciones (antes «Ops»), dentro de cada producto. Se eligen en la ficha de cada trabajador y al importar, y los tres módulos tienen filtro de producto y de departamento.' },
+    { titulo:'Cada uno en su sitio', donde:'Vacaciones › Departamento',
+      texto:'Si en el cuadrante salen trabajadores de varios productos o departamentos, cada grupo lleva delante a cuál pertenece (por ejemplo, «GroundHandling · Rampa Grupo 1»), ordenados por producto y departamento.' },
+    { titulo:'El buscador de trabajador, arriba', donde:'Vacaciones › Por trabajador',
+      texto:'El buscador para elegir a la persona está ahora en la barra de arriba, encima de los meses. Los filtros y su resumen siguen a la izquierda.' },
+    { titulo:'Archivos de rotación de Rampa', donde:'Importar rotaciones',
+      texto:'Si el nombre del archivo lo dice (RAMPA, RMP, OPS…), el departamento ya viene marcado al revisarlo, como pasaba con PAX.' },
+  ],
   '10.23.0': [
     { titulo:'La inactividad no se toca, solo se mueve', donde:'Vacaciones, al pinchar un día de inactividad',
       texto:'En el periodo de inactividad de un fijo discontinuo ya no se puede poner nada: ni vacaciones, ni descansos, ni festivos. Al pincharlo sale una sola opción, «Cambiar fechas del periodo de inactividad», para mover el inicio o el final.' },
@@ -702,7 +718,7 @@ const NOVEDADES = {
     { titulo:'Fijos discontinuos por banda', donde:'Personal › ficha del trabajador',
       texto:'Los fijos discontinuos ya no llevan una jornada fija: van como los parciales sin garantía, del 50 % al 90 % de un tiempo completo, pero por 10 meses en lugar de 12 (entre 708 h y 1.275 h). Si alguno es un caso excepcional, cambia en su ficha los meses que trabaja.' },
     { titulo:'Producto y departamento', donde:'Personal y Control de jornada',
-      texto:'Debajo de la barra hay dos filtros nuevos: Producto (GroundHandling o RedBull) y Departamento (Pasaje u Ops). En la ficha, el departamento se elige con un botón.' },
+      texto:'Debajo de la barra hay dos filtros nuevos: Producto (GroundHandling o RedBull) y Departamento (Pasaje, Rampa u Operaciones). En la ficha, el departamento se elige con un botón.' },
     { titulo:'Días de vacaciones', donde:'Personal › ficha del trabajador',
       texto:'Cada ficha tiene sus días de vacaciones al año: 24 en tiempo completo y parcial, 20 en fijo discontinuo. Puedes cambiarlos a mano a quien lo necesite.' },
     { titulo:'Importar rotaciones', donde:'Control de jornada › Importar rotaciones',
@@ -816,8 +832,14 @@ const ICO = {
 /* ---------- catálogos fijos ---------- */
 const NEGOCIOS = { gh:{nombre:'GroundHandling', color:'#1F5FBF'}, rb:{nombre:'RedBull', color:'#E8650F'} };
 const negocioChip = t => NEGOCIOS[t.negocio] ? `<span class="neg ${t.negocio}">${NEGOCIOS[t.negocio].nombre}</span>` : '';
-const DEPTOS = ['Pasaje', 'Ops'];
-const normDepto = v => { const s = String(v||'').trim().replace(/\s+/g,' '); return /^pasaje$/i.test(s) ? 'Pasaje' : /^(ops|operaciones)$/i.test(s) ? 'Ops' : s; };
+/* los tres departamentos, dentro de cada producto (GroundHandling · Pasaje, RedBull · Rampa…) */
+const DEPTOS = ['Pasaje', 'Rampa', 'Operaciones'];
+const normDepto = v => { const s = String(v||'').trim().replace(/\s+/g,' ');
+  return /^(pasaje|pax)$/i.test(s) ? 'Pasaje' : /^(rampa|ramp)$/i.test(s) ? 'Rampa' : /^(ops|operaciones)$/i.test(s) ? 'Operaciones' : s; };
+/* departamento según el nombre de un archivo (PAX_GH, RAMPA_RB, OPS…) */
+const deptoDeArchivo = a => /pasaje|(^|[^a-z])pax/i.test(a) ? 'Pasaje' : /(^|[^a-z])(ramp|rmp)/i.test(a) ? 'Rampa' : /(^|[^a-z])(ops|oper)/i.test(a) ? 'Operaciones' : '';
+/* «GroundHandling · Pasaje»: producto y departamento juntos */
+const orgTxt = t => [NEGOCIOS[t.negocio]?.nombre, t.depto].filter(Boolean).join(' · ') || 'Sin producto ni departamento';
 /* filtro de producto y departamento, común a Personal y Control de jornada */
 const enOrg = t => (UI.fProd==='todos' || t.negocio===UI.fProd) && (UI.fDep==='todos' || t.depto===UI.fDep);
 function filtrosOrg(){
@@ -890,7 +912,7 @@ let S;
 try { S = normalizar(JSON.parse(localStorage.getItem(CLAVE))); } catch(e){ S = estadoInicial(); }
 /* cada cambio apunta la hora (para comparar con las copias); guardar(false) guarda sin marcar */
 const guardar = (marca=true) => { if(marca) S.modificado = new Date().toISOString(); try { localStorage.setItem(CLAVE, JSON.stringify(S)); } catch(e){ toast('No se ha podido guardar en este navegador'); } };
-let UI = { vista:'inicio', buscar:'', filtro:'todos', filtroJ:'todos', segJ:'semana', fProd:'todos', fDep:'todos', vacTab:'dep', vacZoom:'mes', vacMes:null, vacTrab:null, vacQ:'', vacCon:'todos', vacProd:'todos', edit:null, fichaJ:null, fjVer:'semana' };
+let UI = { vista:'inicio', buscar:'', filtro:'todos', filtroJ:'todos', segJ:'semana', fProd:'todos', fDep:'todos', vacTab:'dep', vacZoom:'mes', vacMes:null, vacTrab:null, vacQ:'', vacCon:'todos', vacProd:'todos', vacDep:'todos', edit:null, fichaJ:null, fjVer:'semana' };
 try { const u = JSON.parse(sessionStorage.getItem('cp-ui')||'{}'); if(u.vista) UI.vista=u.vista; } catch(e){}
 
 /* =========================================================
@@ -1898,8 +1920,8 @@ function vVacaciones(){
   if(MOVER) setTimeout(pintarMover, 0);
   const y = S.anio, tab = UI.vacTab || 'dep';
   /* filtros propios del módulo: nombre, contrato y producto */
-  const con = UI.vacCon || 'todos', prod = UI.vacProd || 'todos';
-  const todos = S.trabajadores.filter(t=>(con==='todos' || t.contrato===con) && (prod==='todos' || t.negocio===prod));
+  const con = UI.vacCon || 'todos', prod = UI.vacProd || 'todos', dep = UI.vacDep || 'todos';
+  const todos = S.trabajadores.filter(t=>(con==='todos' || t.contrato===con) && (prod==='todos' || t.negocio===prod) && (dep==='todos' || t.depto===dep));
   const conRot = S.trabajadores.filter(t=>enVacaciones(t, y));
   const ws = normNombre(UI.vacQ || '').split(' ').filter(Boolean);
   const ts = tab==='dep' ? todos.filter(t=>{ const n = normNombre(t.nombre); return ws.every(w=>n.includes(w)); }) : todos;
@@ -1908,9 +1930,10 @@ function vVacaciones(){
   const elegido = lista.find(x=>x.id===UI.vacTrab) || lista.find(x=>tieneRot(x, y)) || lista[0] || null;
   const segF = (campo, val, ops) => `<div class="seg s-${campo}" role="group">${ops.map(([k,txt])=>`<button class="${val===k?'on':''}" onclick="UI.${campo}='${k}';pintar()">${txt}</button>`).join('')}</div>`;
   const filtros = `<div class="vfiltros">
-      ${tab==='trab' ? comboHTML(lista, elegido) : `<input class="buscar" type="search" placeholder="Buscar por nombre" value="${esc(UI.vacQ||'')}" aria-label="Buscar por nombre" oninput="UI.vacQ=this.value;clearTimeout(window._b);window._b=setTimeout(()=>{pintar();const i=document.querySelector('.vfiltros .buscar');i.focus();i.setSelectionRange(i.value.length,i.value.length)},200)">`}
-      <span class="flab">Contrato</span>${segF('vacCon', con, [['todos','Todos'],['completo','Completo'],['parcial','Parcial'],['discontinuo','Discontinuo']])}
-      <span class="flab">Producto</span>${segF('vacProd', prod, [['todos','Todos'], ...Object.entries(NEGOCIOS).map(([k,n])=>[k,n.nombre])])}
+      ${tab==='trab' ? '' : `<input class="buscar" type="search" placeholder="Buscar por nombre" value="${esc(UI.vacQ||'')}" aria-label="Buscar por nombre" oninput="UI.vacQ=this.value;clearTimeout(window._b);window._b=setTimeout(()=>{pintar();const i=document.querySelector('.vfiltros .buscar');i.focus();i.setSelectionRange(i.value.length,i.value.length)},200)">`}
+      <span class="fpar"><span class="flab">Contrato</span>${segF('vacCon', con, [['todos','Todos'],['completo','Completo'],['parcial','Parcial'],['discontinuo','Discontinuo']])}</span>
+      <span class="fpar"><span class="flab">Producto</span>${segF('vacProd', prod, [['todos','Todos'], ...Object.entries(NEGOCIOS).map(([k,n])=>[k,n.nombre])])}</span>
+      <span class="fpar"><span class="flab">Departamento</span>${segF('vacDep', dep, [['todos','Todos'], ...DEPTOS.map(d=>[d,d])])}</span>
     </div>`;
   const cab = `<div class="portada anim"><button class="volver" onclick="ir('inicio')">‹ Inicio</button><h2>Vacaciones</h2>
     <p>La rotación de ${y} y las vacaciones de cada uno: todo el departamento de un vistazo, o una persona con su calendario del año.</p></div>`;
@@ -1918,6 +1941,7 @@ function vVacaciones(){
       <div class="seg" role="group" aria-label="Vista"><button class="${tab==='dep'?'on':''}" onclick="UI.vacTab='dep';pintar()">Departamento</button><button class="${tab==='trab'?'on':''}" onclick="UI.vacTab='trab';pintar()">Por trabajador</button></div>
       <div class="anio" title="Año"><button onclick="cambiarAnio(-1)" aria-label="Año anterior">‹</button><b>${y}</b><button onclick="cambiarAnio(1)" aria-label="Año siguiente">›</button></div>
       <span class="muted vayuda">Pincha un día, o arrastra para coger varios, y elige qué poner.</span>
+      ${tab==='trab' && lista.length ? comboHTML(lista, elegido) : ''}
       <span class="esp"></span>
       ${DESHACER.length ? `<button class="btn" onclick="deshacerDia()" title="Ctrl + Z">↶ Deshacer</button>` : ''}
       <button class="btn" onclick="abrirRotaciones()">${ICO.calendario} Importar rotaciones</button>
@@ -1965,8 +1989,14 @@ function vacDepartamento(ts, y){
   const nm = zoom==='mes' ? 1 : zoom==='tri' ? 3 : 12, desdeM = zoom==='anio' ? 0 : Math.min(m0, 12-nm);
   const ini = `${y}-${String(desdeM+1).padStart(2,'0')}-01`, fin = sumaDias(desdeM+nm>=12 ? `${y+1}-01-01` : `${y}-${String(desdeM+nm+1).padStart(2,'0')}-01`, -1);
   const dias = diasDelAnio(y).filter(d=>d>=ini && d<=fin), hoy = hoyIso();
-  const grupos = {}; ts.forEach(t=>{ (grupos[grupoTxt(t)] = grupos[grupoTxt(t)] || []).push(t); });
-  const nombres = Object.keys(grupos).sort(ordenGrupo);
+  /* si salen varios productos o departamentos, cada grupo lleva delante a cuál pertenece */
+  const varias = new Set(ts.map(orgTxt)).size > 1;
+  const clave = t => varias ? `${orgTxt(t)}\u0001${grupoTxt(t)}` : grupoTxt(t);
+  const grupos = {}; ts.forEach(t=>{ (grupos[clave(t)] = grupos[clave(t)] || []).push(t); });
+  const ordenOrg = k => { const t = grupos[k][0]; return [Object.keys(NEGOCIOS).indexOf(t.negocio)>>>0, DEPTOS.indexOf(t.depto)>>>0]; };
+  const nombres = Object.keys(grupos).sort((a,b)=>{ const oa = ordenOrg(a), ob = ordenOrg(b);
+    return oa[0]-ob[0] || oa[1]-ob[1] || a.split('\u0001')[0].localeCompare(b.split('\u0001')[0],'es') || ordenGrupo(a.split('\u0001').pop(), b.split('\u0001').pop()); });
+  const grpTxt = k => { const [o, g] = k.includes('\u0001') ? k.split('\u0001') : ['', k]; return o ? `<span class="vg-org">${esc(o)}</span> ${esc(g)}` : esc(g); };
   const conTexto = zoom!=='anio';
   const cls = d => `${diaSem(d)>=5?' fin':''}${d===hoy?' hoy':''}${d.endsWith('-01')?' m1':''}`;
   const meses = []; dias.forEach(d=>{ const m = Number(d.slice(5,7))-1; if(!meses.length || meses[meses.length-1].m!==m) meses.push({m, n:0}); meses[meses.length-1].n++; });
@@ -1984,7 +2014,7 @@ function vacDepartamento(ts, y){
     <div class="vgrid-scroll"><table class="vgrid z-${zoom}">
       <thead><tr><th class="esq" rowspan="2">Trabajador</th>${meses.map(x=>`<th class="mes" colspan="${x.n}">${zoom==='anio'&&x.n<20?MESES[x.m]:MESES_L[x.m]}</th>`).join('')}</tr>
         <tr>${dias.map(d=>`<th class="dia${cls(d)}">${conTexto?`<small>${DIAS_SEM[diaSem(d)]}</small>${Number(d.slice(8))}`:''}</th>`).join('')}</tr></thead>
-      ${nombres.map(g=>`<tbody><tr class="grp"><th>${esc(g)}</th><td colspan="${dias.length}"></td></tr>${grupos[g].sort((a,b)=>a.nombre.localeCompare(b.nombre,'es')).map(fila).join('')}</tbody>`).join('')}
+      ${nombres.map(g=>`<tbody><tr class="grp"><th>${grpTxt(g)}</th><td colspan="${dias.length}"></td></tr>${grupos[g].sort((a,b)=>a.nombre.localeCompare(b.nombre,'es')).map(fila).join('')}</tbody>`).join('')}
       <tfoot><tr><th>De vacaciones</th>${cuenta(c=>c && COD_VAC.has(c))}</tr><tr><th>Trabajan</th>${cuenta(c=>c==='T')}</tr></tfoot>
     </table></div>`;
 }
@@ -2438,8 +2468,8 @@ function prepararRot(hojas, archivo){
   const cols = Object.keys(fechas).map(Number).filter(c=>fechas[c].startsWith(y+'-'));
   const codigos = {};
   ROT = { archivo, y, completo: porAnio[y]===diasAnio(y), hayNum: ci>=0, ponerNum: true,
-    negocio: /red\s*bull|_rb\b|\brb\b/i.test(archivo) ? 'rb' : /ground|_gh|\bgh\b/i.test(archivo) ? 'gh' : '',
-    depto: /pasaje|pax/i.test(archivo) ? 'Pasaje' : /\bops\b|operaciones/i.test(archivo) ? 'Ops' : '', filas: datos.map(f=>{
+    negocio: /red\s*bull|(^|[^a-z])rb/i.test(archivo) ? 'rb' : /ground|(^|[^a-z])gh/i.test(archivo) ? 'gh' : '',
+    depto: deptoDeArchivo(archivo), filas: datos.map(f=>{
     const nombre = String(f[cn]).replace(/\s+/g,' ').trim(), num = ci>=0 ? String(f[ci] ?? '').trim() : '';
     const dias = Array(diasAnio(y)).fill('?');
     cols.forEach(c=>{ const v = f[c]; const cod = v==null || v==='' ? '' : String(v).trim().toUpperCase().replace(/,/g,' ');
