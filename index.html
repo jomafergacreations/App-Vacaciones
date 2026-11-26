@@ -441,6 +441,13 @@ table.segj{border-collapse:separate;border-spacing:0;font-variant-numeric:tabula
 .soltar:hover,.soltar.encima{border-color:var(--asfalto);background:var(--senal-suave)}
 .soltar b{font-family:var(--cond);font-size:22px}
 .soltar input{display:none}
+.soltar.bloq,.org-pega.bloq{opacity:.4;pointer-events:none}
+.org-paso{display:flex;flex-direction:column;gap:10px;padding:14px;background:#F4F5F8;border-radius:14px}
+.org-tit{margin:0;display:flex;align-items:center;gap:9px;font-family:var(--cond);font-size:19px;font-weight:700}
+.org-tit span{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--asfalto);color:var(--senal);font-size:15px;flex-shrink:0}
+.org-tit small{display:block;font-family:var(--texto);font-size:13px;color:var(--gris);font-weight:600}
+.org-fila{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap}
+.org-fila .flab{min-width:104px}
 .imp-ajustes{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;background:#F4F5F8;border-radius:14px;padding:14px}
 .imp-ajustes .semtxt{font-size:13px;color:var(--gris);font-weight:600}
 .cols{display:flex;flex-wrap:wrap;gap:6px}
@@ -607,9 +614,15 @@ main.entrando .anim{animation:subir .4s cubic-bezier(.2,.7,.2,1) both;animation-
    Control Planning 10 — rehecha desde cero
    Datos en localStorage, con una clave nueva.
    ========================================================= */
-const APP_VERSION = '10.24.0';
+const APP_VERSION = '10.25.0';
 const CLAVE = 'control-planning-v10';
 const NOVEDADES = {
+  '10.25.0': [
+    { titulo:'Primero, de qué es el archivo', donde:'Importar rotaciones, Importar turnos y Añadir desde Excel',
+      texto:'Al pulsar cualquier botón de importar, la app pregunta antes de nada de qué producto y departamento es el archivo. Hasta que marcas los dos no se puede elegir ni pegar nada. Ya no se adivina por el nombre del archivo.' },
+    { titulo:'Busca entre los suyos', donde:'Al revisar lo importado',
+      texto:'Los nombres del archivo se emparejan con los trabajadores de ese producto y departamento (y con los que aún no tienen ninguno). Si alguien solo aparece en otro departamento, sale en amarillo, «Está en otro producto o departamento», para que lo revises; al apuntar su rotación no se le cambia de departamento. Los trabajadores nuevos entran ya con el producto y el departamento elegidos.' },
+  ],
   '10.24.0': [
     { titulo:'Llega Rampa', donde:'Personal, Control de jornada y Vacaciones',
       texto:'Ya están los tres departamentos: Pasaje, Rampa y Operaciones (antes «Ops»), dentro de cada producto. Se eligen en la ficha de cada trabajador y al importar, y los tres módulos tienen filtro de producto y de departamento.' },
@@ -836,8 +849,6 @@ const negocioChip = t => NEGOCIOS[t.negocio] ? `<span class="neg ${t.negocio}">$
 const DEPTOS = ['Pasaje', 'Rampa', 'Operaciones'];
 const normDepto = v => { const s = String(v||'').trim().replace(/\s+/g,' ');
   return /^(pasaje|pax)$/i.test(s) ? 'Pasaje' : /^(rampa|ramp)$/i.test(s) ? 'Rampa' : /^(ops|operaciones)$/i.test(s) ? 'Operaciones' : s; };
-/* departamento según el nombre de un archivo (PAX_GH, RAMPA_RB, OPS…) */
-const deptoDeArchivo = a => /pasaje|(^|[^a-z])pax/i.test(a) ? 'Pasaje' : /(^|[^a-z])(ramp|rmp)/i.test(a) ? 'Rampa' : /(^|[^a-z])(ops|oper)/i.test(a) ? 'Operaciones' : '';
 /* «GroundHandling · Pasaje»: producto y departamento juntos */
 const orgTxt = t => [NEGOCIOS[t.negocio]?.nombre, t.depto].filter(Boolean).join(' · ') || 'Sin producto ni departamento';
 /* filtro de producto y departamento, común a Personal y Control de jornada */
@@ -1389,6 +1400,34 @@ function borrarTrabajador(id){
 /* ---------- añadir trabajadores desde Excel: archivo o filas pegadas ----------
    Busca la columna de nombres y, si las hay, la de contrato y la de horas a la semana.
    Antes de añadir se revisa la lista: los que ya están y los «ficticios» salen sin marcar. */
+/* ---------- al importar: primero de qué producto y departamento es el archivo ---------- */
+let ORGI = { negocio:'', depto:'' };
+const orgListo = () => !!(ORGI.negocio && ORGI.depto);
+function orgPaso(){
+  ORGI = { negocio:'', depto:'' };
+  return `<div class="org-paso"><p class="org-tit"><span>1</span>¿De qué producto y departamento es el archivo?</p>
+    <div class="org-fila"><span class="flab">Producto</span><div class="negocios" data-org="negocio">${Object.entries(NEGOCIOS).map(([k,n])=>`<button type="button" data-v="${k}" style="--nc:${n.color}" onclick="elegirOrg('negocio','${k}')">${n.nombre}</button>`).join('')}</div></div>
+    <div class="org-fila"><span class="flab">Departamento</span><div class="seg" role="group" aria-label="Departamento" data-org="depto">${DEPTOS.map(d=>`<button type="button" data-v="${d}" onclick="elegirOrg('depto','${d}')">${d}</button>`).join('')}</div></div></div>
+    <p class="org-tit" id="orgDos"><span>2</span>Elige el archivo</p>`;
+}
+function elegirOrg(campo, v){
+  ORGI[campo] = v;
+  document.querySelectorAll(`#capa [data-org="${campo}"] button`).forEach(b=>b.classList.toggle('on', b.dataset.v===v));
+  orgBloqueo();
+}
+/* hasta tener los dos, no se puede elegir ni pegar nada */
+function orgBloqueo(){
+  const ok = orgListo();
+  document.querySelectorAll('#capa .soltar, #capa .org-pega').forEach(el=>el.classList.toggle('bloq', !ok));
+  document.querySelectorAll('#capa .soltar input, #capa .org-pega textarea, #capa [data-org-leer]').forEach(el=>el.disabled = !ok);
+  const dos = $('#orgDos'); if(dos) dos.innerHTML = ok ? `<span>2</span><div>Elige el archivo de ${esc(NEGOCIOS[ORGI.negocio].nombre)} · ${esc(ORGI.depto)}</div>` : '<span>2</span><div>Elige el archivo<small>Antes, marca el producto y el departamento</small></div>';
+}
+/* al emparejar, solo cuentan los de ese producto y departamento (y los que aún no tienen) */
+const enOrgI = t => (!t.negocio || t.negocio===ORGI.negocio) && (!t.depto || t.depto===ORGI.depto);
+/* primero entre los suyos; si no sale nadie, entre todos, pero avisando de que es de otro sitio */
+const emparejarOrg = (nombre, fila) => { const m = emparejar(nombre, fila, enOrgI); if(m.id) return m;
+  const g = emparejar(nombre, fila); return g.id ? { id:g.id, como:'otro' } : m; };
+
 let PLA = null;
 function abrirPegar(){
   PLA = null;
@@ -1396,13 +1435,15 @@ function abrirPegar(){
     <div class="dlg-cab"><h2 id="pTit">Añadir desde Excel</h2><button class="cerrar" onclick="cerrarPegar()" aria-label="Cerrar">×</button></div>
     <div class="dlg-cuerpo">
       <p style="margin:0">Sube el Excel con la plantilla o pega sus filas. Basta con una columna de <b>nombres</b>; si además trae el <b>contrato</b> y las <b>horas a la semana</b>, también se recogen. Lo revisas antes de añadir a nadie.</p>
-      <label class="soltar" ondragover="event.preventDefault();this.classList.add('encima')" ondragleave="this.classList.remove('encima')" ondrop="event.preventDefault();this.classList.remove('encima');leerPlantilla(event.dataTransfer.files[0])">
+      ${orgPaso()}
+      <label class="soltar" ondragover="event.preventDefault();this.classList.add('encima')" ondragleave="this.classList.remove('encima')" ondrop="event.preventDefault();this.classList.remove('encima');if(orgListo())leerPlantilla(event.dataTransfer.files[0])">
         <input type="file" accept=".xlsx,.xlsm,.csv,.txt" onchange="leerPlantilla(this.files[0])">
         ${ICO.subir.replace('<svg','<svg width="30" height="30"')}<b>Elegir archivo</b><span class="muted">o arrástralo aquí · Excel (.xlsx) o .csv</span></label>
-      <label>O pega aquí las filas copiadas de tu Excel<textarea id="pegado" style="min-height:110px" placeholder="ANA GARCÍA LÓPEZ&#9;completo&#10;LUIS PÉREZ RUIZ&#9;parcial&#9;30&#10;MARTA SANZ GIL&#9;discontinuo&#9;40"></textarea></label>
+      <label class="org-pega">O pega aquí las filas copiadas de tu Excel<textarea id="pegado" style="min-height:110px" placeholder="ANA GARCÍA LÓPEZ&#9;completo&#10;LUIS PÉREZ RUIZ&#9;parcial&#9;30&#10;MARTA SANZ GIL&#9;discontinuo&#9;40"></textarea></label>
       <p class="muted" style="margin:0;font-size:13.5px">Contrato: «completo», «parcial» o «discontinuo» (vale cualquier palabra que empiece así). Si no viene, se entiende tiempo completo; luego lo cambias en la ficha de cada uno.</p>
     </div>
-    <div class="dlg-pie"><button class="btn" onclick="cerrarPegar()">Cancelar</button><button class="btn primario" onclick="leerPegadoPlantilla()">Leer lo pegado</button></div></div></div>`;
+    <div class="dlg-pie"><button class="btn" onclick="cerrarPegar()">Cancelar</button><button class="btn primario" data-org-leer onclick="leerPegadoPlantilla()">Leer lo pegado</button></div></div></div>`;
+  orgBloqueo();
 }
 function cerrarPegar(){ PLA = null; $('#capa').innerHTML = ''; }
 async function leerPlantilla(f){
@@ -1436,7 +1477,7 @@ function prepararPlantilla(hojas, archivo, pegado){
     else if(ch<0 && vs.every(v=>{ const x = num(v); return x!=null && x>0 && x<=S.ajustes.hSemana; })) ch = k; }
   const vistos = new Set();
   const fuera = pegado ? 0 : h.filas.filter(f=>!esNombre(f[c]) && /FICTICI/i.test(String(f[c]||''))).length;
-  PLA = { archivo, cc, ch, fuera, negocio:'', depto: /pasaje/i.test(archivo) ? 'Pasaje' : '', tambien:false, filas: filas.map(f=>{
+  PLA = { archivo, cc, ch, fuera, negocio:ORGI.negocio, depto:ORGI.depto, tambien:false, filas: filas.map(f=>{
     const nombre = String(f[c]).replace(/\s+/g,' ').trim(), k = normNombre(nombre);
     const m = emparejar(nombre, []), ya = m.id && ['exacto','orden','guardado'].includes(m.como);
     const ficticio = /\bFICTICI[OA]\b|\bEVENTUAL\b.*\d|^PAX\b/i.test(sinAcentos(nombre));
@@ -2421,11 +2462,13 @@ function abrirRotaciones(){
     <div class="dlg-cab"><h2 id="rTit">Importar rotaciones</h2><button class="cerrar" onclick="cerrarRot()" aria-label="Cerrar">×</button></div>
     <div class="dlg-cuerpo">
       <p style="margin:0">Sube el Excel con la rotación del año: una fila por trabajador y una columna por día, con sus códigos (R, H, F, X, AJ…). Las casillas vacías cuentan como días de trabajo. Lo revisas antes de apuntar nada.</p>
-      <label class="soltar" ondragover="event.preventDefault();this.classList.add('encima')" ondragleave="this.classList.remove('encima')" ondrop="event.preventDefault();this.classList.remove('encima');leerRotaciones(event.dataTransfer.files[0])">
+      ${orgPaso()}
+      <label class="soltar" ondragover="event.preventDefault();this.classList.add('encima')" ondragleave="this.classList.remove('encima')" ondrop="event.preventDefault();this.classList.remove('encima');if(orgListo())leerRotaciones(event.dataTransfer.files[0])">
         <input type="file" accept=".xlsx,.xlsm,.csv,.txt" onchange="leerRotaciones(this.files[0])">
         ${ICO.calendario.replace('<svg','<svg width="30" height="30"')}<b>Elegir archivo</b><span class="muted">o arrástralo aquí · Excel (.xlsx o .xlsm) o .csv</span></label>
     </div>
     <div class="dlg-pie"><button class="btn" onclick="cerrarRot()">Cancelar</button></div></div></div>`;
+  orgBloqueo();
 }
 function cerrarRot(){ ROT = null; $('#capa').innerHTML = ''; }
 async function leerRotaciones(f){
@@ -2468,13 +2511,12 @@ function prepararRot(hojas, archivo){
   const cols = Object.keys(fechas).map(Number).filter(c=>fechas[c].startsWith(y+'-'));
   const codigos = {};
   ROT = { archivo, y, completo: porAnio[y]===diasAnio(y), hayNum: ci>=0, ponerNum: true,
-    negocio: /red\s*bull|(^|[^a-z])rb/i.test(archivo) ? 'rb' : /ground|(^|[^a-z])gh/i.test(archivo) ? 'gh' : '',
-    depto: deptoDeArchivo(archivo), filas: datos.map(f=>{
+    negocio: ORGI.negocio, depto: ORGI.depto, filas: datos.map(f=>{
     const nombre = String(f[cn]).replace(/\s+/g,' ').trim(), num = ci>=0 ? String(f[ci] ?? '').trim() : '';
     const dias = Array(diasAnio(y)).fill('?');
     cols.forEach(c=>{ const v = f[c]; const cod = v==null || v==='' ? '' : String(v).trim().toUpperCase().replace(/,/g,' ');
       dias[idxDia(fechas[c])] = cod; codigos[cod] = (codigos[cod]||0) + 1; });
-    const m = emparejar(nombre, num ? [num] : []);
+    const m = emparejarOrg(nombre, num ? [num] : []);
     return { nombre, num, grupo: grupoDe.get(f) || '', dias, trab: dias.filter(c=>!NO_TRABAJO.has(c)).length, vac: dias.filter(c=>COD_VAC.has(c)).length, id:m.id, como:m.como, manual:false };
   }) };
   ROT.codigos = codigos;
@@ -2484,7 +2526,7 @@ function pintarRot(primera){
   const d0 = $('#capa .dlg'), sc = d0 ? d0.scrollTop : 0, y = ROT.y;
   const opciones = S.trabajadores.slice().sort((a,b)=>a.nombre.localeCompare(b.nombre,'es')).map(t=>`<option value="${t.id}">${esc(t.nombre)}</option>`).join('');
   const usados = {}; ROT.filas.forEach(f=>{ if(f.id && f.id!=='nuevo') usados[f.id] = (usados[f.id]||0) + 1; });
-  const ok = ROT.filas.filter(f=>f.id && f.id!=='nuevo' && ESTADOS[f.como]?.[0]==='ok').length, duda = ROT.filas.filter(f=>f.id && f.como==='posible').length,
+  const ok = ROT.filas.filter(f=>f.id && f.id!=='nuevo' && ESTADOS[f.como]?.[0]==='ok').length, duda = ROT.filas.filter(f=>f.id && (f.como==='posible' || f.como==='otro')).length,
         no = ROT.filas.filter(f=>!f.id).length, nuevos = ROT.filas.filter(f=>f.id==='nuevo').length, repes = Object.values(usados).filter(n=>n>1).length;
   const ya = ROT.filas.filter(f=>f.id && f.id!=='nuevo' && S.trabajadores.find(t=>t.id===f.id)?.rot?.[y]).length;
   const cods = Object.entries(ROT.codigos).sort((a,b)=>b[1]-a[1]).map(([c,n])=>`<span class="${NO_TRABAJO.has(c)?'':'t'}">${c===''?'Vacías':esc(c)}${COD_NOMBRE[c]&&c!==''?` (${COD_NOMBRE[c]})`:''}: ${n}</span>`).join('');
@@ -2504,7 +2546,7 @@ function pintarRot(primera){
         return dup.length ? `<p class="aviso-suave" style="margin:0">El nº de empleado ${dup.join(', ')} sale en más de una fila (${ROT.filas.filter(f=>dup.includes(f.num)).map(f=>esc(f.nombre)).join(', ')}). No se apunta: ponlo a mano en su ficha.</p>` : ''; })()}
       <div class="imp-ajustes"><div><label style="margin-bottom:6px">Producto de este archivo</label><div class="negocios">${Object.entries(NEGOCIOS).map(([k,n])=>`<button type="button" class="${ROT.negocio===k?'on':''}" style="--nc:${n.color}" onclick="ROT.negocio=ROT.negocio==='${k}'?'':'${k}';pintarRot()">${n.nombre}</button>`).join('')}</div></div>
         <div><label style="margin-bottom:6px">Departamento de este archivo</label>${deptoBtns(ROT.depto, 'ROT.depto', 'pintarRot')}</div>
-        <p class="muted" style="margin:0;font-size:13px;grid-column:1/-1">Se les pone a todos los que apuntes, para que luego puedas filtrar por producto y departamento.</p></div>
+        <p class="muted" style="margin:0;font-size:13px;grid-column:1/-1">Se les pone a todos los que apuntes (menos a los que ya eran de otro producto o departamento), para que luego puedas filtrar por producto y departamento.</p></div>
       ${ROT.hayNum ? `<label class="check"><input type="checkbox" ${ROT.ponerNum?'checked':''} onchange="ROT.ponerNum=this.checked"> Apuntar también el nº de empleado a quien no lo tenga</label>` : ''}
       ${ya ? `<p class="muted" style="margin:0;font-size:14px">${ya} ya tenía${ya===1?'':'n'} rotación de ${y}: se sustituye por la del archivo.</p>` : ''}
       ${repes ? `<p class="aviso" style="margin:0">Hay trabajadores elegidos en dos filas. Cada rotación tiene que ir a una persona distinta.</p>` : ''}
@@ -2522,10 +2564,11 @@ function guardarRot(){
     let t;
     if(f.id==='nuevo'){ t = nuevoTrabajador({ id:uid(), nombre:f.nombre, num:f.num, ...(f.nombre.includes(',') ? separarNombre(f.nombre) : {}) }); t.nombre = nombreCompleto(t); S.trabajadores.push(t); }
     else { t = S.trabajadores.find(x=>x.id===f.id); if(!t) return;
-      if(f.como==='posible' || f.como==='manual') S.alias[normNombre(f.nombre)] = t.id;
+      if(f.como==='posible' || f.como==='otro' || f.como==='manual') S.alias[normNombre(f.nombre)] = t.id;
       if(ROT.ponerNum && f.num && !t.num && !numRepe(f.num)){ t.num = f.num; nums++; } }
     t.rot = t.rot || {}; t.rot[y] = f.dias.join(','); if(f.grupo) t.grupo = f.grupo;
-    if(ROT.negocio) t.negocio = ROT.negocio; if(ROT.depto) t.depto = ROT.depto; n++;
+    /* a quien ya era de otro producto o departamento no se le cambia: se ve en la revisión */
+    if(f.como!=='otro'){ if(ROT.negocio) t.negocio = ROT.negocio; if(ROT.depto) t.depto = ROT.depto; } n++;
   });
   const dup = [...new Set(ROT.filas.filter(f=>f.num && ROT.filas.filter(g=>g.num===f.num).length>1).map(f=>f.num))];
   S.anio = y; guardar(); cerrarRot(); pintar();
@@ -2547,12 +2590,14 @@ function abrirImportar(){
     <div class="dlg-cab"><h2 id="iTit">Importar turnos</h2><button class="cerrar" onclick="cerrarImportar()" aria-label="Cerrar">×</button></div>
     <div class="dlg-cuerpo">
       <p style="margin:0">Sube el archivo de turnos de una semana. La app busca sola los nombres y las horas, y te lo enseña para que lo revises antes de apuntar nada.</p>
-      <label class="soltar" id="soltar" ondragover="event.preventDefault();this.classList.add('encima')" ondragleave="this.classList.remove('encima')" ondrop="event.preventDefault();this.classList.remove('encima');leerArchivo(event.dataTransfer.files[0])">
+      ${orgPaso()}
+      <label class="soltar" id="soltar" ondragover="event.preventDefault();this.classList.add('encima')" ondragleave="this.classList.remove('encima')" ondrop="event.preventDefault();this.classList.remove('encima');if(orgListo())leerArchivo(event.dataTransfer.files[0])">
         <input type="file" accept=".xlsx,.xlsm,.csv,.txt" onchange="leerArchivo(this.files[0])">
         ${ICO.subir.replace('<svg','<svg width="30" height="30"')}<b>Elegir archivo</b><span class="muted">o arrástralo aquí · Excel (.xlsx) o .csv</span></label>
-      <label>O pega aquí las filas copiadas de tu Excel<textarea id="impPegado" style="min-height:110px" placeholder="GARCÍA LÓPEZ, ANA&#9;37,5&#10;PÉREZ RUIZ, LUIS&#9;30"></textarea></label>
+      <label class="org-pega">O pega aquí las filas copiadas de tu Excel<textarea id="impPegado" style="min-height:110px" placeholder="GARCÍA LÓPEZ, ANA&#9;37,5&#10;PÉREZ RUIZ, LUIS&#9;30"></textarea></label>
     </div>
-    <div class="dlg-pie"><button class="btn" onclick="cerrarImportar()">Cancelar</button><button class="btn primario" onclick="leerPegadoImp()">Leer lo pegado</button></div></div></div>`;
+    <div class="dlg-pie"><button class="btn" onclick="cerrarImportar()">Cancelar</button><button class="btn primario" data-org-leer onclick="leerPegadoImp()">Leer lo pegado</button></div></div></div>`;
+  orgBloqueo();
 }
 function cerrarImportar(){ IMP = null; $('#capa').innerHTML = ''; }
 
@@ -2737,9 +2782,9 @@ function casiIgual(a, b){
     if(a.length>b.length) i++; else if(b.length>a.length) j++; else { i++; j++; } }
   return dif + (a.length-i) + (b.length-j) <= 1;
 }
-function emparejar(nombre, fila){
-  const ts = S.trabajadores, k = normNombre(nombre);
-  const al = S.alias[k]; if(al && ts.some(t=>t.id===al)) return {id:al, como:'guardado'};
+function emparejar(nombre, fila, filtro){
+  const ts = filtro ? S.trabajadores.filter(filtro) : S.trabajadores, k = normNombre(nombre);
+  const al = S.alias[k]; if(al && S.trabajadores.some(t=>t.id===al)) return {id:al, como:'guardado'};
   const celdas = new Set(fila.map(v=>String(v).trim()).filter(Boolean));
   const pn = ts.filter(t=>t.num && celdas.has(String(t.num).trim())); if(pn.length===1) return {id:pn[0].id, como:'numero'};
   const ex = ts.filter(t=>normNombre(t.nombre)===k); if(ex.length===1) return {id:ex[0].id, como:'exacto'};
@@ -2765,14 +2810,14 @@ function construirFilas(){
     const ps = IMP.colsHoras.map(c=>{ const x = horasDe(f[c]); return x ? x.h * fac(c) : null; });
     const horas = ps.some(x=>x!=null) ? r2(ps.reduce((a,x)=>a+(x||0),0)) : null;
     const antes = prev.find(p=>p.nombre===nombre && p.manual);
-    const m = antes ? {id:antes.id, como:'manual'} : emparejar(nombre, f);
+    const m = antes ? {id:antes.id, como:'manual'} : emparejarOrg(nombre, f);
     return { nombre, horas, id:m.id, como:m.como, manual:!!antes };
   });
 }
 
 /* ---------- pantalla de revisión ---------- */
 const ESTADOS = { exacto:['ok','Mismo nombre'], orden:['ok','Mismo nombre, en otro orden'], numero:['ok','Por nº de empleado'], guardado:['ok','Emparejado otras veces'],
-  manual:['ok','Elegido a mano'], posible:['duda','¿Es esta persona? Revísalo'], nada:['no','Sin emparejar: no se apunta'], nuevo:['nuevo','Se añade como trabajador nuevo'] };
+  manual:['ok','Elegido a mano'], posible:['duda','¿Es esta persona? Revísalo'], otro:['duda','Está en otro producto o departamento: revísalo'], nada:['no','Sin emparejar: no se apunta'], nuevo:['nuevo','Se añade como trabajador nuevo'] };
 function pintarImport(primera){
   const dlgPrev = document.querySelector('#capa .dlg'), sc = dlgPrev ? dlgPrev.scrollTop : 0;
   const filas = IMP.hojas[IMP.hoja].filas, n = filas[0]?.length || 0;
@@ -2781,7 +2826,7 @@ function pintarImport(primera){
   const usados = {}; IMP.filas.forEach(f=>{ if(f.id && f.id!=='nuevo') usados[f.id] = (usados[f.id]||0) + 1; });
   const apuntar = IMP.filas.filter(f=>f.id && f.horas!=null);
   const yaTenian = new Set(IMP.filas.filter(f=>f.id && f.id!=='nuevo' && f.horas!=null).map(f=>f.id).filter(id=>S.trabajadores.find(t=>t.id===id)?.horas?.[IMP.lunes]!==undefined));
-  const ok = IMP.filas.filter(f=>f.id && f.id!=='nuevo' && ESTADOS[f.como][0]==='ok').length, duda = IMP.filas.filter(f=>f.id && f.como==='posible').length,
+  const ok = IMP.filas.filter(f=>f.id && f.id!=='nuevo' && ESTADOS[f.como][0]==='ok').length, duda = IMP.filas.filter(f=>f.id && (f.como==='posible' || f.como==='otro')).length,
         no = IMP.filas.filter(f=>!f.id).length, nuevos = IMP.filas.filter(f=>f.id==='nuevo').length;
   const filasHTML = IMP.filas.map((f,i)=>{ const est = f.id==='nuevo' ? 'nuevo' : !f.id ? 'nada' : f.como; const [cls, txt] = ESTADOS[est];
     return `<div class="imp-fila ${f.id?'':'ign'}"><span class="nf">${esc(f.nombre)}</span><span class="hf">${f.horas==null?'—':nh(f.horas)+' h'}</span>
@@ -2817,8 +2862,8 @@ function guardarImport(){
   const suma = {};
   filas.forEach(f=>{
     let id = f.id;
-    if(id==='nuevo'){ const t = nuevoTrabajador({ id:uid(), nombre:f.nombre, ...(f.nombre.includes(',') ? separarNombre(f.nombre) : {}) }); t.nombre = nombreCompleto(t); S.trabajadores.push(t); id = t.id; }
-    else if(f.como==='posible' || f.como==='manual') S.alias[normNombre(f.nombre)] = id;   // la próxima vez se empareja solo
+    if(id==='nuevo'){ const t = nuevoTrabajador({ id:uid(), nombre:f.nombre, negocio:ORGI.negocio, depto:ORGI.depto, ...(f.nombre.includes(',') ? separarNombre(f.nombre) : {}) }); t.nombre = nombreCompleto(t); S.trabajadores.push(t); id = t.id; }
+    else if(f.como==='posible' || f.como==='otro' || f.como==='manual') S.alias[normNombre(f.nombre)] = id;   // la próxima vez se empareja solo
     suma[id] = (suma[id]||0) + f.horas;
   });
   Object.entries(suma).forEach(([id,h])=>{ const t = S.trabajadores.find(x=>x.id===id); if(t){ t.horas = t.horas || {}; t.horas[IMP.lunes] = r2(h); } });

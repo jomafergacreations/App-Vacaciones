@@ -1,8 +1,7 @@
 {
-  "version": "10.24.0",
+  "version": "10.25.0",
   "fecha": "2026-11-26",
   "novedades": [
-    "Departamento de Rampa: Pasaje, Rampa y Operaciones en los tres módulos",
-    "El buscador de trabajador de Vacaciones, en la barra de arriba"
+    "Al importar, la app pregunta primero de qué producto y departamento es el archivo"
   ]
 }
