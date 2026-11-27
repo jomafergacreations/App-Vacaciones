@@ -1,7 +1,7 @@
 {
-  "version": "10.29.0",
+  "version": "10.30.0",
   "fecha": "2026-11-27",
   "novedades": [
-    "Diseño nuevo: menú lateral, pestañas en el móvil y resumen del año"
+    "Sincronización entre tus dispositivos con un repositorio privado de GitHub"
   ]
 }

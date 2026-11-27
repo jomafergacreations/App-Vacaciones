@@ -609,6 +609,26 @@ table.fj-sem{width:100%;border-collapse:separate;border-spacing:0;font-variant-n
 .puntos i{width:8px;height:8px;border-radius:50%;background:var(--linea)} .puntos i.on{background:var(--senal)}
 .aviso-toast{pointer-events:none;position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--asfalto);color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;font-weight:500;z-index:200;box-shadow:0 16px 40px -12px rgba(16,24,40,.45);animation:subirc .3s var(--ease);max-width:calc(100vw - 32px)}
 
+
+/* sincronización */
+.sync-punto{position:absolute;left:24px;top:20px;width:8px;height:8px;border-radius:50%;background:#5B6B8C;box-shadow:0 0 0 2px var(--noche);transition:background .3s}
+.sync-punto.ok{background:#3CC47C} .sync-punto.va{background:#6E96F2;animation:latir 1s ease-in-out infinite} .sync-punto.mal{background:#F0645A} .sync-punto.aviso{background:#F5B638}
+#syncTxt{display:flex;flex-direction:column;line-height:1.25} #syncTxt small{font-size:11.5px;color:#7F90B2;font-weight:400}
+@keyframes latir{50%{opacity:.35}}
+.dlg.sync{width:min(640px,100%)}
+.sync-pasos{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;color:var(--gris);font-size:14px}
+.sync-pasos b{color:var(--asfalto)}
+.sync-estado{display:flex;align-items:center;gap:12px;border:1px solid var(--linea);border-radius:10px;padding:12px 14px}
+.sync-estado i{display:block;width:10px;height:10px;min-width:10px;border-radius:50%;flex:0 0 10px;background:var(--gris2)}
+.sync-estado i.ok{background:var(--ok)} .sync-estado i.mal{background:var(--mal)} .sync-estado i.va{background:var(--senal);animation:latir 1s infinite} .sync-estado i.aviso{background:#E09A1F}
+.sync-estado b{display:block;font-weight:600} .sync-estado small{display:block;color:var(--gris);font-size:12.5px}
+.sync-dos{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sync-dos button{border:1px solid var(--linea);background:#fff;border-radius:10px;padding:12px 14px;text-align:left;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.sync-dos button:hover{border-color:var(--senal);box-shadow:0 0 0 1px var(--senal)}
+.sync-dos b{display:block;font-weight:600;margin-bottom:2px} .sync-dos small{display:block;color:var(--gris);font-size:12.5px}
+@media (max-width:1023px){ .sync-punto{left:auto;right:5px;top:auto;bottom:5px} #syncTxt{display:none} }
+@media (max-width:760px){ .sync-dos{grid-template-columns:1fr} }
+
 /* ---------- movimiento ---------- */
 @keyframes subir{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 @keyframes subirc{from{opacity:0;transform:translate(-50%,12px)}to{opacity:1;transform:translate(-50%,0)}}
@@ -633,6 +653,7 @@ main.entrando .anim{animation:subir .5s var(--ease) both;animation-delay:calc(va
 @media (max-width:1023px){
   header.shell{position:sticky;top:0;bottom:auto;width:auto;flex-direction:row;align-items:center;gap:10px;padding:10px 14px;padding-top:max(10px,env(safe-area-inset-top))}
   .marca h1 small{display:none}
+  .marca{min-width:0;flex:1 1 auto} .marca h1{overflow:hidden;text-overflow:ellipsis;min-width:0}
   .logo{width:32px;height:32px;border-radius:8px}
   .cab-acc{margin:0 0 0 auto;flex-direction:row;border:0;padding:0;gap:4px}
   .cabtn{padding:8px;border-radius:var(--r)}
@@ -661,6 +682,7 @@ main.entrando .anim{animation:subir .5s var(--ease) both;animation-delay:calc(va
   body{font-size:15px}
   main{padding:16px 12px calc(var(--tab) + 36px + env(safe-area-inset-bottom))}
   .marca h1{font-size:15px}
+  header.shell{gap:6px;padding-left:12px;padding-right:10px} .cab-acc{gap:0} .cabtn{padding:7px} .ver{padding:6px 4px;font-size:12px}
   .portada{margin-bottom:16px}
   .portada h2{font-size:22px;gap:10px} .portada .pict{width:32px;height:32px;border-radius:8px} .portada .pict svg{width:18px;height:18px}
   .portada p{font-size:14px}
@@ -734,6 +756,7 @@ main.entrando .anim{animation:subir .5s var(--ease) both;animation-delay:calc(va
   <div class="cab-acc">
     <button class="cabtn" onclick="guardarCopia()" title="Descargar una copia de todos los datos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg><span>Guardar copia</span></button>
     <button class="cabtn" onclick="abrirCopias()" title="Cargar una copia y ver el registro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V4M7.5 8.5 12 4l4.5 4.5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg><span>Cargar copia</span></button>
+    <button class="cabtn" id="syncBtn" onclick="abrirSync()" title="Sincronizar entre tus dispositivos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18.5h10.5a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.6 9.2 4.7 4.7 0 0 0 7 18.5z"/></svg><span id="syncTxt">Sincronizar</span><i class="sync-punto" id="syncPunto"></i></button>
     <button class="cabtn" id="novBtn" onclick="abrirNovedades()" title="Qué trae esta versión"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.4 5.2 5.6.6-4.2 3.8 1.2 5.5L12 15.3 7 18.1l1.2-5.5L4 8.8l5.6-.6z"/></svg><span>Novedades</span><i class="nov-punto" hidden></i></button>
     <button class="ver" id="verBtn" onclick="buscarActualizacion()" title="Buscar una versión nueva"><span class="verp">Versión</span><b id="verTxt"></b></button>
   </div>
@@ -746,9 +769,17 @@ main.entrando .anim{animation:subir .5s var(--ease) both;animation-delay:calc(va
    Control Planning 10 — rehecha desde cero
    Datos en localStorage, con una clave nueva.
    ========================================================= */
-const APP_VERSION = '10.29.0';
+const APP_VERSION = '10.30.0';
 const CLAVE = 'control-planning-v10';
 const NOVEDADES = {
+  '10.30.0': [
+    { titulo:'Los mismos datos en el móvil y en el ordenador', donde:'Menú › Sincronizar',
+      texto:'La app puede guardar los datos en un repositorio privado de tu cuenta de GitHub. Cada cambio se sube solo a los pocos segundos y, al abrir la app o volver a ella en el otro dispositivo, se traen los cambios. Ya no hace falta guardar y cargar archivos.' },
+    { titulo:'Cómo activarlo', donde:'Sincronizar',
+      texto:'Crea un repositorio privado llamado control-planning-datos y un token que solo tenga acceso a él (Contents: Read and write). Pégalo primero en el dispositivo con los datos buenos y luego en el otro. El punto junto a «Sincronizar» dice cómo va: verde al día, azul subiendo, rojo si hay un problema.' },
+    { titulo:'Si cambias en los dos a la vez', donde:'Sincronizar',
+      texto:'Si has cambiado datos en los dos dispositivos sin que se hayan sincronizado, la app te pregunta con cuáles te quedas y guarda los otros aparte por si hiciera falta volver.' },
+  ],
   '10.29.0': [
     { titulo:'Diseño nuevo', donde:'Toda la app',
       texto:'La app estrena un diseño más sobrio y profesional: fondo claro, letra IBM Plex Sans, acentos en azul y tablas, cifras y calendarios más limpios.' },
@@ -1076,7 +1107,7 @@ function normalizar(d){
 let S;
 try { S = normalizar(JSON.parse(localStorage.getItem(CLAVE))); } catch(e){ S = estadoInicial(); }
 /* cada cambio apunta la hora (para comparar con las copias); guardar(false) guarda sin marcar */
-const guardar = (marca=true) => { if(marca) S.modificado = new Date().toISOString(); try { localStorage.setItem(CLAVE, JSON.stringify(S)); } catch(e){ toast('No se ha podido guardar en este navegador'); } };
+const guardar = (marca=true) => { if(marca) S.modificado = new Date().toISOString(); try { localStorage.setItem(CLAVE, JSON.stringify(S)); } catch(e){ toast('No se ha podido guardar en este navegador'); } if(marca) programarSync(); };
 let UI = { vista:'inicio', buscar:'', filtro:'todos', filtroJ:'todos', segJ:'semana', fProd:'todos', fDep:'todos', vacTab:'dep', vacZoom:'mes', vacMes:null, vacTrab:null, vacQ:'', vacCon:'todos', vacProd:'todos', vacDep:'todos', edit:null, fichaJ:null, fjVer:'semana' };
 try { const u = JSON.parse(sessionStorage.getItem('cp-ui')||'{}'); if(u.vista) UI.vista=u.vista; } catch(e){}
 
@@ -1266,7 +1297,7 @@ function vInicio(){
   if(pend) p.push(['v-aviso', `${pend} ficha${pend===1?'':'s'} sin jornada completa`, 'Personal', "ir('personal')"]);
   if(ts.length && sinRot) p.push(['v-aviso', `${sinRot} sin rotación de ${y}`, 'Vacaciones', "ir('vacaciones')"]);
   if(ts.length && !c) p.push(['v-info', `Sin turnos importados de ${y}`, 'Control de jornada', "ir('jornada')"]);
-  const sinCopia = S.modificado && (!S.ultimaCopia || S.ultimaCopia.el < S.modificado);
+  const sinCopia = !SYNC.token && S.modificado && (!S.ultimaCopia || S.ultimaCopia.el < S.modificado);
   if(ts.length && sinCopia) p.push(['v-info', 'Hay cambios sin copia guardada', S.ultimaCopia ? `Última copia: ${fechaCorta(S.ultimaCopia.el)}` : 'Aún no has guardado ninguna', 'guardarCopia()']);
   const hoy = new Date().toLocaleDateString('es-ES', { weekday:'long', day:'numeric', month:'long' });
   return `<div class="ini-cab anim"><div><h2>Resumen de ${y}</h2><p>${hoy.charAt(0).toUpperCase()+hoy.slice(1)} · ${ts.length ? `${ts.length} personas en plantilla` : 'todavía no hay personal'}</p></div>
@@ -1284,7 +1315,7 @@ function vInicio(){
       <aside class="ini-pend anim" style="--i:2"><h3>Pendiente <span>${p.length}</span></h3>
         ${p.length ? p.map(([cls, txt, sub, acc])=>`<button class="pend ${cls}" onclick="${acc}"><i></i><span><b>${txt}</b><small>${sub}</small></span></button>`).join('')
           : `<p class="pend-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.6 2.5L16 9.5"/></svg>Todo al día</p>`}
-        <p class="ini-dato">${S.ultimaCopia ? `Última copia guardada: ${fechaHora(S.ultimaCopia.el)}` : 'Todavía no has guardado ninguna copia.'}</p>
+        <p class="ini-dato">${SYNC.token ? `Sincronizado con tus dispositivos${SYNC.ult ? ` · ${fechaHora(SYNC.ult)}` : ''}` : S.ultimaCopia ? `Última copia guardada: ${fechaHora(S.ultimaCopia.el)}` : 'Todavía no has guardado ninguna copia. <button class="enlace" onclick="abrirSync()">Sincronizar entre dispositivos</button>'}</p>
       </aside>
     </div>`;
 }
@@ -3163,6 +3194,159 @@ function abrirNovedades(){
 }
 function cerrarNovedades(){ vaciarCapa(); }
 
+
+/* =========================================================
+   Sincronizar entre tus dispositivos (repositorio privado de GitHub)
+   Los datos van a un archivo datos.json de un repositorio PRIVADO tuyo.
+   La clave (token) se guarda solo en cada dispositivo, nunca en este repositorio.
+   ========================================================= */
+var SYNC = (()=>{ try { return JSON.parse(localStorage.getItem(CLAVE + '-sync')) || {}; } catch(e){ return {}; } })();
+SYNC.repo = SYNC.repo || 'jomafergacreations/control-planning-datos';
+SYNC.ruta = SYNC.ruta || 'datos.json';
+let SYNC_ESTADO = { tipo: SYNC.token ? 'va' : 'off', txt: SYNC.token ? 'Conectando…' : 'Sin configurar', el:null };
+const guardarSyncCfg = () => { try { localStorage.setItem(CLAVE + '-sync', JSON.stringify(SYNC)); } catch(e){} };
+/* lo que es de cada dispositivo no viaja */
+const SOLO_AQUI = ['versionVista', 'registro', 'ultimaCopia', 'cargada'];
+const resumenTxt = d => { const r = resumenDatos(d); return `${r.n} trabajadores · ${r.rot} con rotación · ${r.sem} semanas de horas`; };
+const datosParaSubir = () => { const d = JSON.parse(JSON.stringify(S)); SOLO_AQUI.forEach(k=>delete d[k]); return d; };
+const a64 = txt => { const by = new TextEncoder().encode(txt); let b = ''; for(let i=0;i<by.length;i+=0x8000) b += String.fromCharCode.apply(null, by.subarray(i, i+0x8000)); return btoa(b); };
+const de64 = b64 => new TextDecoder().decode(Uint8Array.from(atob(b64.replace(/\s/g,'')), c=>c.charCodeAt(0)));
+async function gh(metodo, cuerpo){
+  const r = await fetch(`https://api.github.com/repos/${SYNC.repo}/contents/${SYNC.ruta}${metodo==='GET' ? '?t=' + Date.now() : ''}`, {
+    method: metodo, cache:'no-store',
+    headers: { 'Authorization': `Bearer ${SYNC.token}`, 'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' },
+    body: cuerpo ? JSON.stringify(cuerpo) : undefined });
+  if(r.status===404 && metodo==='GET') return null;
+  if(!r.ok){ const e = new Error('gh ' + r.status); e.status = r.status; throw e; }
+  return r.json();
+}
+async function traerNube(){
+  const j = await gh('GET'); if(!j) return null;
+  let txt;
+  if(j.content) txt = de64(j.content);
+  else { const r = await fetch(j.download_url, { cache:'no-store', headers:{ 'Authorization': `Bearer ${SYNC.token}` } }); txt = await r.text(); }
+  const c = JSON.parse(txt);
+  return { sha: j.sha, datos: c.datos || c, cuando: c.guardada || c.datos?.modificado, disp: c.dispositivo || '' };
+}
+async function subirNube(){
+  const copia = { app:'control-planning', version: APP_VERSION, guardada: new Date().toISOString(), dispositivo: dispositivo(), datos: datosParaSubir() };
+  const cuerpo = { message: `Datos desde ${dispositivo()} (${fechaCorta(copia.guardada)})`, content: a64(JSON.stringify(copia)) };
+  if(SYNC.sha) cuerpo.sha = SYNC.sha;
+  const j = await gh('PUT', cuerpo);
+  SYNC.sha = j.content.sha; SYNC.base = S.modificado; SYNC.ult = copia.guardada; guardarSyncCfg();
+}
+/* pone en este dispositivo lo que hay en la nube (guarda antes lo de aquí por si acaso) */
+function aplicarNube(n){
+  try { localStorage.setItem(CLAVE_ANTES, JSON.stringify(S)); } catch(e){}
+  const quedan = Object.fromEntries(SOLO_AQUI.map(k=>[k, S[k]]));
+  S = Object.assign(normalizar(JSON.parse(JSON.stringify(n.datos))), quedan);
+  S.modificado = n.datos.modificado || n.cuando || null; guardar(false);
+  SYNC.sha = n.sha; SYNC.base = S.modificado; SYNC.ult = new Date().toISOString(); guardarSyncCfg();
+  DESHACER.length = 0; pintar();
+}
+const ocupado = () => !!($('#capa').innerHTML || $('#menuDia') || (typeof SEL!=='undefined' && SEL) || (typeof MOVER!=='undefined' && MOVER));
+let SYNC_EN_CURSO = false, SYNC_OTRA = false, SYNC_CONFLICTO = null;
+async function sincronizar(manual, intento=0){
+  if(!SYNC.token) return pintarSync();
+  if(SYNC_EN_CURSO){ SYNC_OTRA = true; return; }
+  if(!navigator.onLine){ estadoSync('mal', 'Sin conexión', 'Se sincronizará al volver la conexión'); return; }
+  SYNC_EN_CURSO = true; estadoSync('va', 'Sincronizando…');
+  try {
+    const n = await traerNube();
+    const loc = S.modificado || '', rem = n?.datos?.modificado || '', base = SYNC.base || '';
+    const hayLocal = loc && loc !== base, hayNube = n && rem !== base;
+    if(!n){ if(S.trabajadores.length || loc) await subirNube(); }
+    else if(rem === loc){ SYNC.sha = n.sha; SYNC.base = loc; guardarSyncCfg(); }
+    else if(hayLocal && hayNube && base){ SYNC_CONFLICTO = n; SYNC.sha = n.sha; estadoSync('aviso', 'Cambios en los dos sitios', 'Elige qué datos te quedas'); SYNC_EN_CURSO = false; abrirSync(); return; }
+    else if(hayNube && (!hayLocal || !base) && (!loc || rem > loc || !hayLocal)){
+      if(ocupado() && !manual){ SYNC.sha = n.sha; estadoSync('aviso', 'Hay datos nuevos', 'Se traerán al cerrar lo que tienes abierto'); SYNC_EN_CURSO = false; setTimeout(()=>sincronizar(), 4000); return; }
+      aplicarNube(n); toast(`Datos al día: traídos del ${n.disp || 'otro dispositivo'}`);
+    }
+    else { SYNC.sha = n.sha; await subirNube(); }
+    estadoSync('ok', 'Al día', `Sincronizado a las ${new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}`);
+  } catch(e){
+    if((e.status===409 || e.status===422) && intento < 2){ SYNC.sha = null; SYNC_EN_CURSO = false; return sincronizar(manual, intento + 1); }
+    estadoSync('mal', e.status===401 || e.status===403 ? 'La clave no vale' : e.status===404 ? 'No encuentro el repositorio' : 'No se ha podido sincronizar',
+      e.status===401 || e.status===403 ? 'Revisa el token en Sincronizar' : e.status===404 ? `Comprueba que existe ${SYNC.repo} y que el token tiene acceso` : 'Se volverá a intentar en un momento');
+    if(!e.status) setTimeout(()=>sincronizar(), 30000);
+  }
+  SYNC_EN_CURSO = false;
+  if(SYNC_OTRA){ SYNC_OTRA = false; sincronizar(); }
+}
+/* cada cambio se sube a los pocos segundos */
+function programarSync(){
+  if(typeof SYNC==='undefined' || !SYNC.token) return;
+  clearTimeout(programarSync._t); estadoSync('va', 'Cambios por subir');
+  programarSync._t = setTimeout(()=>sincronizar(), 2500);
+}
+function estadoSync(tipo, txt, sub=''){ SYNC_ESTADO = { tipo, txt, sub }; pintarSync(); }
+function pintarSync(){
+  const p = $('#syncPunto'), t = $('#syncTxt'), e = SYNC.token ? SYNC_ESTADO : { tipo:'off', txt:'Sincronizar', sub:'Sin configurar' };
+  if(p) p.className = 'sync-punto ' + (e.tipo==='off' ? '' : e.tipo);
+  if(t) t.innerHTML = `${esc(e.txt)}${e.sub ? `<small>${esc(e.sub)}</small>` : ''}`;
+  const b = $('#syncBtn'); if(b) b.title = [e.txt, e.sub].filter(Boolean).join(' · ');
+  const d = $('#syncDlgEstado'); if(d) d.innerHTML = estadoSyncHTML();
+}
+const estadoSyncHTML = () => { const e = SYNC_ESTADO;
+  const err = !SYNC.token && e.tipo==='mal';
+  return `<div class="sync-estado"><i class="${SYNC.token || err ? e.tipo : ''}"></i><span><b>${SYNC.token || err ? esc(e.txt) : 'No conectado'}</b><small>${SYNC.token || err ? esc(e.sub || '') : 'Los datos solo están en este dispositivo'}${SYNC.ult ? ` · última subida o bajada: ${fechaCorta(SYNC.ult)}` : ''}</small></span></div>`; };
+function abrirSync(){
+  const c = SYNC_CONFLICTO;
+  $('#capa').innerHTML = `<div class="fondo" onclick="if(event.target===this)cerrarSync()"><div class="dlg sync" role="dialog" aria-modal="true" aria-label="Sincronizar">
+    <div class="dlg-cab"><h2>Sincronizar entre tus dispositivos</h2><button class="cerrar" onclick="cerrarSync()" aria-label="Cerrar">×</button></div>
+    <div class="dlg-cuerpo">
+      ${c ? `<div><p style="margin:0 0 10px"><b>Has cambiado datos aquí y en otro dispositivo desde la última vez.</b> Elige con cuáles te quedas; los otros se guardan aparte por si hiciera falta volver.</p>
+        <div class="sync-dos"><button onclick="resolverSync('aqui')"><b>Los de este dispositivo</b><small>Último cambio: ${fechaCorta(S.modificado)}</small><small>${resumenTxt(S)}</small></button>
+        <button onclick="resolverSync('nube')"><b>Los de la nube</b><small>Subidos desde ${esc(c.disp || 'otro dispositivo')}: ${fechaCorta(c.datos.modificado || c.cuando)}</small><small>${resumenTxt(c.datos)}</small></button></div></div>` : ''}
+      <div id="syncDlgEstado">${estadoSyncHTML()}</div>
+      ${SYNC.token ? `<p class="muted" style="margin:0">Cada cambio se sube solo a los pocos segundos, y al abrir la app o volver a ella se traen los cambios del otro dispositivo. Los datos están en <b>${esc(SYNC.repo)}</b> (privado).</p>
+        <div class="fila"><button class="btn primario" onclick="sincronizar(true)">Sincronizar ahora</button><button class="btn" onclick="desconectarSync()">Desconectar este dispositivo</button></div>`
+      : `<p style="margin:0">Los datos se guardan en un repositorio <b>privado</b> de tu cuenta de GitHub. Solo hay que prepararlo una vez:</p>
+        <ol class="sync-pasos">
+          <li>En GitHub, crea un repositorio nuevo llamado <b>control-planning-datos</b> y márcalo como <b>Private</b>.</li>
+          <li>Ve a Settings › Developer settings › Personal access tokens › <b>Fine-grained tokens</b> › Generate new token. En «Repository access» elige <b>Only select repositories</b> y ese repositorio; en «Permissions › Contents» pon <b>Read and write</b>. Ponle una caducidad larga.</li>
+          <li>Pega el token aquí, en el ordenador y en el móvil. Empieza por el dispositivo que tiene los datos buenos.</li>
+        </ol>
+        <label>Repositorio<input id="syncRepo" value="${esc(SYNC.repo)}" autocomplete="off" spellcheck="false"></label>
+        <label>Token<input id="syncTok" type="password" placeholder="github_pat_…" autocomplete="off" spellcheck="false"></label>
+        <div class="fila"><button class="btn primario" onclick="conectarSync()">Conectar</button></div>`}
+    </div></div></div>`;
+}
+function cerrarSync(){ vaciarCapa(); }
+async function conectarSync(){
+  const tok = $('#syncTok').value.trim(), repo = $('#syncRepo').value.trim().replace(/^https?:\/\/github\.com\//,'').replace(/\.git$/,'').replace(/\/$/,'');
+  if(!tok || !/^[\w.-]+\/[\w.-]+$/.test(repo)){ toast('Pon el repositorio (usuario/nombre) y el token'); return; }
+  SYNC = { repo, ruta: SYNC.ruta || 'datos.json', token: tok }; guardarSyncCfg();
+  estadoSync('va', 'Conectando…'); abrirSync();
+  try {
+    const n = await traerNube();
+    if(n && S.trabajadores.length && (n.datos.modificado || '') !== (S.modificado || '')){ SYNC_CONFLICTO = n; SYNC.sha = n.sha; estadoSync('aviso', 'Ya hay datos en la nube', 'Elige con cuáles te quedas'); abrirSync(); return; }
+    if(n){ SYNC.sha = n.sha; if((n.datos.modificado||'') === (S.modificado||'')){ SYNC.base = S.modificado; guardarSyncCfg(); } else { aplicarNube(n); } }
+    else await subirNube();
+    estadoSync('ok', 'Al día', 'Conectado'); abrirSync(); toast(n ? 'Conectado: datos traídos de la nube' : 'Conectado: datos subidos a la nube');
+  } catch(e){
+    SYNC.token = ''; guardarSyncCfg();
+    estadoSync('mal', e.status===401 || e.status===403 ? 'La clave no vale' : e.status===404 ? 'No encuentro el repositorio' : 'No se ha podido conectar',
+      e.status===404 ? 'Comprueba el nombre y que el token tiene acceso a ese repositorio' : 'Revisa el token y vuelve a probar');
+    abrirSync();
+  }
+}
+async function resolverSync(cual){
+  const n = SYNC_CONFLICTO; if(!n) return; SYNC_CONFLICTO = null;
+  try {
+    if(cual==='nube'){ aplicarNube(n); toast('Te has quedado con los datos de la nube'); }
+    else { try { localStorage.setItem(CLAVE_ANTES, JSON.stringify(n.datos)); } catch(e){} SYNC.sha = n.sha; await subirNube(); toast('Subidos los datos de este dispositivo'); }
+    estadoSync('ok', 'Al día', `Sincronizado a las ${new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}`);
+  } catch(e){ estadoSync('mal', 'No se ha podido sincronizar', 'Vuelve a probar'); }
+  abrirSync();
+}
+function desconectarSync(){
+  if(!confirm('Este dispositivo dejará de sincronizarse. Los datos se quedan aquí y en la nube. ¿Desconectar?')) return;
+  SYNC = { repo: SYNC.repo, ruta: SYNC.ruta }; guardarSyncCfg(); SYNC_ESTADO = { tipo:'off', txt:'Sin configurar' }; pintarSync(); abrirSync();
+}
+addEventListener('online', ()=>sincronizar());
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') sincronizar(); });
+
 /* ---------- arranque ---------- */
 document.addEventListener('keydown', e=>{ if(e.key==='Escape' && !$('#bloqueo') && $('#capa').innerHTML){ UI.edit=null; $('#capa').innerHTML=''; } });
 if('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(()=>{});
@@ -3170,6 +3354,7 @@ pintar(true);
 puntoNovedades();
 { const v = document.getElementById("verTxt"); if(v) v.textContent = APP_VERSION; }
 comprobarVersion(); setInterval(comprobarVersion, 60*1000);
+pintarSync(); if(SYNC.token) sincronizar();
 
 if(/[?&]v=/.test(location.search)) history.replaceState(null, '', location.pathname);
 </script>
