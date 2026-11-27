@@ -610,6 +610,10 @@ table.fj-sem{width:100%;border-collapse:separate;border-spacing:0;font-variant-n
 .aviso-toast{pointer-events:none;position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--asfalto);color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;font-weight:500;z-index:200;box-shadow:0 16px 40px -12px rgba(16,24,40,.45);animation:subirc .3s var(--ease);max-width:calc(100vw - 32px)}
 
 
+.auto-caja{border-top:1px solid var(--linea);padding-top:16px;display:flex;flex-direction:column;gap:10px}
+.auto-caja h3{font-size:16px}
+.auto-caja p{margin:0}
+.auto-que{font-size:13.5px}
 /* sincronización */
 .sync-punto{position:absolute;left:24px;top:20px;width:8px;height:8px;border-radius:50%;background:#5B6B8C;box-shadow:0 0 0 2px var(--noche);transition:background .3s}
 .sync-punto.ok{background:#3CC47C} .sync-punto.va{background:#6E96F2;animation:latir 1s ease-in-out infinite} .sync-punto.mal{background:#F0645A} .sync-punto.aviso{background:#F5B638}
@@ -769,9 +773,15 @@ main.entrando .anim{animation:subir .5s var(--ease) both;animation-delay:calc(va
    Control Planning 10 — rehecha desde cero
    Datos en localStorage, con una clave nueva.
    ========================================================= */
-const APP_VERSION = '10.30.0';
+const APP_VERSION = '10.31.0';
 const CLAVE = 'control-planning-v10';
 const NOVEDADES = {
+  '10.31.0': [
+    { titulo:'Copia automática en una carpeta', donde:'Cargar copia › Copia automática',
+      texto:'Elige una vez una carpeta del ordenador (por ejemplo, una nueva en el Escritorio) y la app guardará ahí sola la copia de seguridad a los pocos segundos de cada cambio: control-planning.json, siempre el mismo y sobrescrito, y una copia por día en la subcarpeta «copias-diarias», donde se quedan las de los últimos 14 días. Funciona en Chrome y Edge del ordenador.' },
+    { titulo:'Si Chrome vuelve a pedir permiso', donde:'Resumen › Pendiente',
+      texto:'A veces Chrome pide confirmar de nuevo el permiso de la carpeta al abrir la app. Lo verás en «Pendiente»: púlsalo y elige «Permitir en cada visita» para que no vuelva a preguntar.' },
+  ],
   '10.30.0': [
     { titulo:'Los mismos datos en el móvil y en el ordenador', donde:'Menú › Sincronizar',
       texto:'La app puede guardar los datos en un repositorio privado de tu cuenta de GitHub. Cada cambio se sube solo a los pocos segundos y, al abrir la app o volver a ella en el otro dispositivo, se traen los cambios. Ya no hace falta guardar y cargar archivos.' },
@@ -1107,7 +1117,7 @@ function normalizar(d){
 let S;
 try { S = normalizar(JSON.parse(localStorage.getItem(CLAVE))); } catch(e){ S = estadoInicial(); }
 /* cada cambio apunta la hora (para comparar con las copias); guardar(false) guarda sin marcar */
-const guardar = (marca=true) => { if(marca) S.modificado = new Date().toISOString(); try { localStorage.setItem(CLAVE, JSON.stringify(S)); } catch(e){ toast('No se ha podido guardar en este navegador'); } if(marca) programarSync(); };
+const guardar = (marca=true) => { if(marca) S.modificado = new Date().toISOString(); try { localStorage.setItem(CLAVE, JSON.stringify(S)); } catch(e){ toast('No se ha podido guardar en este navegador'); } if(marca){ programarSync(); programarAuto(); } };
 let UI = { vista:'inicio', buscar:'', filtro:'todos', filtroJ:'todos', segJ:'semana', fProd:'todos', fDep:'todos', vacTab:'dep', vacZoom:'mes', vacMes:null, vacTrab:null, vacQ:'', vacCon:'todos', vacProd:'todos', vacDep:'todos', edit:null, fichaJ:null, fjVer:'semana' };
 try { const u = JSON.parse(sessionStorage.getItem('cp-ui')||'{}'); if(u.vista) UI.vista=u.vista; } catch(e){}
 
@@ -1297,7 +1307,9 @@ function vInicio(){
   if(pend) p.push(['v-aviso', `${pend} ficha${pend===1?'':'s'} sin jornada completa`, 'Personal', "ir('personal')"]);
   if(ts.length && sinRot) p.push(['v-aviso', `${sinRot} sin rotación de ${y}`, 'Vacaciones', "ir('vacaciones')"]);
   if(ts.length && !c) p.push(['v-info', `Sin turnos importados de ${y}`, 'Control de jornada', "ir('jornada')"]);
-  const sinCopia = !SYNC.token && S.modificado && (!S.ultimaCopia || S.ultimaCopia.el < S.modificado);
+  if(AUTO.estado==='permiso') p.push(['v-aviso', 'Copia automática en pausa', `Pulsa para volver a permitir la carpeta «${esc(AUTO.handle?.name||'')}»`, 'permitirAuto()']);
+  if(AUTO.estado==='error') p.push(['v-mal', 'La copia automática ha fallado', esc(AUTO.error || 'Vuelve a elegir la carpeta'), 'abrirCopias()']);
+  const sinCopia = !SYNC.token && AUTO.estado!=='ok' && AUTO.estado!=='permiso' && S.modificado && (!S.ultimaCopia || S.ultimaCopia.el < S.modificado);
   if(ts.length && sinCopia) p.push(['v-info', 'Hay cambios sin copia guardada', S.ultimaCopia ? `Última copia: ${fechaCorta(S.ultimaCopia.el)}` : 'Aún no has guardado ninguna', 'guardarCopia()']);
   const hoy = new Date().toLocaleDateString('es-ES', { weekday:'long', day:'numeric', month:'long' });
   return `<div class="ini-cab anim"><div><h2>Resumen de ${y}</h2><p>${hoy.charAt(0).toUpperCase()+hoy.slice(1)} · ${ts.length ? `${ts.length} personas en plantilla` : 'todavía no hay personal'}</p></div>
@@ -1315,7 +1327,7 @@ function vInicio(){
       <aside class="ini-pend anim" style="--i:2"><h3>Pendiente <span>${p.length}</span></h3>
         ${p.length ? p.map(([cls, txt, sub, acc])=>`<button class="pend ${cls}" onclick="${acc}"><i></i><span><b>${txt}</b><small>${sub}</small></span></button>`).join('')
           : `<p class="pend-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.6 2.5L16 9.5"/></svg>Todo al día</p>`}
-        <p class="ini-dato">${SYNC.token ? `Sincronizado con tus dispositivos${SYNC.ult ? ` · ${fechaHora(SYNC.ult)}` : ''}` : S.ultimaCopia ? `Última copia guardada: ${fechaHora(S.ultimaCopia.el)}` : 'Todavía no has guardado ninguna copia. <button class="enlace" onclick="abrirSync()">Sincronizar entre dispositivos</button>'}</p>
+        <p class="ini-dato">${AUTO.estado==='ok' ? `Copia automática en «${esc(AUTO.handle.name)}»${AUTO.ultima ? ` · ${fechaHora(AUTO.ultima)}` : ''}` : AUTO.estado==='off' && FS_OK && !SYNC.token ? `${S.ultimaCopia ? `Última copia: ${fechaHora(S.ultimaCopia.el)}. ` : ''}<button class="enlace" onclick="abrirCopias()">Activar la copia automática en una carpeta</button>` : SYNC.token ? `Sincronizado con tus dispositivos${SYNC.ult ? ` · ${fechaHora(SYNC.ult)}` : ''}` : S.ultimaCopia ? `Última copia guardada: ${fechaHora(S.ultimaCopia.el)}` : 'Todavía no has guardado ninguna copia. <button class="enlace" onclick="abrirSync()">Sincronizar entre dispositivos</button>'}</p>
       </aside>
     </div>`;
 }
@@ -2631,14 +2643,15 @@ async function guardarCopia(){
   if($('#capa .copias')) abrirCopias(); else pintar();
 }
 let CARGA = null;
+function cerrarCopias(){ CARGA = null; vaciarCapa(); pintar(); }
 function abrirCopias(){
   CARGA = null;
   const r = resumenDatos(S), antes = localStorage.getItem(CLAVE_ANTES);
   const reg = (S.registro || []).slice(0, 10);
-  $('#capa').innerHTML = `<div class="fondo" onclick="if(event.target===this)$('#capa').innerHTML=''"><div class="dlg copias" role="dialog" aria-modal="true" aria-labelledby="cTit">
-    <div class="dlg-cab"><h2 id="cTit">Guardar y cargar</h2><button class="cerrar" onclick="$('#capa').innerHTML=''" aria-label="Cerrar">×</button></div>
+  $('#capa').innerHTML = `<div class="fondo" onclick="if(event.target===this)cerrarCopias()"><div class="dlg copias" role="dialog" aria-modal="true" aria-labelledby="cTit">
+    <div class="dlg-cab"><h2 id="cTit">Copias de seguridad</h2><button class="cerrar" onclick="cerrarCopias()" aria-label="Cerrar">×</button></div>
     <div class="dlg-cuerpo">
-      <p style="margin:0">Los datos se guardan en cada dispositivo. Para tener lo mismo en el móvil y en el ordenador, guarda una copia en uno y cárgala en el otro.</p>
+      <p style="margin:0">Los datos se guardan en este navegador. Guarda copias para no perderlos si se borran los datos del navegador o cambias de ordenador.</p>
       <div class="cop-estado">
         <div><small>En este dispositivo</small><b>${dispositivo()}</b><span>${r.n} trabajadores · ${r.rot} con rotación · ${r.sem} semanas de horas</span></div>
         <div><small>Último cambio</small><b>${fechaHora(S.modificado)}</b></div>
@@ -2650,6 +2663,7 @@ function abrirCopias(){
         <label class="btn">${ICO.subir} Cargar una copia<input type="file" accept=".json,application/json" hidden onchange="leerCopia(this.files[0])"></label>
       </div>
       <div id="cargaPrev"></div>
+      <div id="autoCaja">${autoHTML()}</div>
       ${reg.length ? `<div><h3 style="font-size:19px;margin:4px 0 8px">Registro</h3><div class="cop-reg">${reg.map(x=>`<div><span class="est ${x.tipo==='guardada'?'ok':'nuevo'}">${x.tipo==='guardada'?'Guardada':'Cargada'}</span>
         <span>${x.tipo==='guardada' ? `Copia del ${fechaCorta(x.copia)}` : `Copia del ${fechaCorta(x.copia)}, cargada el ${fechaCorta(x.el)}`}</span><span class="muted">${esc(x.disp||'')}</span></div>`).join('')}</div></div>` : ''}
       ${antes ? `<p class="muted" style="margin:0;font-size:13.5px">¿Te has equivocado al cargar? <button class="enlace" onclick="volverAntes()">Volver a los datos de antes de la última carga</button></p>` : ''}
@@ -3195,6 +3209,105 @@ function abrirNovedades(){
 function cerrarNovedades(){ vaciarCapa(); }
 
 
+
+/* =========================================================
+   Copia automática en una carpeta del ordenador
+   Chrome/Edge de escritorio: eliges una carpeta una vez (p. ej. en el Escritorio)
+   y la app escribe ahí control-planning.json a los pocos segundos de cada cambio,
+   más una copia por día en «copias-diarias» (se guardan las últimas AUTO_DIAS).
+   El permiso de la carpeta se guarda en IndexedDB de este navegador.
+   ========================================================= */
+const AUTO_DIAS = 14;
+const FS_OK = typeof window.showDirectoryPicker === 'function';
+const idb = (()=>{ let p;
+  const abrir = () => p || (p = new Promise((ok, mal)=>{ const q = indexedDB.open('control-planning', 1);
+    q.onupgradeneeded = ()=>q.result.createObjectStore('kv'); q.onsuccess = ()=>ok(q.result); q.onerror = ()=>mal(q.error); }));
+  const op = (modo, f) => abrir().then(db=>new Promise((ok, mal)=>{ const tx = db.transaction('kv', modo), q = f(tx.objectStore('kv'));
+    tx.oncomplete = ()=>ok(q && q.result); tx.onerror = ()=>mal(tx.error); }));
+  return { get: k => op('readonly', st=>st.get(k)), set: (k, v) => op('readwrite', st=>st.put(v, k)), del: k => op('readwrite', st=>st.delete(k)) };
+})();
+/* estado: no (el navegador no deja), off (sin carpeta), ok, permiso (hay que volver a permitir), error */
+var AUTO = { handle:null, estado: FS_OK ? 'off' : 'no', ultima: localStorage.getItem(CLAVE + '-auto-ultima'), error:'' };
+async function iniciarAuto(){
+  if(!FS_OK) return;
+  try {
+    const h = await idb.get('carpeta'); if(!h){ AUTO.estado = 'off'; return pintarAuto(); }
+    AUTO.handle = h;
+    const per = await h.queryPermission({ mode:'readwrite' });
+    AUTO.estado = per==='granted' ? 'ok' : 'permiso';
+    if(per==='granted' && S.modificado && (!AUTO.ultima || S.modificado > AUTO.ultima)) await copiaAuto();
+  } catch(e){ AUTO.estado = 'error'; AUTO.error = e.message || String(e); }
+  pintarAuto();
+}
+async function elegirCarpeta(){
+  let h;
+  try { h = await window.showDirectoryPicker({ id:'control-planning', mode:'readwrite', startIn:'desktop' }); }
+  catch(e){ if(e.name!=='AbortError') toast('No se ha podido usar esa carpeta'); return; }
+  AUTO.handle = h; AUTO.estado = 'ok';
+  try { await idb.set('carpeta', h); } catch(e){}
+  await copiaAuto(true);
+}
+async function permitirAuto(){
+  if(!AUTO.handle) return elegirCarpeta();
+  try { const per = await AUTO.handle.requestPermission({ mode:'readwrite' });
+    if(per==='granted'){ AUTO.estado = 'ok'; await copiaAuto(true); return; } } catch(e){}
+  toast('Sin permiso no se pueden guardar las copias en la carpeta'); pintarAuto();
+}
+async function quitarAuto(){
+  try { await idb.del('carpeta'); } catch(e){}
+  AUTO = { handle:null, estado:'off', ultima: AUTO.ultima, error:'' }; toast('Copia automática desactivada. Los archivos de la carpeta no se tocan'); pintarAuto();
+}
+function programarAuto(){
+  if(typeof AUTO==='undefined' || AUTO.estado!=='ok') return;
+  clearTimeout(programarAuto._t); programarAuto._t = setTimeout(()=>copiaAuto(), 4000);
+}
+let AUTO_EN_CURSO = false;
+async function copiaAuto(aviso){
+  if(!AUTO.handle || AUTO_EN_CURSO) return; AUTO_EN_CURSO = true;
+  const ahora = new Date(), iso = ahora.toISOString(), p2 = n => String(n).padStart(2,'0');
+  const hoy = `${ahora.getFullYear()}-${p2(ahora.getMonth()+1)}-${p2(ahora.getDate())}`;
+  S.ultimaCopia = { el: iso, disp: dispositivo(), auto: true };
+  const txt = JSON.stringify({ app:'Control Planning', version: APP_VERSION, guardada: iso, dispositivo: dispositivo(), auto: true, datos: S });
+  const escribir = async (dir, nombre) => { const f = await dir.getFileHandle(nombre, { create:true }); const w = await f.createWritable(); await w.write(txt); await w.close(); };
+  try {
+    await escribir(AUTO.handle, 'control-planning.json');
+    const dia = await AUTO.handle.getDirectoryHandle('copias-diarias', { create:true });
+    await escribir(dia, `control-planning_${hoy}.json`);
+    const nombres = [];
+    for await (const [n, h] of dia.entries()) if(h.kind==='file' && /^control-planning_\d{4}-\d{2}-\d{2}\.json$/.test(n)) nombres.push(n);
+    for(const n of nombres.sort().slice(0, -AUTO_DIAS)) await dia.removeEntry(n).catch(()=>{});
+    AUTO.ultima = iso; AUTO.estado = 'ok'; AUTO.error = '';
+    try { localStorage.setItem(CLAVE + '-auto-ultima', iso); } catch(e){}
+    guardar(false);
+    if(aviso){ toast(`Copia guardada en «${AUTO.handle.name}»`); if($('#capa .copias') && !CARGA){ abrirCopias(); $('#capa .fondo')?.classList.add('quieto'); } }
+  } catch(e){
+    if(e.name==='NotAllowedError' || e.name==='SecurityError') AUTO.estado = 'permiso';
+    else if(e.name==='NotFoundError'){ AUTO.estado = 'error'; AUTO.error = 'No encuentro la carpeta: puede que se haya movido o borrado'; }
+    else { AUTO.estado = 'error'; AUTO.error = e.message || String(e); }
+  }
+  AUTO_EN_CURSO = false; pintarAuto();
+}
+function autoHTML(){
+  const a = AUTO, nom = a.handle ? esc(a.handle.name) : '';
+  if(a.estado==='no') return `<div class="auto-caja"><h3>Copia automática en una carpeta</h3><p class="muted">Este navegador no deja que la app escriba en una carpeta. Funciona en Chrome o Edge del ordenador.</p></div>`;
+  const est = { off:['', 'Desactivada', 'Elige una carpeta (por ejemplo, una nueva en el Escritorio) y la app guardará ahí las copias sola.'],
+    ok:['ok', `Activa en «${nom}»`, a.ultima ? `Última copia: ${fechaHora(a.ultima)}` : 'Todavía no ha guardado ninguna'],
+    permiso:['aviso', `En pausa en «${nom}»`, 'Chrome pide volver a dar permiso a la carpeta. Si pregunta, elige «Permitir en cada visita».'],
+    error:['mal', 'No se ha podido guardar', a.error || 'Vuelve a elegir la carpeta'] }[a.estado];
+  return `<div class="auto-caja"><h3>Copia automática en una carpeta</h3>
+    <div class="sync-estado"><i class="${est[0]}"></i><span><b>${est[1]}</b><small>${est[2]}</small></span></div>
+    ${a.estado==='ok' ? `<p class="muted auto-que">A los pocos segundos de cada cambio se guarda <b>control-planning.json</b> (siempre el mismo, sobrescrito) y, dentro de <b>copias-diarias</b>, una copia por día; se conservan las de los últimos ${AUTO_DIAS} días.</p>` : ''}
+    <div class="fila">${a.estado==='off' ? `<button class="btn primario" onclick="elegirCarpeta()">Elegir carpeta</button>`
+      : a.estado==='permiso' ? `<button class="btn primario" onclick="permitirAuto()">Permitir de nuevo</button><button class="btn" onclick="elegirCarpeta()">Elegir otra carpeta</button>`
+      : a.estado==='error' ? `<button class="btn primario" onclick="elegirCarpeta()">Elegir la carpeta</button>`
+      : `<button class="btn" onclick="copiaAuto(true)">Guardar ahora</button><button class="btn" onclick="elegirCarpeta()">Cambiar carpeta</button>`}
+      ${a.handle ? `<button class="btn peligro" onclick="quitarAuto()">Desactivar</button>` : ''}</div></div>`;
+}
+function pintarAuto(){
+  const c = $('#autoCaja'); if(c) c.innerHTML = autoHTML();
+  if(UI.vista==='inicio' && !$('#capa').innerHTML && !$('#menuDia')) pintar();
+}
+
 /* =========================================================
    Sincronizar entre tus dispositivos (repositorio privado de GitHub)
    Los datos van a un archivo datos.json de un repositorio PRIVADO tuyo.
@@ -3355,6 +3468,7 @@ puntoNovedades();
 { const v = document.getElementById("verTxt"); if(v) v.textContent = APP_VERSION; }
 comprobarVersion(); setInterval(comprobarVersion, 60*1000);
 pintarSync(); if(SYNC.token) sincronizar();
+iniciarAuto();
 
 if(/[?&]v=/.test(location.search)) history.replaceState(null, '', location.pathname);
 </script>
