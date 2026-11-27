@@ -1,7 +1,7 @@
 {
-  "version": "10.28.0",
-  "fecha": "2026-11-26",
+  "version": "10.29.0",
+  "fecha": "2026-11-27",
   "novedades": [
-    "Inicio: un panel de aeropuerto para cada módulo, con su nombre y sus cifras"
+    "Diseño nuevo: menú lateral, pestañas en el móvil y resumen del año"
   ]
 }
